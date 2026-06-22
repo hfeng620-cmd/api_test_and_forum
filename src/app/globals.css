@@ -2,33 +2,37 @@
 
 :root,
 :root[data-theme="blue"] {
-  --background: #f6f9fc;
+  --background: #f7f9fc;
   --foreground: #0f172a;
-  --color-bg: #f6f9fc;
+  --color-bg: #f7f9fc;
   --color-ink: #0f172a;
-  --color-muted: #5b667a;
-  --color-line: #d8e2ee;
-  --color-soft: #eef4fa;
+  --color-muted: #5f6b7d;
+  --color-line: #dde5f0;
+  --color-soft: #f2f6fb;
   --color-brand: #2563eb;
   --color-brand-deep: #1d4ed8;
-  --color-brand-strong: #1e40af;
-  --color-brand-soft: #eaf2ff;
-  --color-panel-glow: rgba(37, 99, 235, 0.12);
+  --color-brand-strong: #163b92;
+  --color-brand-soft: #e9f1ff;
+  --color-panel-glow: rgba(37, 99, 235, 0.08);
+  --color-panel: rgba(255, 255, 255, 0.92);
+  --shadow-card: 0 18px 60px rgba(15, 23, 42, 0.06);
 }
 
 :root[data-theme="green"] {
-  --background: #f6f9fc;
+  --background: #f7f9fc;
   --foreground: #0f172a;
-  --color-bg: #f6f9fc;
+  --color-bg: #f7f9fc;
   --color-ink: #0f172a;
-  --color-muted: #5b667a;
-  --color-line: #d8e2ee;
-  --color-soft: #eef4fa;
+  --color-muted: #5f6b7d;
+  --color-line: #dde5f0;
+  --color-soft: #f2f6fb;
   --color-brand: #16a34a;
   --color-brand-deep: #15803d;
   --color-brand-strong: #166534;
   --color-brand-soft: #eaf8ef;
-  --color-panel-glow: rgba(22, 163, 74, 0.1);
+  --color-panel-glow: rgba(22, 163, 74, 0.08);
+  --color-panel: rgba(255, 255, 255, 0.92);
+  --shadow-card: 0 18px 60px rgba(15, 23, 42, 0.06);
 }
 
 @theme inline {
@@ -48,10 +52,23 @@ html {
 
 body {
   background:
-    radial-gradient(circle at top left, var(--color-panel-glow), transparent 30%),
-    linear-gradient(180deg, #fbfdff 0%, var(--color-bg) 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(247, 249, 252, 0.98) 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 0%, var(--color-panel-glow), transparent 22%),
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: auto, 28px 28px, 28px 28px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.28), transparent 78%);
+  z-index: -1;
 }
 
 a {
@@ -59,6 +76,12 @@ a {
   text-decoration: none;
 }
 
-input {
+input,
+textarea,
+button {
   font: inherit;
+}
+
+::selection {
+  background: var(--color-brand-soft);
 }
