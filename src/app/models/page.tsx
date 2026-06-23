@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 import { modelGuideNotes, modelPreviewRows, tickerItems } from "@/lib/site-data";
 
 export default function ModelsPage() {
@@ -19,7 +18,6 @@ export default function ModelsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-white p-1 lg:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"

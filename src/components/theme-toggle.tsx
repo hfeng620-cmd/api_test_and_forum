@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+const THEME_STORAGE_KEY = "relay-theme-v2";
+
 const THEMES = [
   { id: "blue", label: "白蓝" },
   { id: "green", label: "白绿" },
@@ -18,11 +20,11 @@ function isThemeId(value: string | null): value is ThemeId {
 
 function readSavedTheme(): ThemeId {
   if (typeof window === "undefined") {
-    return "blue";
+    return "midnight";
   }
 
-  const savedTheme = window.localStorage.getItem("relay-theme");
-  return isThemeId(savedTheme) ? savedTheme : "blue";
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return isThemeId(savedTheme) ? savedTheme : "midnight";
 }
 
 function syncTheme(theme: ThemeId) {
@@ -31,7 +33,7 @@ function syncTheme(theme: ThemeId) {
   }
 
   if (typeof window !== "undefined") {
-    window.localStorage.setItem("relay-theme", theme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
   }
 }
 

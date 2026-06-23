@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { StationsBoard } from "@/components/stations-board";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function StationsPage() {
   return (
@@ -19,7 +18,6 @@ export default function StationsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] p-1 lg:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"

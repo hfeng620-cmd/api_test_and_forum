@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { QqGroupModalButton } from "@/components/qq-group-modal-button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   prioritizedStationNames,
   resourceLinks,
@@ -51,7 +50,6 @@ export default function Home() {
                 更多指南
               </Link>
             </nav>
-            <ThemeToggle />
           </div>
         </div>
 

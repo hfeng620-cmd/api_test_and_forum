@@ -6,7 +6,6 @@ import { useState } from "react";
 import { CommunityPostPanel } from "@/components/community-post-panel";
 import { DiscussionFeed } from "@/components/discussion-feed";
 import { QqGroupModalButton } from "@/components/qq-group-modal-button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { siteLinks } from "@/lib/site-links";
 
 export default function CommunityPage() {
@@ -30,7 +29,6 @@ export default function CommunityPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] p-1 md:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"

@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   collaborationChannels,
   faqEntries,
@@ -25,7 +24,6 @@ export default function GuidesPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-white p-1 md:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
