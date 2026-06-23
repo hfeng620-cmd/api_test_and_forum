@@ -34,18 +34,15 @@ const footerLinks = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-[var(--color-line)] bg-white/82 backdrop-blur">
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-10 lg:grid-cols-[1.25fr_0.75fr] lg:px-10">
+    <footer className="mt-auto border-t border-[var(--color-line)] bg-[var(--color-panel)] backdrop-blur">
+      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-8 lg:grid-cols-[1fr_1fr] lg:px-10">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-brand-deep)]">
             Timin观察站
           </p>
-          <h2 className="mt-3 max-w-2xl text-3xl font-black tracking-tight text-[var(--color-ink)]">
-            榜单负责先给判断，社区负责持续纠偏，QQ群负责实时共建。
+          <h2 className="mt-3 max-w-2xl text-2xl font-black tracking-tight text-[var(--color-ink)]">
+            中转站榜单与社区反馈。
           </h2>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--color-muted)]">
-            这里不是单纯导航页，而是一个能持续更新价格、倍率、模型口径、试用入口和避坑结论的共建观察站。你可以直接发帖、进群报线索，也可以去 GitHub Discussions 留更完整的长讨论。
-          </p>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2">
@@ -84,7 +81,6 @@ export function SiteFooter() {
             </p>
             <div className="mt-4 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
               <p>QQ群：602190132</p>
-              <p>适合先报价格变化、试用线索、失效活动和高峰期表现。</p>
               <a
                 className="inline-flex font-semibold text-[var(--color-brand-deep)] transition hover:text-[var(--color-brand)]"
                 href={siteLinks.pages}

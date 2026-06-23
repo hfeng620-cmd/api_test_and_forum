@@ -139,7 +139,7 @@ export function DiscussionFeed({
   const [expandedPostId, setExpandedPostId] = useState<string | null>(posts[0]?.id ?? null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [replyTargets, setReplyTargets] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState("这里是发帖讨论，不是划词批注。");
+  const [status, setStatus] = useState("发帖讨论。");
 
   const visiblePosts = useMemo(() => {
     const base = compact ? posts.slice(0, 4) : posts;
@@ -166,7 +166,7 @@ export function DiscussionFeed({
     setBody("");
     setStation("");
     setExpandedPostId(updated[0]?.id ?? null);
-    setStatus("帖子已经发出，现在别人可以继续回复和点赞。");
+    setStatus("已发布。");
   }
 
   function handleLike(id: string) {
@@ -194,12 +194,12 @@ export function DiscussionFeed({
     setReplyDrafts((current) => ({ ...current, [id]: "" }));
     setReplyTargets((current) => ({ ...current, [id]: "楼主" }));
     setExpandedPostId(id);
-    setStatus("回复已经挂到帖子下面了。");
+    setStatus("已回复。");
   }
 
   return (
     <section
-      className="overflow-hidden rounded-[8px] border border-[var(--color-line)] bg-white shadow-[var(--shadow-card)]"
+      className="overflow-hidden rounded-[8px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[var(--shadow-card)]"
       data-selection-comments="off"
     >
       <div className="border-b border-[var(--color-line)] px-5 py-4">
@@ -211,7 +211,7 @@ export function DiscussionFeed({
 
       {!hideComposer ? (
         <div className="border-b border-[var(--color-line)] px-6 py-5">
-          <div className="rounded-[28px] bg-[linear-gradient(180deg,#fbfdff,#f3f7fd)] p-5">
+          <div className="rounded-[18px] bg-[var(--color-soft)] p-5">
             <textarea
               className="min-h-28 w-full resize-none bg-transparent text-base leading-7 outline-none"
               onChange={(event) => setBody(event.target.value)}
@@ -221,7 +221,7 @@ export function DiscussionFeed({
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--color-line)] pt-4">
               <div className="flex flex-wrap items-center gap-3">
                 <input
-                  className="min-w-52 rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                  className="min-w-52 rounded-full border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-2 text-sm outline-none transition focus:border-[var(--color-brand)]"
                   onChange={(event) => setStation(event.target.value)}
                   placeholder="带一个站点名或标签，例如 虎虎 / Aether"
                   value={station}
@@ -229,7 +229,7 @@ export function DiscussionFeed({
                 <span className="text-xs text-[var(--color-muted)]">{status}</span>
               </div>
               <button
-                className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
+                className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
                 onClick={handleSubmitPost}
                 type="button"
               >
@@ -247,7 +247,7 @@ export function DiscussionFeed({
           return (
             <article
               key={post.id}
-              className="px-6 py-5 transition hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,251,255,0.9))]"
+              className="px-6 py-5 transition hover:bg-[var(--color-hover)]"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
@@ -338,7 +338,7 @@ export function DiscussionFeed({
 
                   <div className="mt-4 flex flex-wrap gap-3 border-t border-[var(--color-line)] pt-4">
                     <input
-                      className="min-w-60 flex-1 rounded-full border border-[var(--color-line)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                      className="min-w-60 flex-1 rounded-full border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
                       onChange={(event) =>
                         setReplyDrafts((current) => ({
                           ...current,
@@ -349,7 +349,7 @@ export function DiscussionFeed({
                       value={replyDrafts[post.id] ?? ""}
                     />
                     <button
-                      className="rounded-full bg-[var(--color-brand)] px-4 py-3 text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
+                      className="rounded-full bg-[var(--color-brand)] px-4 py-3 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
                       onClick={() => handleReply(post.id)}
                       type="button"
                     >

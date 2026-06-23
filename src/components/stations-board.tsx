@@ -147,7 +147,7 @@ export function StationsBoard() {
                   href={stationLinkMap[row.name]}
                   rel="noreferrer"
                   target="_blank"
-                  className="group min-h-[258px] rounded-[8px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(245,249,255,0.98))] p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-[2px] hover:border-[var(--color-brand)]"
+                  className="stagger-in group min-h-[238px] rounded-[8px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-5 shadow-[var(--shadow-card)] transition hover:-translate-y-[2px] hover:border-[var(--color-brand)]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -182,7 +182,7 @@ export function StationsBoard() {
               ))}
             </div>
 
-            <div className="mt-8 rounded-[8px] border border-[var(--color-line)] bg-white/92 p-5 shadow-[var(--shadow-card)] backdrop-blur">
+            <div className="surface-in mt-8 rounded-[8px] border border-[var(--color-line)] bg-[var(--color-panel)] p-5 shadow-[var(--shadow-card)] backdrop-blur">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -210,8 +210,8 @@ export function StationsBoard() {
                     key={filter.id}
                     className={`rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                       activeFilter === filter.id
-                        ? "bg-[var(--color-brand)] text-white shadow-[0_10px_24px_var(--color-panel-glow)]"
-                        : "border border-[var(--color-line)] bg-white text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                        ? "bg-[var(--color-brand)] text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)]"
+                        : "border border-[var(--color-line)] bg-[var(--color-panel)] text-[var(--color-muted)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
                     }`}
                     onClick={() => setActiveFilter(filter.id)}
                     type="button"
@@ -250,7 +250,7 @@ export function StationsBoard() {
                   aria-label="打开论坛入口"
                   href="/community"
                   title="打开论坛入口"
-                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand)] px-5 text-sm font-black text-white shadow-[0_10px_28px_var(--color-panel-glow)] transition hover:scale-[1.03] hover:bg-[var(--color-brand-deep)]"
+                  className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand)] px-5 text-sm font-black text-[var(--color-on-brand)] shadow-[0_10px_28px_var(--color-panel-glow)] transition hover:scale-[1.03] hover:bg-[var(--color-brand-deep)]"
                 >
                   讨论
                 </Link>
@@ -260,7 +260,7 @@ export function StationsBoard() {
             <div className="mt-6 grid gap-3">
               <Link
                 href="/community"
-                className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
+                className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-center text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
               >
                 进入站内讨论区
               </Link>
@@ -268,7 +268,7 @@ export function StationsBoard() {
                 href="https://github.com/hfeng620-cmd/timin_api_test_and_forum/discussions"
                 rel="noreferrer"
                 target="_blank"
-                className="rounded-full border border-[var(--color-line)] bg-white px-5 py-3 text-center text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-5 py-3 text-center text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
               >
                 GitHub Discussions
               </a>
@@ -314,7 +314,7 @@ export function StationsBoard() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-14 lg:px-10">
-        <div className="overflow-hidden rounded-[8px] border border-[var(--color-line)] bg-white shadow-[var(--shadow-card)]">
+        <div className="surface-in overflow-hidden rounded-[8px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[var(--shadow-card)]">
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-line)] px-6 py-5">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -332,7 +332,7 @@ export function StationsBoard() {
               </button>
               <Link
                 href="/community"
-                className="rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-2 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
               >
                 去论坛补反馈
               </Link>
@@ -355,7 +355,7 @@ export function StationsBoard() {
                 <article
                   key={`${row.name}-${index}`}
                   className={`grid grid-cols-[0.8fr_1.05fr_1fr_0.92fr_0.9fr_0.8fr_1.3fr] items-start px-6 py-5 ${
-                    index % 2 === 0 ? "bg-white" : "bg-[#f9fbfe]"
+                    index % 2 === 0 ? "bg-[var(--color-panel)]" : "bg-[var(--color-row-alt)]"
                   }`}
                 >
                   <div className="font-bold text-[var(--color-muted)]">{rankingBadge(index)}</div>
@@ -403,14 +403,14 @@ export function StationsBoard() {
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--color-line)] px-6 py-5">
-              <p className="text-sm leading-7 text-[var(--color-muted)]">
+            <p className="text-sm leading-7 text-[var(--color-muted)]">
               {filteredRows.length === 0
                 ? "当前筛选没有结果。"
                 : `当前显示 ${visibleRows.length} / ${filteredRows.length} 条。`}
             </p>
             {!showAllRows && filteredRows.length > visibleRows.length ? (
               <button
-                className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
+                className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
                 onClick={() => setShowAllRows(true)}
                 type="button"
               >

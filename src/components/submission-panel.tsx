@@ -13,7 +13,7 @@ export function SubmissionPanel() {
   const [priceOrRate, setPriceOrRate] = useState("");
   const [note, setNote] = useState("");
   const [contact, setContact] = useState("");
-  const [status, setStatus] = useState("提交后不会直接上榜，会先进入你的审核区。");
+  const [status, setStatus] = useState("提交后进入审核区。");
 
   function handleSubmit() {
     if (!stationName.trim() || !note.trim()) {
@@ -35,17 +35,17 @@ export function SubmissionPanel() {
     setPriceOrRate("");
     setNote("");
     setContact("");
-    setStatus("已提交到你的待审核区。你可以自己改后通过，也可以直接驳回。");
+    setStatus("已提交到待审核区。");
   }
 
   return (
-    <div className="rounded-[32px] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-card)]">
+    <div className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-panel)] p-6 shadow-[var(--shadow-card)]">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
             提交补充
           </p>
-          <h2 className="mt-2 text-2xl font-black">新站点、纠错、补充备注都先提到你这里审核</h2>
+          <h2 className="mt-2 text-2xl font-black">提交补充，管理员审核。</h2>
         </div>
         <span className="rounded-full bg-[var(--color-brand-soft)] px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
           提交后待审核
@@ -56,7 +56,7 @@ export function SubmissionPanel() {
         <label className="space-y-2">
           <span className="text-sm font-semibold text-[var(--color-muted)]">提交类型</span>
           <select
-            className="w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
+            className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
             onChange={(event) => setKind(event.target.value as (typeof submissionKinds)[number])}
             value={kind}
           >
@@ -71,7 +71,7 @@ export function SubmissionPanel() {
         <label className="space-y-2">
           <span className="text-sm font-semibold text-[var(--color-muted)]">站点名</span>
           <input
-            className="w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
+            className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
             onChange={(event) => setStationName(event.target.value)}
             value={stationName}
           />
@@ -80,7 +80,7 @@ export function SubmissionPanel() {
         <label className="space-y-2">
           <span className="text-sm font-semibold text-[var(--color-muted)]">地址或入口</span>
           <input
-            className="w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
+            className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
             onChange={(event) => setUrl(event.target.value)}
             value={url}
           />
@@ -89,7 +89,7 @@ export function SubmissionPanel() {
         <label className="space-y-2">
           <span className="text-sm font-semibold text-[var(--color-muted)]">倍率或价格</span>
           <input
-            className="w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
+            className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
             onChange={(event) => setPriceOrRate(event.target.value)}
             placeholder="例如：0.12x / GPT 0.2 / 免费"
             value={priceOrRate}
@@ -100,7 +100,7 @@ export function SubmissionPanel() {
       <label className="mt-4 block space-y-2">
         <span className="text-sm font-semibold text-[var(--color-muted)]">备注说明</span>
         <textarea
-          className="min-h-28 w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
+          className="min-h-28 w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
           onChange={(event) => setNote(event.target.value)}
           placeholder="写清楚你补充的是什么、看到的价格页面、模型分组、试用信息或需要纠正的内容。"
           value={note}
@@ -110,7 +110,7 @@ export function SubmissionPanel() {
       <label className="mt-4 block space-y-2">
         <span className="text-sm font-semibold text-[var(--color-muted)]">联系方式或备注来源</span>
         <input
-          className="w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
+          className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
           onChange={(event) => setContact(event.target.value)}
           placeholder="例如：QQ群昵称 / 金山文档来源 / 自己实测"
           value={contact}
@@ -120,7 +120,7 @@ export function SubmissionPanel() {
       <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm leading-6 text-[var(--color-muted)]">{status}</p>
         <button
-          className="rounded-full bg-[var(--color-brand)] px-6 py-3 text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
+          className="rounded-full bg-[var(--color-brand)] px-6 py-3 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
           onClick={handleSubmit}
           type="button"
         >

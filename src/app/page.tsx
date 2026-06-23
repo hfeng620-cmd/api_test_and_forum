@@ -21,10 +21,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)]">
-      <section className="sticky top-0 z-30 border-b border-[var(--color-line)] bg-white/80 backdrop-blur-xl">
+      <section className="sticky top-0 z-30 border-b border-[var(--color-line)] bg-[var(--color-header)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 lg:px-10">
           <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-brand)] text-xl font-black text-white shadow-[0_12px_40px_var(--color-panel-glow)]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-brand)] text-xl font-black text-[var(--color-on-brand)] shadow-[0_12px_40px_var(--color-panel-glow)]">
               T
             </div>
             <div>
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="border-t border-[var(--color-line)] bg-white/70">
+        <div className="border-t border-[var(--color-line)] bg-[var(--color-panel)]">
           <div className="mx-auto flex max-w-7xl items-center gap-5 overflow-x-auto px-6 py-3 text-sm whitespace-nowrap text-[var(--color-muted)] lg:px-10">
             <span className="font-semibold text-[var(--color-ink)]">站点速报</span>
             {tickerItems.map((item) => (
@@ -105,13 +105,13 @@ export default function Home() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/community"
-                className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
+                className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-black text-[var(--color-on-brand)] shadow-[0_12px_28px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
               >
                 进入社区讨论 / 发帖反馈
               </Link>
               <Link
                 href="/stations"
-                className="rounded-full border border-[var(--color-line)] bg-white px-5 py-3 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-5 py-3 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
               >
                 查看完整榜单
               </Link>
@@ -121,7 +121,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[8px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(244,248,255,0.94))] shadow-[var(--shadow-card)]">
+          <div className="surface-in overflow-hidden rounded-[8px] border border-[var(--color-line)] bg-[var(--surface-gradient)] shadow-[var(--shadow-card)]">
             <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
               <div className="px-6 py-6 lg:px-8 lg:py-7">
                 <div className="hidden grid-cols-[0.55fr_1fr_0.95fr_0.75fr_1.35fr] border-b border-[var(--color-line)] pb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)] md:grid">
@@ -136,7 +136,7 @@ export default function Home() {
                   {topRows.map((row, index) => (
                     <article
                       key={`${row.name}-${index}`}
-                      className="grid gap-4 border-b border-[var(--color-line)] py-5 transition hover:bg-white/70 md:grid-cols-[0.55fr_1fr_0.95fr_0.75fr_1.35fr] md:items-start"
+                      className="stagger-in grid gap-4 border-b border-[var(--color-line)] py-5 transition hover:bg-[var(--color-hover)] md:grid-cols-[0.55fr_1fr_0.95fr_0.75fr_1.35fr] md:items-start"
                     >
                       <div className="flex items-center justify-between gap-3 md:block">
                         <span className="text-sm font-bold text-[var(--color-muted)] md:pt-1">
@@ -176,7 +176,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <aside className="border-t border-[var(--color-line)] bg-white/72 px-6 py-6 lg:border-t-0 lg:border-l lg:px-8 lg:py-7">
+              <aside className="border-t border-[var(--color-line)] bg-[var(--color-panel)] px-6 py-6 lg:border-t-0 lg:border-l lg:px-8 lg:py-7">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
                   社区入口
                 </p>
@@ -186,7 +186,7 @@ export default function Home() {
                     <p className="mt-1 text-2xl font-black">发帖、回复、点赞、收藏。</p>
                     <Link
                       href="/community"
-                      className="mt-4 inline-flex rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-black text-white transition hover:bg-[var(--color-brand-deep)]"
+                      className="mt-4 inline-flex rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-black text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
                     >
                       进入讨论区
                     </Link>
