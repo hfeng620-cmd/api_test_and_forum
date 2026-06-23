@@ -1,17 +1,25 @@
 import Link from "next/link";
 
+import { QqGroupModalButton } from "@/components/qq-group-modal-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   faqPreview,
   forumHighlights,
+  prioritizedStationNames,
   resourceLinks,
   stationComparisonRows,
+  stationLinkMap,
   tickerItems,
 } from "@/lib/site-data";
 
 export default function Home() {
-  const topRows = stationComparisonRows.slice(0, 4);
-  const moreRows = stationComparisonRows.slice(4, 10);
+  type StationRow = (typeof stationComparisonRows)[number];
+  const topRows = prioritizedStationNames
+    .map((name) => stationComparisonRows.find((row) => row.name === name))
+    .filter((row): row is StationRow => Boolean(row));
+  const moreRows = stationComparisonRows.filter(
+    (row) => !prioritizedStationNames.includes(row.name),
+  );
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)]">
@@ -26,6 +34,9 @@ export default function Home() {
               <p className="text-sm text-[var(--color-muted)]">
                 先看榜单，再决定长期用谁。
               </p>
+            </div>
+            <div className="hidden lg:block">
+              <QqGroupModalButton />
             </div>
           </div>
 
@@ -50,13 +61,19 @@ export default function Home() {
           <div className="mx-auto flex max-w-7xl items-center gap-5 overflow-x-auto px-6 py-3 text-sm whitespace-nowrap text-[var(--color-muted)] lg:px-10">
             <span className="font-semibold text-[var(--color-ink)]">站点速报</span>
             {tickerItems.map((item) => (
-              <span key={item.label} className="flex items-center gap-2">
+              <a
+                key={item.label}
+                className="flex items-center gap-2 transition hover:text-[var(--color-ink)]"
+                href={item.href}
+                rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+                target={item.href.startsWith("http") ? "_blank" : undefined}
+              >
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: item.color }}
                 />
                 <span>{item.label}</span>
-              </span>
+              </a>
             ))}
           </div>
         </div>
@@ -78,6 +95,24 @@ export default function Home() {
                 这一版首页不再先讲概念，直接把你最想先看的站点放在第一屏。价格、倍率、试用入口和社区备注先给到，再决定要不要继续往下看更多站点和讨论。
               </p>
 
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/stations"
+                  className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
+                >
+                  直接看完整榜单
+                </Link>
+                <Link
+                  href="/community"
+                  className="rounded-full border border-[var(--color-line)] bg-white px-5 py-3 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                >
+                  去讨论区发帖
+                </Link>
+                <div className="lg:hidden">
+                  <QqGroupModalButton />
+                </div>
+              </div>
+
               <div className="mt-10 flex flex-wrap gap-4">
                 <div className="min-w-36 border-l-2 border-[var(--color-brand)] pl-4">
                   <p className="text-sm text-[var(--color-muted)]">优先关注</p>
@@ -88,8 +123,8 @@ export default function Home() {
                   <p className="mt-1 text-2xl font-black">0.058x</p>
                 </div>
                 <div className="min-w-36 border-l-2 border-[var(--color-line)] pl-4">
-                  <p className="text-sm text-[var(--color-muted)]">免费入口</p>
-                  <p className="mt-1 text-2xl font-black">1 个</p>
+                  <p className="text-sm text-[var(--color-muted)]">试用 / 免费入口</p>
+                  <p className="mt-1 text-2xl font-black">4+</p>
                 </div>
               </div>
             </div>
@@ -97,25 +132,35 @@ export default function Home() {
             <div className="grid gap-8 border-t border-[var(--color-line)] pt-8 lg:border-t-0 lg:border-l lg:pl-10 lg:pt-0">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                  论坛入口
+                  三个入口
                 </p>
-                <h2 className="mt-3 text-3xl font-black tracking-tight">
-                  价格变化、避坑和报料都从这里进
-                </h2>
-                <p className="mt-4 max-w-lg text-sm leading-7 text-[var(--color-muted)]">
-                  首页不再把论坛做成一整块重卡片，但入口会一直显眼。想补站点、报新活动、贴踩坑反馈，直接从这里进入讨论区。
-                </p>
-                <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold text-[var(--color-muted)]">
-                  {forumHighlights.map((item) => (
-                    <span key={item.title}>{item.title}</span>
-                  ))}
+                <h2 className="mt-3 text-3xl font-black tracking-tight">榜单、讨论和加群各走各的，不再混在一起</h2>
+                <div className="mt-5 space-y-4">
+                  <Link
+                    href="/stations"
+                    className="block border-b border-[var(--color-line)] pb-4 transition hover:border-[var(--color-brand)]"
+                  >
+                    <p className="text-lg font-black text-[var(--color-ink)]">先看榜单</p>
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-[var(--color-muted)]">
+                      价格、倍率、模型口径和一句判断先在榜单里横向比较。
+                    </p>
+                  </Link>
+                  <Link
+                    href="/community"
+                    className="block border-b border-[var(--color-line)] pb-4 transition hover:border-[var(--color-brand)]"
+                  >
+                    <p className="text-lg font-black text-[var(--color-ink)]">再进讨论区</p>
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-[var(--color-muted)]">
+                      价格变化、避坑、活动失效和高峰稳定性统一进帖子流继续补。
+                    </p>
+                  </Link>
+                  <div className="border-b border-[var(--color-line)] pb-4">
+                    <p className="text-lg font-black text-[var(--color-ink)]">即时协作走 QQ 群</p>
+                    <p className="mt-2 max-w-lg text-sm leading-6 text-[var(--color-muted)]">
+                      群里负责线索流和实时反馈，站里负责定稿流和正式收录。
+                    </p>
+                  </div>
                 </div>
-                <Link
-                  href="/community"
-                  className="mt-6 inline-flex items-center text-sm font-bold text-[var(--color-brand-deep)]"
-                >
-                  进入论坛入口 →
-                </Link>
               </div>
 
               <div className="border-t border-[var(--color-line)] pt-8">
@@ -128,8 +173,8 @@ export default function Home() {
                       key={link.title}
                       className="block border-b border-[var(--color-line)] pb-4 transition hover:border-[var(--color-brand)]"
                       href={link.href}
-                      rel="noreferrer"
-                      target="_blank"
+                      rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+                      target={link.href.startsWith("http") ? "_blank" : undefined}
                     >
                       <p className="text-lg font-black text-[var(--color-ink)]">{link.title}</p>
                       <p className="mt-2 max-w-lg text-sm leading-6 text-[var(--color-muted)]">
@@ -197,7 +242,14 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="text-base font-black">{row.price}</p>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{row.entry}</p>
+                  <a
+                    className="mt-2 inline-flex text-sm leading-6 text-[var(--color-brand-deep)] transition hover:text-[var(--color-brand)]"
+                    href={stationLinkMap[row.name]}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {row.entry}
+                  </a>
                 </div>
                 <p className="text-base font-black">{row.multiplier}</p>
                 <div>
@@ -285,11 +337,13 @@ export default function Home() {
 
             <div className="border-t border-[var(--color-line)] pt-8">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                后续方向
+                社区重点
               </p>
-              <p className="mt-3 text-base leading-8 text-[var(--color-muted)]">
-                这一版先把首页做成真正可用的榜单前台。下一步我会继续把管理员登录、审核和共享数据接成真后台，而不是停留在本地原型。
-              </p>
+              <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold text-[var(--color-muted)]">
+                {forumHighlights.map((item) => (
+                  <span key={item.title}>{item.title}</span>
+                ))}
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { FloatingQuickPanel } from "@/components/floating-quick-panel";
+import { MouseGlowLayer } from "@/components/mouse-glow-layer";
+import { SelectionCommentLayer } from "@/components/selection-comment-layer";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,9 +30,17 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full">
+        <MouseGlowLayer />
+        <div className="relative z-10 flex min-h-full flex-col">
+          {children}
+          <FloatingQuickPanel />
+          <SelectionCommentLayer />
+        </div>
+      </body>
     </html>
   );
 }

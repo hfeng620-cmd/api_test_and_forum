@@ -1,15 +1,17 @@
-import Image from "next/image";
-import Link from "next/link";
+"use client";
 
+import Link from "next/link";
+import { useState } from "react";
+
+import { CommunityPostPanel } from "@/components/community-post-panel";
+import { DiscussionFeed } from "@/components/discussion-feed";
+import { QqGroupModalButton } from "@/components/qq-group-modal-button";
 import { ThemeToggle } from "@/components/theme-toggle";
-import {
-  collaborationSteps,
-  communityPosts,
-  contributionTasks,
-  forumHighlights,
-} from "@/lib/site-data";
+import { forumHighlights } from "@/lib/site-data";
 
 export default function CommunityPage() {
+  const [feedRefreshKey, setFeedRefreshKey] = useState(0);
+
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-ink)]">
       <section className="border-b border-[var(--color-line)] bg-white/90 backdrop-blur">
@@ -21,6 +23,9 @@ export default function CommunityPage() {
             <div>
               <p className="text-2xl font-black tracking-tight">Timin观察站</p>
               <p className="text-sm text-[var(--color-muted)]">讨论区与共建入口</p>
+            </div>
+            <div className="hidden md:block">
+              <QqGroupModalButton />
             </div>
           </div>
 
@@ -39,7 +44,7 @@ export default function CommunityPage() {
               >
                 中转站榜单
               </Link>
-              <span className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white">
+              <span className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_var(--color-panel-glow)]">
                 论坛入口
               </span>
             </nav>
@@ -48,136 +53,51 @@ export default function CommunityPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-10 lg:px-10">
-        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,0.88fr)_minmax(260px,0.46fr)] xl:justify-between">
           <div className="space-y-6">
-            <div className="rounded-[32px] border border-[var(--color-line)] bg-[linear-gradient(135deg,#eff6ff,#dbeafe)] p-6 shadow-[0_18px_60px_rgba(37,99,235,0.10)]">
+            <div className="border-b border-[var(--color-line)] pb-6">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-brand-deep)]">
-                小入口但要显眼
+                社区主入口
               </p>
-              <h1 className="mt-2 text-4xl font-black tracking-tight">
-                这里以后就是群友一起维护的讨论区入口
-              </h1>
-              <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">
-                首页不把论坛做太重，但这个入口要能承接报料、避坑、价格变动、试用反馈和新站点收集。后面你可以接 GitHub Discussions、Issue 或外部论坛。
-              </p>
+              <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+                <div className="max-w-3xl">
+                  <h1 className="text-4xl font-black tracking-tight lg:text-5xl">价格变化、试用线索和避坑记录都先发到这里</h1>
+                  <p className="mt-4 text-base leading-8 text-[var(--color-muted)]">
+                    左边是最新帖子流，右边是发帖入口。QQ群负责实时协作，GitHub Discussions 负责沉淀长讨论。
+                  </p>
+                </div>
+                <a
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                  href="https://github.com/hfeng620-cmd/api_test_and_forum/discussions"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <span className="text-[var(--color-brand-deep)]">GitHub Discussions</span>
+                  <span className="text-[var(--color-muted)]">适合沉淀长讨论</span>
+                </a>
+              </div>
               <div className="mt-5 flex flex-wrap gap-2">
                 {forumHighlights.map((item) => (
                   <span
                     key={item.title}
-                    className="rounded-full bg-white px-3 py-2 text-sm font-semibold text-[var(--color-muted)] ring-1 ring-[var(--color-line)]"
+                    className="rounded-full bg-[var(--color-soft)] px-3 py-2 text-sm font-semibold text-[var(--color-muted)]"
                   >
                     {item.title}
                   </span>
                 ))}
               </div>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/stations"
-                  className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
-                >
-                  先回榜单看站点
-                </Link>
-                <Link
-                  href="/guides"
-                  className="rounded-full border border-[var(--color-line)] bg-white px-5 py-3 text-sm font-bold text-[var(--color-ink)] transition hover:bg-[var(--color-soft)]"
-                >
-                  查看更多指南
-                </Link>
-              </div>
             </div>
 
-            <div className="rounded-[32px] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_60px_rgba(13,25,48,0.07)]">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="max-w-md">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                    加入 QQ 群
-                  </p>
-                  <h2 className="mt-2 text-2xl font-black tracking-tight">
-                    先加群，再一起补站点和价格变化
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-                    群里后面可以继续收集试用入口、倍率变化、避坑反馈和新站点线索。你也可以把管理员分工、审核节奏和协作规则先放在这里统一说明。
-                  </p>
-                  <div className="mt-5 inline-flex rounded-full bg-[var(--color-brand-soft)] px-4 py-2 text-sm font-bold text-[var(--color-brand-deep)]">
-                    QQ 群号：602190132
-                  </div>
-                </div>
-
-                <div className="rounded-[28px] border border-[var(--color-line)] bg-[var(--color-soft)] p-3">
-                  <Image
-                    src="/qq-group-qrcode.jpg"
-                    alt="Timin观察站 QQ群二维码"
-                    width={180}
-                    height={180}
-                    className="rounded-[20px]"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[32px] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_60px_rgba(13,25,48,0.07)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                怎么一起做
-              </p>
-              <div className="mt-5 space-y-3">
-                {collaborationSteps.map((step) => (
-                  <article
-                    key={step.title}
-                    className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-soft)] p-4"
-                  >
-                    <h2 className="font-bold">{step.title}</h2>
-                    <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                      {step.description}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[32px] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_60px_rgba(13,25,48,0.07)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                先从这些开始
-              </p>
-              <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">
-                发给群友的时候，最容易参与的不是直接写代码，而是先补一条线索、一个截图、一次使用感受。
-              </p>
-              <div className="mt-5 grid gap-3">
-                {contributionTasks.map((task) => (
-                  <div
-                    key={task}
-                    className="rounded-2xl border border-[var(--color-line)] bg-[var(--color-soft)] px-4 py-4 text-sm font-semibold"
-                  >
-                    {task}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <DiscussionFeed
+              key={feedRefreshKey}
+              hideComposer
+              title="最新讨论"
+              subtitle="右侧发出的新帖会直接落到这里。这里负责承接站点更新、试用线索、避坑记录和正式回复。"
+              limit={8}
+            />
           </div>
 
-          <div className="rounded-[32px] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_60px_rgba(13,25,48,0.07)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-              首页会露出的讨论样例
-            </p>
-            <div className="mt-5 grid gap-4">
-              {communityPosts.map((post) => (
-                <article
-                  key={post.title}
-                  className="rounded-[26px] border border-[var(--color-line)] bg-[var(--color-soft)] p-5"
-                >
-                  <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="rounded-full bg-white px-3 py-1 font-semibold text-[var(--color-brand-deep)]">
-                      {post.category}
-                    </span>
-                    <span className="text-[var(--color-muted)]">{post.meta}</span>
-                  </div>
-                  <h2 className="mt-4 text-xl font-bold">{post.title}</h2>
-                  <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-                    {post.summary}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
+          <CommunityPostPanel onPostCreated={() => setFeedRefreshKey((value) => value + 1)} />
         </div>
       </section>
     </main>

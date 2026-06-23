@@ -1,8 +1,24 @@
 export const tickerItems = [
-  { label: "虎虎填表可拿 3 美刀试用额度", color: "#3b82f6" },
-  { label: "虎虎进 QQ 群可继续领部分免费额度", color: "#10b981" },
-  { label: "杂货铺 GPT 模型当前整理倍率为 0.058x", color: "#f59e0b" },
-  { label: "星见雅公益当前标记为免费入口，适合单独关注", color: "#8b5cf6" },
+  {
+    label: "虎虎填表可拿 3 美刀试用额度",
+    color: "#3b82f6",
+    href: "https://www.kdocs.cn/l/cj84YbmlJswN",
+  },
+  {
+    label: "QQ 群 602190132：补站点、报价格变化、同步试用线索",
+    color: "#10b981",
+    href: "/community",
+  },
+  {
+    label: "杂货铺 GPT 模型当前整理倍率为 0.058x",
+    color: "#f59e0b",
+    href: "https://api.dstopology.com/keys",
+  },
+  {
+    label: "星见雅公益目前可调用 Grok，适合单独关注",
+    color: "#8b5cf6",
+    href: "https://new.xinjianya.top/",
+  },
 ];
 
 export const guideSteps = [
@@ -24,7 +40,7 @@ export const guideSteps = [
 ];
 
 export const highlightMetrics = [
-  { label: "已录入站点", value: "12", note: "按你提供的这批真实中转站先做首版观察表" },
+  { label: "已录入站点", value: "14", note: "已补入五条悟 qiutian.live，并继续扩展可比站点" },
   { label: "可直接试用入口", value: "2", note: "虎虎试用单和 dazes.cc 新人赠额都已挂到页面" },
   { label: "特殊价格口径", value: "5+", note: "含多倍率、日卡/周卡/月卡、plus/pro 分组等情况" },
   { label: "共建优先级", value: "高", note: "这批数据最需要群友继续补测和纠错" },
@@ -97,6 +113,187 @@ export const communityPosts = [
   },
 ];
 
+export type XDiscussionReply = {
+  author: string;
+  handle: string;
+  postedAt: string;
+  body: string;
+};
+
+export type XDiscussionPost = {
+  id: string;
+  author: string;
+  handle: string;
+  postedAt: string;
+  body: string;
+  tags: string[];
+  station?: string;
+  stats: {
+    replies: number;
+    likes: number;
+    bookmarks: number;
+  };
+  replies?: XDiscussionReply[];
+};
+
+export const xDiscussionSeed: XDiscussionPost[] = [
+  {
+    id: "huhu-trial-thread",
+    author: "北城补站员",
+    handle: "@beicheng_api",
+    postedAt: "今天 09:14",
+    station: "虎虎",
+    body:
+      "虎虎这两天还是挺适合新人的，先填试用单拿 3 美刀，再进群里问一嘴，通常还能拿到一点补充额度。真要说缺点，就是长期价格还得继续盯，别因为第一口试用顺就直接大额冲。",
+    tags: ["试用入口", "虎虎", "新手先试"],
+    stats: {
+      replies: 18,
+      likes: 42,
+      bookmarks: 15,
+    },
+    replies: [
+      {
+        author: "西瓜不加冰",
+        handle: "@melon_patch",
+        postedAt: "今天 09:26",
+        body: "我昨天填的，额度到账挺快，适合先跑点日常请求试水。",
+      },
+      {
+        author: "阿泽补档中",
+        handle: "@aze_logs",
+        postedAt: "今天 09:41",
+        body: "建议群里顺手补一下高峰期表现，别最后首页只剩试用信息最完整。",
+      },
+    ],
+  },
+  {
+    id: "aether-main-choice",
+    author: "长文本搬运工",
+    handle: "@context_runner",
+    postedAt: "今天 10:03",
+    station: "Aether",
+    body:
+      "Aether 现在给我的感觉还是偏“主力候选”。0.263 这个口径不算最低，但好处是群里用的人多，反馈没那么飘。要是你不是专门薅最低价，而是想找个能长期放在工作流里的站，它反而值得盯。",
+    tags: ["Aether", "主力候选", "稳定性"],
+    stats: {
+      replies: 11,
+      likes: 33,
+      bookmarks: 12,
+    },
+    replies: [
+      {
+        author: "雾里看接口",
+        handle: "@foggy_route",
+        postedAt: "今天 10:17",
+        body: "同感，至少现在群里提到它时，不会马上跟着一堆避坑截图。",
+      },
+    ],
+  },
+  {
+    id: "grocery-dual-pricing",
+    author: "倍率警察",
+    handle: "@ratio_watch",
+    postedAt: "今天 11:08",
+    station: "杂货铺",
+    body:
+      "杂货铺最怕被一句“0.058x 很便宜”带过去。GPT 那档确实亮眼，但 Claude Max 又是另一套价格，得拆开写，不然新来的人很容易把最低倍率当成整站统一口径，这个误导挺大的。",
+    tags: ["杂货铺", "多口径", "Claude Max"],
+    stats: {
+      replies: 24,
+      likes: 57,
+      bookmarks: 21,
+    },
+    replies: [
+      {
+        author: "半夜修表格",
+        handle: "@sheet_fixer",
+        postedAt: "今天 11:20",
+        body: "这个一定得在榜单里做明显点，不然别人一眼只看最低值。",
+      },
+      {
+        author: "桉树",
+        handle: "@eucalyptus_dev",
+        postedAt: "今天 11:31",
+        body: "对，最好后面都默认写成“0.058x 起”，别再只留单值了。",
+      },
+    ],
+  },
+  {
+    id: "dasuapi-needs-testing",
+    author: "实测等你发车",
+    handle: "@bench_first",
+    postedAt: "今天 12:02",
+    station: "dasuAPI",
+    body:
+      "dasuAPI 现在是那种“群里口碑偏正向，但结构化信息太少”的典型。入口明确、大家印象不差，可真正拿来比较时，倍率、模型分组、峰值时段表现都还缺。这个站我建议放首页，但旁边一定写清楚“待补测”。",
+    tags: ["dasuAPI", "待补测", "首页精选"],
+    stats: {
+      replies: 15,
+      likes: 28,
+      bookmarks: 9,
+    },
+    replies: [
+      {
+        author: "路过存个档",
+        handle: "@cache_copy",
+        postedAt: "今天 12:18",
+        body: "我支持先挂上，但不要直接写成稳定推荐，不然后面改口会很尴尬。",
+      },
+    ],
+  },
+  {
+    id: "xinjianya-grok-note",
+    author: "公益入口观察员",
+    handle: "@free_gate_note",
+    postedAt: "今天 13:11",
+    station: "星见雅公益",
+    body:
+      "星见雅公益这次最值得单独标出来的是它现在还能调 Grok。对新手来说，这种免费入口本来就适合先摸模型差异；加上 Grok 之后，关注点就不只是“免费”，而是“有额外模型可以顺手试”。当然，公益入口永远别默认它长期稳。",
+    tags: ["星见雅公益", "Grok", "免费入口"],
+    stats: {
+      replies: 19,
+      likes: 49,
+      bookmarks: 18,
+    },
+    replies: [
+      {
+        author: "小赵先记一下",
+        handle: "@memo_zhao",
+        postedAt: "今天 13:24",
+        body: "这个信息很值钱，很多人还停留在“它只是免费入口”的印象里。",
+      },
+    ],
+  },
+  {
+    id: "qq-group-collab-call",
+    author: "表格催更组",
+    handle: "@update_ping",
+    postedAt: "今天 14:06",
+    body:
+      "QQ群这块我建议别只放成联系方式，要明确它是共建入口。谁发现新站、谁看到价格变了、谁跑出高峰报错、谁拿到试用活动，都先往群里丢。后面管理员按“通过 / 修改后通过 / 驳回”收进正式榜单，这样节奏会顺很多。",
+    tags: ["QQ群共建", "审核流程", "群维护"],
+    stats: {
+      replies: 21,
+      likes: 63,
+      bookmarks: 24,
+    },
+    replies: [
+      {
+        author: "南巷口",
+        handle: "@south_lane",
+        postedAt: "今天 14:19",
+        body: "是的，群里负责“线索流”，站里负责“定稿流”，这样分工最清楚。",
+      },
+      {
+        author: "接口搬砖人",
+        handle: "@relay_worker",
+        postedAt: "今天 14:33",
+        body: "后面如果接 GitHub 登录，这条直接能变成站内公告置顶。",
+      },
+    ],
+  },
+];
+
 export const demoVideos = [
   {
     title: "演示视频 01",
@@ -149,7 +346,7 @@ export const pendingVerifications = [
   },
   {
     name: "星见雅公益",
-    need: "当前只标记为免费，缺额度规则和长期可用性说明",
+    need: "当前已补可调用 Grok，仍缺额度规则和长期可用性说明",
   },
 ];
 
@@ -187,11 +384,30 @@ export const resourceLinks = [
     note: "可复制到金山文档 APP 打开，适合继续补更多站点信息。",
   },
   {
-    title: "QQ群免费额度提醒",
-    href: "https://www.kdocs.cn/l/cj84YbmlJswN",
-    note: "虎虎这类入口进群后可能还有补充免费额度，适合继续补测。",
+    title: "加入 QQ 群 602190132",
+    href: "/community",
+    note: "直接看群号和二维码，适合补站点、报价格变化、同步试用和避坑反馈。",
   },
 ];
+
+export const stationLinkMap: Record<string, string> = {
+  虎虎: "https://huhuai.xyz",
+  Aether: "https://to-aether.com/dashboard",
+  杂货铺: "https://api.dstopology.com/keys",
+  dasuAPI: "https://dasuapi.com",
+  Datopology: "https://api.dstopology.com/keys",
+  WayX: "https://api.aiwxin.com/dashboard",
+  "ai8.my": "https://ai8.my",
+  Liary: "https://ai.liaryai.com/",
+  "dazes.cc": "https://cn.dazes.cc",
+  viptoken站: "https://www.viptoken.top/dashboard",
+  Primdream: "https://primdream.store/login",
+  "xiaoya-api": "https://xiaoya-api.xyz",
+  星见雅公益: "https://new.xinjianya.top/",
+  五条悟: "https://qiutian.live",
+};
+
+export const prioritizedStationNames = ["虎虎", "Aether", "杂货铺", "dasuAPI"];
 
 export type HomeFeaturedStation = {
   name: string;
@@ -556,22 +772,22 @@ export const stationComparisonRows = [
     entry: "官网入口",
     packageType: "公益 / 免费",
     status: "免费入口",
-    models: "待补",
+    models: "Grok 可调用",
     price: "免费",
     multiplier: "-",
     uptime: "待补",
     latency: "待补",
     source: "群友整理",
     verdict: "适合单独关注",
-    note: "当前只明确是免费入口，额度规则和稳定性还需要继续补。",
-    advantage: "对新手非常友好，门槛最低。",
+    note: "当前已补充为可调用 Grok；免费入口属性仍然成立，但更适合轻量试用和单独关注。",
+    advantage: "对新手非常友好，门槛最低，也有额外模型可试。",
     risk: "免费不代表长期稳定，仍要看规则和高峰表现。",
   },
   {
-    name: "五条悟api",
-    badge: "特殊入口",
-    group: "tb 搜索“五条悟api”",
-    entry: "淘宝搜索入口",
+    name: "五条悟",
+    badge: "新收录",
+    group: "https://qiutian.live",
+    entry: "官网入口",
     packageType: "待补",
     status: "入口型站点",
     models: "未细分",
@@ -579,10 +795,10 @@ export const stationComparisonRows = [
     multiplier: "-",
     uptime: "待补",
     latency: "待补",
-    source: "用户最新整理表",
-    verdict: "先保留获取方式",
-    note: "当前表格只给了获取方式，没有新的价格或模型细节。",
-    advantage: "入口信息明确，方便后续群友补测。",
-    risk: "不是标准官网直链，需要特别说明获取方式。",
+    source: "用户新增补充",
+    verdict: "先收录官网入口",
+    note: "qiutian.live 入口已补入，后面继续补价格、倍率和模型细节。",
+    advantage: "入口明确，方便后续群友补测。",
+    risk: "当前仍缺可直接比较的价格和口径信息。",
   },
 ];

@@ -33,7 +33,7 @@ export default function GuidesPage() {
               >
                 中转站榜单
               </Link>
-              <span className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white">
+              <span className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_var(--color-panel-glow)]">
                 更多指南
               </span>
             </nav>
@@ -49,10 +49,10 @@ export default function GuidesPage() {
                 先看这几个
               </p>
               <h1 className="mt-2 text-4xl font-black tracking-tight">
-                把最常问的问题集中放这里
+                先把新手最容易踩坑的点集中讲清楚
               </h1>
               <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">
-                首页只放一两个问题，这里再把常见概念、风险、第一次怎么试、怎么看多档位这些内容完整展开。
+                首页只放一两个问题，这里把试用顺序、多倍率理解、免费入口风险和第一次怎么验证这些事情单独展开。
               </p>
             </div>
 
@@ -78,6 +78,9 @@ export default function GuidesPage() {
             <div className="rounded-[32px] border border-[var(--color-line)] bg-[var(--color-soft)] p-6">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                 试用入口
+              </p>
+              <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
+                这几条入口更适合先试水，再结合群友反馈判断要不要长期用。
               </p>
               <div className="mt-4 grid gap-3">
                 {resourceLinks.map((item) => (

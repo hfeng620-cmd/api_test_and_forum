@@ -14,7 +14,7 @@ export default function ModelsPage() {
             </div>
             <div>
               <p className="text-2xl font-black tracking-tight">Timin观察站</p>
-              <p className="text-sm text-[var(--color-muted)]">模型择优预留页</p>
+              <p className="text-sm text-[var(--color-muted)]">模型观察与后续扩展</p>
             </div>
           </div>
 
@@ -33,7 +33,7 @@ export default function ModelsPage() {
               >
                 中转站榜单
               </Link>
-              <span className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white">
+              <span className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_var(--color-panel-glow)]">
                 模型择优
               </span>
             </nav>
@@ -42,15 +42,21 @@ export default function ModelsPage() {
 
         <div className="border-t border-[var(--color-line)] bg-[var(--color-soft)]">
           <div className="mx-auto flex max-w-7xl items-center gap-5 overflow-x-auto px-6 py-3 text-sm whitespace-nowrap text-[var(--color-muted)] lg:px-10">
-            <span className="font-semibold text-[var(--color-ink)]">模型观察预留</span>
+            <span className="font-semibold text-[var(--color-ink)]">模型观察</span>
             {tickerItems.slice(0, 3).map((item) => (
-              <span key={item.label} className="flex items-center gap-2">
+              <a
+                key={item.label}
+                className="flex items-center gap-2 transition hover:text-[var(--color-ink)]"
+                href={item.href}
+                rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+                target={item.href.startsWith("http") ? "_blank" : undefined}
+              >
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: item.color }}
                 />
                 <span>{item.label}</span>
-              </span>
+              </a>
             ))}
           </div>
         </div>
@@ -61,22 +67,22 @@ export default function ModelsPage() {
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <p className="inline-flex rounded-full bg-[var(--color-brand-soft)] px-3 py-1 text-sm font-bold text-[var(--color-brand-deep)]">
-                后续可扩展的二级页
+                后续重点扩展页
               </p>
               <h1 className="mt-4 text-5xl font-black tracking-tight sm:text-6xl">
                 不知道先用哪个模型？
               </h1>
               <p className="mt-5 text-lg leading-8 text-[var(--color-muted)]">
-                这个页面后面可以做成类似你发的那种模型能力排序、使用场景和中转站价格联动页。当前先做骨架，方便以后把真实模型排行、中位价格和推荐场景接进来。
+                这个页面会继续往“模型能力排序、使用场景和中转站价格联动”方向补。现在先把观察维度和信息结构放稳，后面再接真实模型排行、价格区间和推荐场景。
               </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-[26px] bg-[var(--color-soft)] px-5 py-4">
-                <p className="text-sm text-[var(--color-muted)]">当前作用</p>
-                <p className="mt-2 text-3xl font-black">预留入口</p>
+                <p className="text-sm text-[var(--color-muted)]">这一页先做什么</p>
+                <p className="mt-2 text-3xl font-black">定观察维度</p>
                 <p className="mt-1 text-sm text-[var(--color-muted)]">
-                  先把结构和视觉方向定下来，后面再接真实榜单数据
+                  先把能力、场景和价格联动的结构定下来，方便后面直接接真实数据
                 </p>
               </div>
               <div className="rounded-[26px] bg-[var(--color-soft)] px-5 py-4">
@@ -90,7 +96,7 @@ export default function ModelsPage() {
           </div>
 
           <div className="mt-8 inline-flex rounded-full bg-[var(--color-soft)] p-1">
-            <span className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-bold text-white">
+            <span className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-white shadow-[0_10px_24px_var(--color-panel-glow)]">
               按能力预览
             </span>
             <span className="px-4 py-2 text-sm font-semibold text-[var(--color-muted)]">

@@ -43,7 +43,7 @@ export function ThemeToggle() {
           key={item.id}
           className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
             theme === item.id
-              ? "bg-[var(--color-ink)] text-white"
+              ? "bg-[var(--color-brand)] text-white shadow-[0_8px_24px_var(--color-panel-glow)]"
               : "text-[var(--color-muted)] hover:bg-[var(--color-soft)]"
           }`}
           onClick={() => setTheme(item.id)}
@@ -52,6 +52,38 @@ export function ThemeToggle() {
           {item.label}
         </button>
       ))}
+    </div>
+  );
+}
+
+export function ThemeToggleInline() {
+  const [theme, setTheme] = useState<ThemeId>(readSavedTheme);
+
+  useEffect(() => {
+    syncTheme(theme);
+  }, [theme]);
+
+  return (
+    <div className="grid gap-2">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
+        配色方案
+      </p>
+      <div className="inline-flex items-center gap-1 rounded-full border border-[var(--color-line)] bg-white p-1">
+        {THEMES.map((item) => (
+          <button
+            key={item.id}
+            className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+              theme === item.id
+                ? "bg-[var(--color-brand)] text-white shadow-[0_8px_24px_var(--color-panel-glow)]"
+                : "text-[var(--color-muted)] hover:bg-[var(--color-soft)]"
+            }`}
+            onClick={() => setTheme(item.id)}
+            type="button"
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

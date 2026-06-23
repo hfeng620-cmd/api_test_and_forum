@@ -79,7 +79,11 @@ export default function AdminPage() {
     );
   }
 
-  function reviewSubmission(id: string, statusValue: StationSubmission["status"]) {
+  function reviewSubmission(
+    id: string,
+    statusValue: StationSubmission["status"],
+    mode: "direct" | "edited" = "direct",
+  ) {
     saveStationSubmissions(submissions);
     const target = submissions.find((item) => item.id === id);
     const next = updateSubmissionReview(id, {
@@ -89,7 +93,9 @@ export default function AdminPage() {
     setSubmissions(next);
     setStatus(
       statusValue === "approved"
-        ? "已通过这条提交。你也可以先改内容，再点通过。"
+        ? mode === "edited"
+          ? "已保存你改过的内容，并通过这条提交。"
+          : "已直接通过这条提交。"
         : "已驳回这条提交。",
     );
   }
@@ -126,7 +132,7 @@ export default function AdminPage() {
               >
                 中转站榜单
               </Link>
-              <span className="rounded-full bg-[var(--color-ink)] px-4 py-2 text-sm font-semibold text-white">
+              <span className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_var(--color-panel-glow)]">
                 管理员页
               </span>
             </nav>
@@ -337,17 +343,17 @@ export default function AdminPage() {
                       <div className="mt-5 flex flex-wrap gap-3">
                         <button
                           className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--color-brand-deep)]"
-                          onClick={() => reviewSubmission(item.id, "approved")}
+                          onClick={() => reviewSubmission(item.id, "approved", "direct")}
                           type="button"
                         >
                           直接通过
                         </button>
                         <button
                           className="rounded-full border border-[var(--color-line)] bg-white px-5 py-3 text-sm font-bold text-[var(--color-ink)] transition hover:bg-[var(--color-soft)]"
-                          onClick={() => reviewSubmission(item.id, "approved")}
+                          onClick={() => reviewSubmission(item.id, "approved", "edited")}
                           type="button"
                         >
-                          修改后通过
+                          保存改动并通过
                         </button>
                         <button
                           className="rounded-full bg-[#fff1f2] px-5 py-3 text-sm font-bold text-[#be123c] transition hover:bg-[#ffe4e6]"

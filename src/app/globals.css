@@ -4,6 +4,9 @@
 :root[data-theme="blue"] {
   --background: #f7f9fc;
   --foreground: #0f172a;
+  --mouse-x: 62vw;
+  --mouse-y: 220px;
+  --mouse-glow-opacity: 0;
   --color-bg: #f7f9fc;
   --color-ink: #0f172a;
   --color-muted: #5f6b7d;
@@ -52,8 +55,8 @@ html {
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 26%),
-    radial-gradient(circle at top right, rgba(15, 23, 42, 0.04), transparent 22%),
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.07), transparent 26%),
+    radial-gradient(circle at top right, rgba(15, 23, 42, 0.035), transparent 22%),
     linear-gradient(180deg, #ffffff 0%, #f7f9fc 38%, #f2f6fb 100%);
   color: var(--foreground);
   font-family: var(--font-geist-sans), "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -72,6 +75,26 @@ body::before {
   z-index: -1;
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: var(--mouse-glow-opacity);
+  transition: opacity 180ms ease;
+  background:
+    radial-gradient(circle 340px at var(--mouse-x) var(--mouse-y), rgba(37, 99, 235, 0.15), transparent 62%),
+    radial-gradient(circle 180px at calc(var(--mouse-x) + 48px) calc(var(--mouse-y) - 28px), rgba(255, 255, 255, 0.74), transparent 58%);
+  filter: blur(12px);
+}
+
+:root[data-theme="green"] body::after {
+  background:
+    radial-gradient(circle 340px at var(--mouse-x) var(--mouse-y), rgba(22, 163, 74, 0.13), transparent 62%),
+    radial-gradient(circle 180px at calc(var(--mouse-x) + 48px) calc(var(--mouse-y) - 28px), rgba(255, 255, 255, 0.7), transparent 58%);
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -85,4 +108,26 @@ button {
 
 ::selection {
   background: var(--color-brand-soft);
+}
+
+button[aria-label="Open Next.js Dev Tools"] {
+  display: none !important;
+}
+
+.selection-comment-pop::after {
+  content: "";
+  position: absolute;
+  inset: auto auto -8px 28px;
+  height: 16px;
+  width: 16px;
+  transform: rotate(45deg);
+  border-right: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+  body::after {
+    display: none;
+  }
 }
