@@ -34,6 +34,9 @@ jobs:
         run: npm ci
 
       - name: 构建静态站点
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://svksgdsuquhkwyliavfn.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_FxCS1_JqJiV74SFCG0q8Pg_-4iSCzk3
         run: npm run build
 
       - name: 配置 Pages
