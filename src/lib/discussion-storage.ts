@@ -9,6 +9,8 @@ export type DiscussionPost = {
   authorAvatarUrl?: string;
   handle: string;
   postedAt: string;
+  createdAt: string;
+  updatedAt: string;
   body: string;
   tags: string[];
   station?: string;
@@ -43,6 +45,7 @@ type ForumPostRow = {
   station?: string | null;
   tags?: string[] | null;
   created_at?: string | null;
+  updated_at?: string | null;
   posted_at?: string | null;
   reply_count?: number | null;
   like_count?: number | null;
@@ -88,6 +91,8 @@ function postFromRow(row: ForumPostRow): DiscussionPost {
     authorAvatarUrl: row.author_avatar_url || undefined,
     handle: "@forum",
     postedAt: formatDate(row.posted_at ?? row.created_at),
+    createdAt: row.created_at ?? "",
+    updatedAt: row.updated_at ?? row.created_at ?? "",
     body: row.body,
     station: row.station || undefined,
     tags: Array.isArray(row.tags) ? row.tags : [],
@@ -125,6 +130,23 @@ async function ensureProfile(displayName = "群友补充") {
 
   if (error) throw error;
   return userData.user.id;
+}
+
+export async function getUserPosts(userId: string): Promise<DiscussionPost[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await getSupabaseClient()
+      .from("forum_posts_public")
+      .select("*")
+      .eq("author_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    return ((data ?? []) as ForumPostRow[]).map(postFromRow);
+  } catch {
+    return [];
+  }
 }
 
 export async function loadDiscussionPosts(): Promise<DiscussionPost[]> {
