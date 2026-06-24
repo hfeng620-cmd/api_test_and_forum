@@ -159,7 +159,7 @@ export default function Home() {
                       </div>
                       <div>
                         <p className="text-base font-black">{row.price}</p>
-                        <span className="mt-2 inline-flex text-sm leading-6 text-[var(--color-brand-deep)]">`r`n                          {row.entry}`r`n                        </span>
+                        <p className="mt-2 text-sm leading-6 text-[var(--color-brand-deep)]">{row.entry}</p>
                       </div>
                       <p className="pt-1 text-base font-black">{row.multiplier}</p>
                       <div>

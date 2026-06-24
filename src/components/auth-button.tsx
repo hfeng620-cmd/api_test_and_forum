@@ -7,14 +7,24 @@ import { useForumAuth } from "@/lib/forum-auth";
 
 export function AuthButton() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const { isConnected, email, signOut } = useForumAuth();
+  const { isConnected, email, needsPassword, signOut } = useForumAuth();
 
   if (isConnected) {
     return (
       <div className="flex items-center gap-2">
-        <span className="hidden max-w-[140px] truncate text-xs text-[var(--color-muted)] sm:inline">
-          {email}
-        </span>
+        {needsPassword ? (
+          <button
+            className="rounded-full bg-[#f59e0b] px-3 py-2 text-xs font-bold text-white transition hover:bg-[#d97706]"
+            onClick={() => setAuthModalOpen(true)}
+            type="button"
+          >
+            设置密码
+          </button>
+        ) : (
+          <span className="hidden max-w-[140px] truncate text-xs text-[var(--color-muted)] sm:inline">
+            {email}
+          </span>
+        )}
         <button
           className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-3 py-2 text-xs font-bold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
           onClick={() => signOut()}
@@ -22,6 +32,11 @@ export function AuthButton() {
         >
           退出
         </button>
+        <ForumAuthModal
+          key={authModalOpen ? "open" : "closed"}
+          open={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+        />
       </div>
     );
   }
