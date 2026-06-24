@@ -70,6 +70,7 @@ export default function AdminPage() {
     { id: string; body: string; status: "approved" | "rejected"; time: string }[]
   >([]);
   const [forumHistoryLoaded, setForumHistoryLoaded] = useState(false);
+  const [forumHistoryError, setForumHistoryError] = useState(false);
 
   // New state
   const [activeTab, setActiveTab] = useState<AdminTab>("posts");
@@ -124,13 +125,14 @@ export default function AdminPage() {
   useEffect(() => {
     if (!isConnected || !adminOk || forumHistoryLoaded) return;
     let cancelled = false;
-    getSupabaseClient()
-      .from("forum_posts")
-      .select("id, body, created_at")
-      .eq("is_hidden", false)
-      .order("created_at", { ascending: false })
-      .limit(20)
-      .then(({ data }) => {
+    (async () => {
+      try {
+        const { data } = await getSupabaseClient()
+          .from("forum_posts")
+          .select("id, body, created_at")
+          .eq("is_hidden", false)
+          .order("created_at", { ascending: false })
+          .limit(20);
         if (cancelled) return;
         if (data) {
           setForumHistory(
@@ -144,8 +146,12 @@ export default function AdminPage() {
             ),
           );
         }
-        setForumHistoryLoaded(true);
-      });
+      } catch {
+        if (!cancelled) setForumHistoryError(true);
+      } finally {
+        if (!cancelled) setForumHistoryLoaded(true);
+      }
+    })();
     return () => {
       cancelled = true;
     };

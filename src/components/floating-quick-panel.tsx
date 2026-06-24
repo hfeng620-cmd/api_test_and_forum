@@ -72,7 +72,7 @@ export function FloatingQuickPanel() {
         onClick={() => setOpen((current) => !current)}
         type="button"
       >
-        配色
+        快捷入口
       </button>
     </div>
   );

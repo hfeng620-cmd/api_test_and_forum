@@ -30,6 +30,16 @@ const footerLinks = [
     href: "/guides",
     external: false,
   },
+  {
+    label: "模型择优",
+    href: "/models",
+    external: false,
+  },
+  {
+    label: "管理员",
+    href: "/admin",
+    external: false,
+  },
 ];
 
 export function SiteFooter() {
