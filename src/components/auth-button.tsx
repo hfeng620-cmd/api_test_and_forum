@@ -20,13 +20,16 @@ export function AuthButton() {
 
   useEffect(() => {
     if (!isConnected || !user) return;
-    getSupabaseClient()
-      .from("forum_profiles")
-      .select("avatar_url")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => { if (data?.avatar_url) setAvatarUrl(data.avatar_url); })
-      .catch(() => {});
+    (async () => {
+      try {
+        const { data } = await getSupabaseClient()
+          .from("forum_profiles")
+          .select("avatar_url")
+          .eq("id", user.id)
+          .single();
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      } catch { /* ignore */ }
+    })();
   }, [isConnected, user]);
 
   if (isConnected) {
