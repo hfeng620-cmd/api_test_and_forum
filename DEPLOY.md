@@ -1,4 +1,20 @@
-# Timin 观察站 -- 服务器部署文档
+# Timix观察站 — 服务器部署文档
+
+## 快速开始
+
+在 VPS 上执行以下命令（一键恢复）：
+
+```bash
+git clone https://github.com/hfeng620-cmd/timin_api_test_and_forum.git
+cd timin_api_test_and_forum
+echo "NEXT_PUBLIC_SUPABASE_URL=https://svksgdsuquhkwyliavfn.supabase.co" > .env.local
+echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_FxCS1_JqJiV74SFCG0q8Pg_-4iSCzk3" >> .env.local
+npm install
+npm run build
+npx serve@latest out -l 3000 -s &
+```
+
+详细介绍见下方。
 
 ---
 
