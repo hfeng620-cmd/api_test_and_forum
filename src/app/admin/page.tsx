@@ -104,7 +104,7 @@ export default function AdminPage() {
 
   // ---- User management state ----
   const [userList, setUserList] = useState<
-    { id: string; display_name: string; avatar_url: string | null; created_at: string; isAdmin: boolean }[]
+    { id: string; display_name: string; avatar_url: string | null; created_at: string; isAdmin: boolean; email: string }[]
   >([]);
   const [userListLoading, setUserListLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
@@ -118,13 +118,24 @@ export default function AdminPage() {
         supabase.from("forum_profiles").select("id, display_name, avatar_url, created_at").order("created_at", { ascending: false }).limit(100),
         supabase.from("forum_admins").select("user_id"),
       ]);
-      const adminIds = new Set(((adminsRes.data ?? []) as { user_id: string }[]).map((a: { user_id: string }) => a.user_id));
+      const adminIds = new Set(((adminsRes.data ?? []) as { user_id: string }[]).map((a) => a.user_id));
+      // Try to get emails via RPC
+      let emailMap: Record<string, string> = {};
+      try {
+        const { data: emailData } = await supabase.rpc("get_admin_list");
+        if (emailData) {
+          for (const row of (emailData as any[])) {
+            emailMap[row.user_id] = row.email || "";
+          }
+        }
+      } catch { /* RPC may not exist */ }
       const users = ((profilesRes.data ?? []) as any[]).map((u: any) => ({
         id: u.id,
         display_name: u.display_name,
         avatar_url: u.avatar_url,
         created_at: u.created_at,
         isAdmin: adminIds.has(u.id),
+        email: emailMap[u.id] || "—",
       }));
       setUserList(users);
     } catch { /* ignore */ }
@@ -1552,7 +1563,7 @@ export default function AdminPage() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-[var(--color-ink)]">{user.display_name}</p>
-                      <p className="text-xs text-[var(--color-muted)]">{new Date(user.created_at).toLocaleDateString("zh-CN")} 加入</p>
+                      <p className="text-xs text-[var(--color-muted)]">{user.email} · {new Date(user.created_at).toLocaleDateString("zh-CN")} 加入</p>
                     </div>
                     {user.isAdmin && (
                       <span className="rounded-full bg-[#fef3c7] px-2 py-0.5 text-[10px] font-bold text-[#b45309]">管理员</span>

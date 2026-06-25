@@ -73,8 +73,12 @@ export function OnlineIndicator() {
     return () => clearInterval(interval);
   }, [isConnected, user]);
 
-  // Fallback: show nothing when not logged in or no one online
-  if (count === 0 && onlineUsers.length === 0) return null;
+  // Always show, even when no one's online
+  if (!isConnected || !user) {
+    return (
+      <span className="text-[11px] font-semibold text-[var(--color-muted)]">— 人在线</span>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2">

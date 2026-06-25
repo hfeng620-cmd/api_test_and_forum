@@ -82,17 +82,11 @@ function formatRelativeTime(postedAt: string): string {
   return postedAt;
 }
 
-function ActionIcon({ kind }: { kind: "comment" | "like" | "bookmark" | "bookmarkFilled" }) {
+function ActionIcon({ kind, liked }: { kind: "comment" | "like" | "bookmark" | "bookmarkFilled"; liked?: boolean }) {
   if (kind === "comment") {
     return (
       <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24">
-        <path
-          d="M20 11.2C20 15.508 16.195 19 11.5 19a9.18 9.18 0 0 1-3.515-.68L4 19.5l1.202-3.396A7.398 7.398 0 0 1 3 11.2C3 6.892 6.805 3.4 11.5 3.4S20 6.892 20 11.2Z"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.8"
-        />
+        <path d="M20 11.2C20 15.508 16.195 19 11.5 19a9.18 9.18 0 0 1-3.515-.68L4 19.5l1.202-3.396A7.398 7.398 0 0 1 3 11.2C3 6.892 6.805 3.4 11.5 3.4S20 6.892 20 11.2Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
       </svg>
     );
   }
@@ -100,13 +94,7 @@ function ActionIcon({ kind }: { kind: "comment" | "like" | "bookmark" | "bookmar
   if (kind === "bookmark") {
     return (
       <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24">
-        <path
-          d="M5 3h14a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.8"
-        />
+        <path d="M5 3h14a2 2 0 0 1 2 2v16l-7-4-7 4V5a2 2 0 0 1 2-2z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
       </svg>
     );
   }
@@ -119,15 +107,18 @@ function ActionIcon({ kind }: { kind: "comment" | "like" | "bookmark" | "bookmar
     );
   }
 
+  // Like — filled red when liked
+  if (liked) {
+    return (
+      <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="#ef4444" viewBox="0 0 24 24" stroke="#ef4444" strokeWidth="1.5">
+        <path d="M12 20.4s-7-4.355-7-9.24A4.16 4.16 0 0 1 9.2 7a4.62 4.62 0 0 1 2.8 1.1A4.62 4.62 0 0 1 14.8 7A4.16 4.16 0 0 1 19 11.16c0 4.885-7 9.24-7 9.24Z" />
+      </svg>
+    );
+  }
+
   return (
     <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24">
-      <path
-        d="M12 20.4s-7-4.355-7-9.24A4.16 4.16 0 0 1 9.2 7a4.62 4.62 0 0 1 2.8 1.1A4.62 4.62 0 0 1 14.8 7A4.16 4.16 0 0 1 19 11.16c0 4.885-7 9.24-7 9.24Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
+      <path d="M12 20.4s-7-4.355-7-9.24A4.16 4.16 0 0 1 9.2 7a4.62 4.62 0 0 1 2.8 1.1A4.62 4.62 0 0 1 14.8 7A4.16 4.16 0 0 1 19 11.16c0 4.885-7 9.24-7 9.24Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
     </svg>
   );
 }
@@ -136,15 +127,17 @@ function ActionButton({
   count,
   icon,
   onClick,
+  liked,
 }: {
   count: number;
   icon: "comment" | "like";
   onClick?: () => void;
+  liked?: boolean;
 }) {
   const content = (
     <>
-      <ActionIcon kind={icon} />
-      <span>{formatCount(count)}</span>
+      <ActionIcon kind={icon} liked={liked} />
+      <span className={liked ? "text-[#ef4444]" : ""}>{formatCount(count)}</span>
     </>
   );
 
@@ -192,6 +185,7 @@ export function DiscussionFeed({
   const [editBody, setEditBody] = useState("");
   const [editSaving, setEditSaving] = useState(false);
   const [replySubmitting, setReplySubmitting] = useState<Set<string>>(new Set());
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<"latest" | "mostReplies" | "mostLikes">("latest");
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
@@ -387,13 +381,16 @@ export function DiscussionFeed({
     const currentPost = posts.find((p) => p.issueNumber === postId);
     if (!currentPost) return;
 
-    const updatedLikes = currentPost.likes + 1;
+    const alreadyLiked = likedPosts.has(postId);
+    // Optimistic toggle
+    setLikedPosts((prev) => { const next = new Set(prev); if (alreadyLiked) next.delete(postId); else next.add(postId); return next; });
     setPosts((current) =>
-      current.map((p) => (p.issueNumber === postId ? { ...p, likes: updatedLikes } : p)),
+      current.map((p) => (p.issueNumber === postId ? { ...p, likes: alreadyLiked ? p.likes - 1 : p.likes + 1 } : p)),
     );
 
     try {
-      const confirmedLikes = await likeDiscussionPost(postId, currentPost.likes);
+      if (!alreadyLiked) {
+        await likeDiscussionPost(postId, currentPost.likes);
       setPosts((current) =>
         current.map((p) => (p.issueNumber === postId ? { ...p, likes: confirmedLikes } : p)),
       );
@@ -929,7 +926,7 @@ export function DiscussionFeed({
                   </div>
                   <div className="mt-4 flex items-center justify-between sm:justify-start sm:gap-7">
                     <ActionButton count={post.replyCount} icon="comment" onClick={() => openReplyBox(post.issueNumber)} />
-                    <ActionButton count={post.likes} icon="like" onClick={() => handleLike(post.issueNumber)} />
+                    <ActionButton count={post.likes} icon="like" liked={likedPosts.has(post.issueNumber)} onClick={() => handleLike(post.issueNumber)} />
                     {/* Bookmark button */}
                     <button
                       className="inline-flex items-center gap-2 text-[15px] text-[var(--color-muted)] transition hover:text-[var(--color-ink)] min-h-[44px] min-w-[44px]"
