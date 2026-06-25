@@ -90,7 +90,7 @@ function formatDate(value?: string | null) {
 function postFromRow(row: ForumPostRow): DiscussionPost {
   return {
     issueNumber: row.id,
-    author: row.author_display_name || "群友补充",
+    author: row.author_display_name || "噜噜",
     authorId: row.author_id || undefined,
     authorAvatarUrl: row.author_avatar_url || undefined,
     handle: "@forum",
@@ -109,7 +109,7 @@ function postFromRow(row: ForumPostRow): DiscussionPost {
 function replyFromRow(row: ForumReplyRow): DiscussionReply {
   return {
     id: row.id,
-    author: row.author_display_name || "群友补充",
+    author: row.author_display_name || "噜噜",
     authorId: row.author_id || undefined,
     avatar: row.author_avatar_url || "",
     postedAt: formatDate(row.created_at),
@@ -118,7 +118,7 @@ function replyFromRow(row: ForumReplyRow): DiscussionReply {
   };
 }
 
-async function ensureProfile(displayName = "群友补充") {
+async function ensureProfile(displayName = "噜噜") {
   assertConfigured();
   const supabase = getSupabaseClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -197,7 +197,7 @@ export async function loadDiscussionPosts(): Promise<DiscussionPost[]> {
 export async function createDiscussionPost(
   input: CreateDiscussionPostInput,
 ): Promise<DiscussionPost> {
-  const authorId = await ensureProfile(input.author || "群友补充");
+  const authorId = await ensureProfile(input.author || "噜噜");
 
   await checkRateLimit(authorId, "forum_posts");
 
@@ -222,7 +222,7 @@ export async function createDiscussionPost(
 
   return postFromRow({
     ...(data as ForumPostRow),
-    author_display_name: input.author || "群友补充",
+    author_display_name: input.author || "噜噜",
     reply_count: 0,
     like_count: 0,
   });
@@ -262,7 +262,7 @@ export async function replyDiscussionPost(
   if (error) throw error;
   return replyFromRow({
     ...(data as ForumReplyRow),
-    author_display_name: "群友补充",
+    author_display_name: "噜噜",
   });
 }
 
@@ -325,7 +325,7 @@ export async function loadPendingDiscussionPosts(): Promise<DiscussionPost[]> {
         station: typeof row.station === "string" ? row.station : "",
         tags: Array.isArray(row.tags) ? (row.tags as string[]) : [],
         created_at: typeof row.created_at === "string" ? row.created_at : null,
-        author_display_name: profile?.display_name ?? "群友补充",
+        author_display_name: profile?.display_name ?? "噜噜",
         reply_count: 0,
         like_count: 0,
       });

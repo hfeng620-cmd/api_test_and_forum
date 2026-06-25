@@ -288,7 +288,7 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
         return { ok: false, error: "密码需包含至少一个数字。" };
       }
 
-      const name = (displayName ?? "").trim() || "群友补充";
+      const name = (displayName ?? "").trim() || "噜噜";
 
       // Save display name FIRST (before auth update triggers state change)
       const { data: userData } = await getSupabaseClient().auth.getUser();

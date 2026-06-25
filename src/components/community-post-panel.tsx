@@ -43,7 +43,7 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
       if (cancelled) {
         const names = new Set<string>();
         for (const p of posts) {
-          if (p.author && p.author !== "群友补充") names.add(p.author);
+          if (p.author && p.author !== "噜噜") names.add(p.author);
         }
         setRecentAuthors(Array.from(names).sort((a, b) => a.localeCompare(b, "zh-CN")));
       }
@@ -164,7 +164,7 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
     setSubmitting(true);
     try {
       await createDiscussionPost({
-        author: displayName || "群友补充",
+        author: displayName || "噜噜",
         handle: "@forum",
         body: body.trim(),
         station: station.trim(),

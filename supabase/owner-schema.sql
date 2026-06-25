@@ -80,7 +80,7 @@ as $$
   select
     fa.user_id,
     u.email,
-    coalesce(fp.display_name, '群友补充') as display_name,
+    coalesce(fp.display_name, '噜噜') as display_name,
     fa.created_at
   from public.forum_admins fa
   join auth.users u on u.id = fa.user_id

@@ -5,7 +5,7 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.forum_profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  display_name text not null default '群友补充' check (char_length(trim(display_name)) between 1 and 80),
+  display_name text not null default '噜噜' check (char_length(trim(display_name)) between 1 and 80),
   avatar_url text,
   bio text check (bio is null or char_length(bio) <= 500),
   created_at timestamptz not null default now(),
@@ -239,7 +239,7 @@ set search_path = public
 as $$
 begin
   insert into public.forum_profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', '群友补充'))
+  values (new.id, coalesce(new.raw_user_meta_data->>'full_name', '噜噜'))
   on conflict (id) do nothing;
   return new;
 end;

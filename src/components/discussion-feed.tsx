@@ -361,7 +361,7 @@ export function DiscussionFeed({
     setStatus("发布中...");
     try {
       await createDiscussionPost({
-        author: displayName || "群友补充",
+        author: displayName || "噜噜",
         handle: "@forum",
         body: body.trim(),
         station: station.trim(),
