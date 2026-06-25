@@ -421,14 +421,12 @@ export function DiscussionFeed({
   /** Open the reply box for a post. When replying to a specific author, auto-prepend @author
    *  and store the target reply body as a quote reference. */
   function openReplyBox(postId: string, targetAuthor = "楼主") {
-    if (expandedPostId === postId) {
-      setExpandedPostId(null);
-    } else {
-      setExpandedPostId(postId);
-      setReplyTargets((current) => ({ ...current, [postId]: targetAuthor }));
+    // Always expand the post and set reply target
+    setExpandedPostId(postId);
+    setReplyTargets((current) => ({ ...current, [postId]: targetAuthor }));
 
-      // Auto-prepend @authorName when replying to a specific user (not the original post)
-      if (targetAuthor !== "楼主") {
+    // Auto-prepend @authorName when replying to a specific user (not the original post)
+    if (targetAuthor !== "楼主") {
         setReplyDrafts((current) => {
           const existing = current[postId] ?? "";
           const mention = `@${targetAuthor} `;
@@ -460,7 +458,6 @@ export function DiscussionFeed({
       }
 
       void loadPostComments(postId);
-    }
   }
 
   async function handleReply(postId: string) {
