@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 const STORAGE_KEY = "timin-notifications";
@@ -162,9 +163,9 @@ export function NotificationBell({
         )}
       </button>
 
-      {/* Full-screen overlay modal */}
-      {open && (
-        <div className="fixed inset-0 z-[110] flex items-start justify-center bg-black/50 px-4 pt-[12vh] backdrop-blur-sm">
+      {/* Full-screen overlay modal — rendered to body via portal */}
+      {open && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-start justify-center bg-black/50 px-4 pt-[12vh] backdrop-blur-sm">
           {/* Card */}
           <div
             className="surface-in w-full max-w-lg overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.18)]"
@@ -259,7 +260,8 @@ export function NotificationBell({
             className="fixed inset-0 -z-10"
             onClick={() => setOpen(false)}
           />
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
