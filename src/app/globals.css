@@ -538,11 +538,25 @@ main#main-content > .theme-stage {
     linear-gradient(180deg, rgba(var(--theme-glow-rgb), 0.035), rgba(var(--theme-glow-rgb), 0) 24%, rgba(var(--theme-secondary-rgb), 0.03) 100%);
 }
 
+main#main-content .route-stage > main.theme-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% -6%, rgba(255,255,255,0.16), transparent 34%),
+    linear-gradient(180deg, rgba(var(--theme-glow-rgb), 0.035), rgba(var(--theme-glow-rgb), 0) 24%, rgba(var(--theme-secondary-rgb), 0.03) 100%);
+}
+
 :root[data-theme="stone"] main#main-content > .theme-stage,
 :root[data-theme="sand"] main#main-content > .theme-stage,
 :root[data-theme="ember"] main#main-content > .theme-stage,
 :root[data-theme="pearl"] main#main-content > .theme-stage,
-:root[data-theme="sage"] main#main-content > .theme-stage {
+:root[data-theme="sage"] main#main-content > .theme-stage,
+:root[data-theme="stone"] main#main-content .route-stage > main.theme-stage,
+:root[data-theme="sand"] main#main-content .route-stage > main.theme-stage,
+:root[data-theme="ember"] main#main-content .route-stage > main.theme-stage,
+:root[data-theme="pearl"] main#main-content .route-stage > main.theme-stage,
+:root[data-theme="sage"] main#main-content .route-stage > main.theme-stage {
   background:
     radial-gradient(circle at 50% -8%, rgba(255,255,255,0.24), transparent 36%),
     linear-gradient(180deg, rgba(var(--theme-glow-rgb), 0.028), rgba(var(--theme-glow-rgb), 0) 24%, rgba(var(--theme-secondary-rgb), 0.038) 100%);
@@ -550,21 +564,28 @@ main#main-content > .theme-stage {
 
 :root[data-theme="graphite"] main#main-content > .theme-stage,
 :root[data-theme="blue"] main#main-content > .theme-stage,
-:root[data-theme="ocean"] main#main-content > .theme-stage {
+:root[data-theme="ocean"] main#main-content > .theme-stage,
+:root[data-theme="graphite"] main#main-content .route-stage > main.theme-stage,
+:root[data-theme="blue"] main#main-content .route-stage > main.theme-stage,
+:root[data-theme="ocean"] main#main-content .route-stage > main.theme-stage {
   background:
     radial-gradient(circle at 50% -6%, rgba(255,255,255,0.18), transparent 34%),
     linear-gradient(180deg, rgba(var(--theme-glow-rgb), 0.04), rgba(var(--theme-glow-rgb), 0) 24%, rgba(var(--theme-secondary-rgb), 0.028) 100%);
 }
 
 :root[data-theme="midnight"] main#main-content > .theme-stage,
-:root[data-theme="cyber"] main#main-content > .theme-stage {
+:root[data-theme="cyber"] main#main-content > .theme-stage,
+:root[data-theme="midnight"] main#main-content .route-stage > main.theme-stage,
+:root[data-theme="cyber"] main#main-content .route-stage > main.theme-stage {
   background:
     radial-gradient(circle at 50% -10%, rgba(255,255,255,0.08), transparent 32%),
     linear-gradient(180deg, rgba(var(--theme-glow-rgb), 0.06), rgba(var(--theme-glow-rgb), 0) 22%, rgba(var(--theme-secondary-rgb), 0.045) 100%);
 }
 
 main#main-content > .theme-stage::before,
-main#main-content > .theme-stage::after {
+main#main-content > .theme-stage::after,
+main#main-content .route-stage > main.theme-stage::before,
+main#main-content .route-stage > main.theme-stage::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -574,7 +595,28 @@ main#main-content > .theme-stage::after {
   transition: opacity 260ms ease;
 }
 
-:root[data-theme-mode="signal"] main#main-content > .theme-stage::before {
+main#main-content .route-stage > main.theme-stage::before {
+  opacity: 0.88;
+  background:
+    radial-gradient(circle at 16% 14%, rgba(var(--theme-glow-rgb), 0.12), transparent 22%),
+    radial-gradient(circle at 84% 18%, rgba(var(--theme-secondary-rgb), 0.11), transparent 20%),
+    linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,0.06) 1px, transparent 1px);
+  background-size: auto, auto, 42px 42px, 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0.72), rgba(0,0,0,0.16) 64%, transparent 100%);
+}
+
+main#main-content .route-stage > main.theme-stage::after {
+  opacity: 0.56;
+  background:
+    radial-gradient(circle at 20% 72%, rgba(var(--theme-surface-rgb), 0.44), transparent 13%),
+    radial-gradient(circle at 76% 42%, rgba(var(--theme-glow-rgb), 0.1), transparent 20%);
+  filter: blur(12px);
+  animation: ambient-float 28s ease-in-out infinite;
+}
+
+:root[data-theme-mode="signal"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="signal"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 0.95;
   background:
     radial-gradient(circle at 14% 16%, rgba(var(--theme-glow-rgb), 0.14), transparent 20%),
@@ -585,7 +627,8 @@ main#main-content > .theme-stage::after {
   mask-image: linear-gradient(180deg, rgba(0,0,0,0.72), rgba(0,0,0,0.16) 62%, transparent 100%);
 }
 
-:root[data-theme-mode="signal"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="signal"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="signal"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.72;
   background:
     radial-gradient(circle at 18% 72%, rgba(var(--theme-surface-rgb), 0.5), transparent 12%),
@@ -593,7 +636,8 @@ main#main-content > .theme-stage::after {
   animation: grid-drift 22s linear infinite;
 }
 
-:root[data-theme-mode="starfield"] main#main-content > .theme-stage::before {
+:root[data-theme-mode="starfield"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="starfield"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 1;
   background:
     radial-gradient(circle at 16% 18%, rgba(var(--theme-surface-rgb), 0.94) 0 0.12rem, transparent 0.18rem),
@@ -607,7 +651,8 @@ main#main-content > .theme-stage::after {
   animation: starfield-twinkle 14s ease-in-out infinite;
 }
 
-:root[data-theme-mode="starfield"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="starfield"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="starfield"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.82;
   background:
     radial-gradient(circle at 20% 22%, rgba(var(--theme-surface-rgb), 0.55), transparent 14%),
@@ -617,7 +662,8 @@ main#main-content > .theme-stage::after {
   animation: ambient-float 28s ease-in-out infinite;
 }
 
-:root[data-theme-mode="bubble"] main#main-content > .theme-stage::before {
+:root[data-theme-mode="bubble"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="bubble"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 0.98;
   background:
     radial-gradient(circle at 18% 22%, rgba(var(--theme-surface-rgb), 0.72) 0 6%, transparent 7%),
@@ -629,7 +675,8 @@ main#main-content > .theme-stage::after {
   animation: bubble-float 18s ease-in-out infinite;
 }
 
-:root[data-theme-mode="bubble"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="bubble"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="bubble"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.74;
   background:
     radial-gradient(circle at 18% 18%, rgba(var(--theme-glow-rgb), 0.12), transparent 18%),
@@ -638,7 +685,8 @@ main#main-content > .theme-stage::after {
   filter: blur(8px);
 }
 
-:root[data-theme-mode="orbit"] main#main-content > .theme-stage::before {
+:root[data-theme-mode="orbit"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="orbit"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 0.98;
   background:
     radial-gradient(circle at 78% 28%, transparent 0 13%, rgba(var(--theme-surface-rgb), 0.4) 13.4% 13.8%, transparent 14.2% 23%, rgba(var(--theme-glow-rgb), 0.24) 23.4% 23.8%, transparent 24.2%),
@@ -648,7 +696,8 @@ main#main-content > .theme-stage::after {
   animation: orbit-spin 34s linear infinite;
 }
 
-:root[data-theme-mode="orbit"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="orbit"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="orbit"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.68;
   background:
     linear-gradient(rgba(148,163,184,0.06) 1px, transparent 1px),
@@ -657,7 +706,8 @@ main#main-content > .theme-stage::after {
   mask-image: radial-gradient(circle at 64% 36%, rgba(0,0,0,0.82), transparent 62%);
 }
 
-:root[data-theme-mode="aurora"] main#main-content > .theme-stage::before {
+:root[data-theme-mode="aurora"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="aurora"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 1;
   background:
     linear-gradient(118deg, rgba(var(--theme-glow-rgb), 0.16), rgba(var(--theme-secondary-rgb), 0.1), rgba(var(--theme-surface-rgb), 0) 68%),
@@ -668,7 +718,8 @@ main#main-content > .theme-stage::after {
   animation: aurora-sweep 18s ease-in-out infinite;
 }
 
-:root[data-theme-mode="aurora"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="aurora"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="aurora"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.74;
   background:
     radial-gradient(circle at 24% 72%, rgba(var(--theme-glow-rgb), 0.12), transparent 18%),
@@ -676,7 +727,8 @@ main#main-content > .theme-stage::after {
   filter: blur(12px);
 }
 
-:root[data-theme-mode="mist"] main#main-content > .theme-stage::before {
+:root[data-theme-mode="mist"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="mist"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 1;
   background:
     radial-gradient(circle at 18% 16%, rgba(var(--theme-surface-rgb), 0.88), transparent 18%),
@@ -688,7 +740,8 @@ main#main-content > .theme-stage::after {
   animation: ambient-float 26s ease-in-out infinite;
 }
 
-:root[data-theme-mode="mist"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="mist"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="mist"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.78;
   background:
     radial-gradient(circle at 26% 18%, rgba(var(--theme-secondary-rgb), 0.08), transparent 20%),
@@ -697,7 +750,8 @@ main#main-content > .theme-stage::after {
   filter: blur(18px);
 }
 
-:root[data-theme-mode="linen"] main#main-content > .theme-stage::before {
+:root[data-theme-mode="linen"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="linen"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 0.96;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
@@ -707,7 +761,8 @@ main#main-content > .theme-stage::after {
   mask-image: linear-gradient(180deg, rgba(0,0,0,0.74), rgba(0,0,0,0.16) 66%, transparent 100%);
 }
 
-:root[data-theme-mode="linen"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="linen"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="linen"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.62;
   background:
     radial-gradient(circle at 22% 72%, rgba(var(--theme-glow-rgb), 0.1), transparent 18%),
@@ -715,7 +770,8 @@ main#main-content > .theme-stage::after {
   filter: blur(14px);
 }
 
-:root[data-theme-mode="velvet"] main#main-content > .theme-stage::before {
+:root[data-theme-mode="velvet"] main#main-content > .theme-stage::before,
+:root[data-theme-mode="velvet"] main#main-content .route-stage > main.theme-stage::before {
   opacity: 1;
   background:
     radial-gradient(circle at 50% 14%, rgba(var(--theme-surface-rgb), 0.38), transparent 20%),
@@ -725,7 +781,8 @@ main#main-content > .theme-stage::after {
   animation: velvet-breathe 18s ease-in-out infinite;
 }
 
-:root[data-theme-mode="velvet"] main#main-content > .theme-stage::after {
+:root[data-theme-mode="velvet"] main#main-content > .theme-stage::after,
+:root[data-theme-mode="velvet"] main#main-content .route-stage > main.theme-stage::after {
   opacity: 0.82;
   background:
     radial-gradient(circle at 50% 18%, rgba(var(--theme-surface-rgb), 0.34), transparent 14%),

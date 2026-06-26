@@ -138,11 +138,11 @@ function createRevealStyle(
     transform: isVisible
       ? "translate3d(0, 0, 0) scale(1)"
       : `translate3d(0, ${distance}px, 0) scale(${scale})`,
-    filter: isVisible ? "blur(0px)" : "blur(10px)",
+    filter: isVisible ? "blur(0px)" : "blur(6px)",
     transition: [
-      `opacity 760ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
-      `transform 760ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
-      `filter 760ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
+      `opacity 560ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
+      `transform 560ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
+      `filter 560ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
     ].join(", "),
     willChange: "opacity, transform, filter",
   };

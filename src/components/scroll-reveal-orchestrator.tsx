@@ -38,14 +38,15 @@ export function ScrollRevealOrchestrator() {
       element.classList.add("reveal-ready");
 
       const bounds = element.getBoundingClientRect();
-      if (bounds.top < window.innerHeight * 0.84 && bounds.bottom > window.innerHeight * 0.08) {
+      if (bounds.top < window.innerHeight * 0.84 && bounds.bottom > 0) {
+        // Element is in view - mark as visible immediately, never hide
         element.classList.remove("reveal-hidden");
         element.classList.add("reveal-visible");
-        return;
+      } else {
+        // Element is below viewport - hide for reveal animation
+        element.classList.remove("reveal-visible");
+        element.classList.add("reveal-hidden");
       }
-
-      element.classList.remove("reveal-visible");
-      element.classList.add("reveal-hidden");
     });
 
     const observer = new IntersectionObserver(
@@ -55,16 +56,14 @@ export function ScrollRevealOrchestrator() {
           if (entry.isIntersecting) {
             element.classList.remove("reveal-hidden");
             element.classList.add("reveal-visible");
-            return;
+            observer.unobserve(entry.target);
           }
-
-          element.classList.remove("reveal-visible");
-          element.classList.add("reveal-hidden");
+          // Never re-hide elements that have been revealed
         });
       },
       {
-        threshold: [0, 0.12, 0.28],
-        rootMargin: "-8% 0px -14% 0px",
+        threshold: 0.05,
+        rootMargin: "0px 0px -5% 0px",
       },
     );
 

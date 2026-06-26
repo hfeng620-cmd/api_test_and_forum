@@ -183,22 +183,18 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
   }, [userId]);
 
   useEffect(() => {
+    updateCardPosition();
+  }, [loading, profile, updateCardPosition]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
-
-    const width = 320;
-    const height = 560;
-    const padding = 12;
-    const nextLeft = Math.min(
-      Math.max(padding, position.x),
-      Math.max(padding, window.innerWidth - width - padding),
-    );
-    const nextTop = Math.min(
-      Math.max(padding, position.y),
-      Math.max(padding, window.innerHeight - height - padding),
-    );
-
-    setCardPosition({ x: nextLeft, y: nextTop });
-  }, [position]);
+    window.addEventListener("resize", updateCardPosition);
+    window.addEventListener("scroll", updateCardPosition, true);
+    return () => {
+      window.removeEventListener("resize", updateCardPosition);
+      window.removeEventListener("scroll", updateCardPosition, true);
+    };
+  }, [updateCardPosition]);
 
   // Close on click outside
   useEffect(() => {
@@ -269,7 +265,9 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
   return (
     <div
       ref={cardRef}
-      className="z-50 w-[320px] max-w-[calc(100vw-24px)] overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
+      className="z-50 max-h-[calc(100vh-24px)] w-[320px] max-w-[calc(100vw-24px)] overflow-y-auto overscroll-contain rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
+      onContextMenu={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
       style={{
         position: "fixed",
         left: cardPosition.x,
@@ -305,7 +303,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
         <>
           <div
             className="relative overflow-hidden border-b border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(37,99,235,0.1),rgba(255,255,255,0.94)_55%,rgba(191,219,254,0.32))] px-5 pb-5 pt-4"
-            style={createCardMotionStyle(isAnimating, 40, 12, 0.994)}
+            style={createCardMotionStyle(isAnimating, 40, 12, 0.994, prefersReducedMotion)}
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.72),transparent_34%),radial-gradient(circle_at_12%_18%,rgba(96,165,250,0.18),transparent_28%)] opacity-90" />
             <button
@@ -323,7 +321,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
               个人档案
             </p>
 
-            <div className="relative mt-4 flex items-start gap-4" style={createCardMotionStyle(isAnimating, 90, 12, 0.996)}>
+            <div className="relative mt-4 flex items-start gap-4" style={createCardMotionStyle(isAnimating, 90, 12, 0.996, prefersReducedMotion)}>
               {profile?.avatar_url ? (
                 <img
                   alt={name}
@@ -348,7 +346,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2" style={createCardMotionStyle(isAnimating, 130, 10, 0.998)}>
+            <div className="mt-4 flex flex-wrap gap-2" style={createCardMotionStyle(isAnimating, 130, 10, 0.998, prefersReducedMotion)}>
               {identityRows.map((item) => (
                 <span
                   key={item.label}
@@ -363,7 +361,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
           </div>
 
           <div className="space-y-4 p-5">
-            <div className="grid grid-cols-2 gap-3" style={createCardMotionStyle(isAnimating, 160, 14, 0.996)}>
+            <div className="grid grid-cols-2 gap-3" style={createCardMotionStyle(isAnimating, 160, 14, 0.996, prefersReducedMotion)}>
               <div className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                   资料完成度
@@ -380,7 +378,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
 
             <div
               className="rounded-[18px] border border-[var(--color-line)] bg-[linear-gradient(135deg,var(--color-brand-soft),rgba(255,255,255,0.76))] px-4 py-3.5"
-              style={createCardMotionStyle(isAnimating, 210, 14, 0.996)}
+              style={createCardMotionStyle(isAnimating, 210, 14, 0.996, prefersReducedMotion)}
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -414,7 +412,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
 
             <div
               className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-soft)] px-4 py-3.5"
-              style={createCardMotionStyle(isAnimating, 250, 14, 0.996)}
+              style={createCardMotionStyle(isAnimating, 250, 14, 0.996, prefersReducedMotion)}
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -441,7 +439,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
 
             <div
               className="rounded-[18px] border border-[var(--color-line)] bg-white/72 px-4 py-3.5"
-              style={createCardMotionStyle(isAnimating, 300, 14, 0.996)}
+              style={createCardMotionStyle(isAnimating, 300, 14, 0.996, prefersReducedMotion)}
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -457,7 +455,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
 
             <div
               className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-soft)] px-4 py-3.5"
-              style={createCardMotionStyle(isAnimating, 340, 14, 0.996)}
+              style={createCardMotionStyle(isAnimating, 340, 14, 0.996, prefersReducedMotion)}
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -490,7 +488,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2" style={createCardMotionStyle(isAnimating, 390, 12, 0.998)}>
+            <div className="grid grid-cols-2 gap-2" style={createCardMotionStyle(isAnimating, 390, 12, 0.998, prefersReducedMotion)}>
               <Link
                 className="block rounded-full bg-[var(--color-brand)] py-2.5 text-center text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
                 href="/profile"
