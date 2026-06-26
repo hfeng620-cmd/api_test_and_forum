@@ -200,6 +200,20 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  // Load owner user IDs for everyone (not just logged-in users) so badges display for all visitors
+  useEffect(() => {
+    if (!configured) return;
+    const supabase = getSupabaseClient();
+    let mounted = true;
+    supabase.from("site_owners").select("user_id")
+      .then(({ data }) => {
+        if (!mounted || !data) return;
+        setOwnerUserIds(new Set((data as { user_id: string }[]).map((r) => r.user_id)));
+      })
+      .catch(() => { /* RLS may block */ });
+    return () => { mounted = false; };
+  }, [configured]);
+
   useEffect(() => {
     if (!configured) return;
 

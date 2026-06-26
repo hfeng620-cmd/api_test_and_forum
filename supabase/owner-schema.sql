@@ -10,10 +10,10 @@ create table if not exists public.site_owners (
 
 alter table public.site_owners enable row level security;
 
--- Only existing owners can see the owner list
+-- Everyone can see the owner list (for displaying badges)
 drop policy if exists "Owners can read owners" on public.site_owners;
 create policy "Owners can read owners" on public.site_owners
-  for select using (public.is_site_owner());
+  for select using (true);
 
 drop policy if exists "Owners can insert owners" on public.site_owners;
 create policy "Owners can insert owners" on public.site_owners
