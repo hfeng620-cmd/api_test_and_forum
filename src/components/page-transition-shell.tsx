@@ -10,19 +10,19 @@ type PageTransitionShellProps = {
 export function PageTransitionShell({ children }: PageTransitionShellProps) {
   const pathname = usePathname();
   const previousPathnameRef = useRef(pathname);
+  const currentChildrenRef = useRef(children);
   const [exitingStage, setExitingStage] = useState<React.ReactNode | null>(null);
-  const [displayChildren, setDisplayChildren] = useState(children);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (previousPathnameRef.current === pathname) {
       previousPathnameRef.current = pathname;
-      setDisplayChildren(children);
+      currentChildrenRef.current = children;
       return;
     }
 
-    setExitingStage(displayChildren);
-    setDisplayChildren(children);
+    setExitingStage(currentChildrenRef.current);
+    currentChildrenRef.current = children;
     previousPathnameRef.current = pathname;
     setIsTransitioning(true);
 
@@ -34,7 +34,7 @@ export function PageTransitionShell({ children }: PageTransitionShellProps) {
     return () => {
       window.clearTimeout(timer);
     };
-  }, [children, displayChildren, pathname]);
+  }, [children, pathname]);
 
   return (
     <div className={`route-shell ${isTransitioning ? "route-shell--transitioning" : ""}`}>
@@ -45,7 +45,7 @@ export function PageTransitionShell({ children }: PageTransitionShellProps) {
         </div>
       ) : null}
       <div key={pathname} className="route-stage page-enter route-stage--enter">
-        {displayChildren}
+        {children}
       </div>
     </div>
   );

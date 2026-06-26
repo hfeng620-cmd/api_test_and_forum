@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 
+const CARD_WIDTH = 320;
+const CARD_EDGE_PADDING = 12;
+const CLOSE_ANIMATION_MS = 200;
+
 type UserProfileRow = {
   display_name: string | null;
   avatar_url: string | null;
@@ -70,19 +74,46 @@ function createCardMotionStyle(
   delayMs = 0,
   distance = 16,
   scale = 0.992,
+  prefersReducedMotion = false,
 ): CSSProperties {
+  if (prefersReducedMotion) {
+    return {
+      opacity: isVisible ? 1 : 0,
+      transition: "opacity 120ms linear",
+    };
+  }
+
   return {
     opacity: isVisible ? 1 : 0,
     transform: isVisible
       ? "translate3d(0, 0, 0) scale(1)"
       : `translate3d(0, ${distance}px, 0) scale(${scale})`,
-    filter: isVisible ? "blur(0px)" : "blur(8px)",
+    filter: isVisible ? "blur(0px)" : "blur(5px)",
     transition: [
-      `opacity 520ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
-      `transform 520ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
-      `filter 520ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
+      `opacity 420ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
+      `transform 420ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
+      `filter 420ms cubic-bezier(0.16, 1, 0.3, 1) ${delayMs}ms`,
     ].join(", "),
     willChange: "opacity, transform, filter",
+  };
+}
+
+function clampCardPosition(
+  position: { x: number; y: number },
+  size: { width: number; height: number },
+) {
+  if (typeof window === "undefined") return position;
+
+  const availableWidth = Math.max(CARD_WIDTH, window.innerWidth - CARD_EDGE_PADDING * 2);
+  const availableHeight = Math.max(120, window.innerHeight - CARD_EDGE_PADDING * 2);
+  const cardWidth = Math.min(size.width, availableWidth);
+  const cardHeight = Math.min(size.height, availableHeight);
+  const maxLeft = Math.max(CARD_EDGE_PADDING, window.innerWidth - cardWidth - CARD_EDGE_PADDING);
+  const maxTop = Math.max(CARD_EDGE_PADDING, window.innerHeight - cardHeight - CARD_EDGE_PADDING);
+
+  return {
+    x: Math.min(Math.max(CARD_EDGE_PADDING, position.x), maxLeft),
+    y: Math.min(Math.max(CARD_EDGE_PADDING, position.y), maxTop),
   };
 }
 
@@ -93,6 +124,8 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
   const [isAnimating, setIsAnimating] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isClosingRef = useRef(false);
 
   // Smooth entrance animation
   useEffect(() => {
@@ -102,14 +135,30 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
     const timer = setTimeout(() => {
       setIsAnimating(true);
     }, 10);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
   }, []);
 
   // Smooth exit animation
   const handleClose = useCallback(() => {
+    if (isClosingRef.current) return;
+    isClosingRef.current = true;
     setIsAnimating(false);
-    setTimeout(onClose, 200);
-  }, [onClose]);
+    closeTimerRef.current = setTimeout(onClose, prefersReducedMotion ? 0 : CLOSE_ANIMATION_MS);
+  }, [onClose, prefersReducedMotion]);
+
+  const updateCardPosition = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const rect = cardRef.current?.getBoundingClientRect();
+    setCardPosition(
+      clampCardPosition(position, {
+        width: rect?.width ?? CARD_WIDTH,
+        height: rect?.height ?? Math.min(560, window.innerHeight - CARD_EDGE_PADDING * 2),
+      }),
+    );
+  }, [position]);
 
   useEffect(() => {
     let cancelled = false;

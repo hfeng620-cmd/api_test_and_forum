@@ -131,9 +131,18 @@ export function subscribeNotifications(
   }
 
   const supabase = getSupabaseClient();
+  const channelName = `notifications:${userId}`;
+
+  // Remove any existing channel with the same name first
+  const existingChannels = supabase.getChannels();
+  for (const ch of existingChannels) {
+    if (ch.topic === channelName) {
+      supabase.removeChannel(ch);
+    }
+  }
 
   const channel: RealtimeChannel = supabase
-    .channel(`notifications:${userId}`)
+    .channel(channelName)
     .on(
       "postgres_changes",
       {

@@ -5,8 +5,10 @@ import { useEffect } from "react";
 
 const REVEAL_SELECTOR = [
   "#main-content > main.theme-stage > section",
+  "#main-content .route-stage > main.theme-stage > section",
   "#main-content > section[data-reveal]",
   "#main-content > main.theme-stage [data-reveal]",
+  "#main-content .route-stage > main.theme-stage [data-reveal]",
 ].join(", ");
 
 export function ScrollRevealOrchestrator() {
@@ -32,24 +34,37 @@ export function ScrollRevealOrchestrator() {
     }
 
     targets.forEach((element, index) => {
-      if (element.classList.contains("reveal-visible")) return;
       element.style.setProperty("--reveal-delay", `${Math.min(index, 10) * 60}ms`);
+      element.classList.add("reveal-ready");
+
+      const bounds = element.getBoundingClientRect();
+      if (bounds.top < window.innerHeight * 0.84 && bounds.bottom > window.innerHeight * 0.08) {
+        element.classList.remove("reveal-hidden");
+        element.classList.add("reveal-visible");
+        return;
+      }
+
+      element.classList.remove("reveal-visible");
       element.classList.add("reveal-hidden");
     });
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
           const element = entry.target as HTMLElement;
-          element.classList.remove("reveal-hidden");
-          element.classList.add("reveal-visible");
-          observer.unobserve(element);
+          if (entry.isIntersecting) {
+            element.classList.remove("reveal-hidden");
+            element.classList.add("reveal-visible");
+            return;
+          }
+
+          element.classList.remove("reveal-visible");
+          element.classList.add("reveal-hidden");
         });
       },
       {
-        threshold: 0.16,
-        rootMargin: "0px 0px -12% 0px",
+        threshold: [0, 0.12, 0.28],
+        rootMargin: "-8% 0px -14% 0px",
       },
     );
 

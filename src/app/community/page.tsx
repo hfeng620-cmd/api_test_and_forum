@@ -302,7 +302,7 @@ export default function CommunityPage() {
 
         <div
           ref={deskRef}
-          className={`mb-4 rounded-[28px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(248,250,252,0.94))] px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.06)] transition-[opacity,transform] duration-700 ease-out delay-75 motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
+          className={`mb-4 rounded-[28px] border border-[var(--color-line)] bg-[linear-gradient(180deg,var(--color-panel),var(--color-soft))] px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.06)] transition-[opacity,transform] duration-700 ease-out delay-75 motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
             revealedSections.desk ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
           }`}
         >
