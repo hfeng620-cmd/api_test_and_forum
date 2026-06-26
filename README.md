@@ -87,20 +87,26 @@
 
 ## 如何参与开发
 
-### 1. 环境准备
+> 完整开发指南见 [DEVELOPMENT.md](./DEVELOPMENT.md)
+
+### 快速开始
 
 ```bash
 git clone https://github.com/hfeng620-cmd/timin_api_test_and_forum.git
 cd timin_api_test_and_forum
 npm install
 cp .env.example .env.local
+# 编辑 .env.local 填入 Supabase 配置
+npm run dev -- -p 3001
 ```
 
-编辑 `.env.local`：
-```
-NEXT_PUBLIC_SUPABASE_URL=你的Supabase项目URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=你的Supabase Anon Key
-```
+### 协作流程
+
+1. Fork 本仓库
+2. 创建功能分支：`git checkout -b feature/你的功能`
+3. 提交代码：`git commit -m "feat: 你的功能描述"`
+4. 推送分支：`git push origin feature/你的功能`
+5. 提交 Pull Request 到 `main` 分支
 
 ### 2. 本地运行
 
