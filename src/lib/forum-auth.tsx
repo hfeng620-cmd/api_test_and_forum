@@ -36,6 +36,7 @@ interface ForumAuthState {
   showAuthModal: () => void;
   hideAuthModal: () => void;
   sendEmailCode: (email: string) => Promise<AuthResult>;
+  verifyOtp: (email: string, token: string) => Promise<AuthResult>;
   signInWithPassword: (email: string, password: string) => Promise<AuthResult>;
   setPassword: (password: string, displayName?: string) => Promise<AuthResult>;
   setDisplayName: (name: string) => Promise<void>;
@@ -59,6 +60,7 @@ const defaultState: ForumAuthState = {
   showAuthModal: () => {},
   hideAuthModal: () => {},
   sendEmailCode: async () => ({ ok: false, error: "认证服务未配置。" }),
+  verifyOtp: async () => ({ ok: false, error: "认证服务未配置。" }),
   signInWithPassword: async () => ({ ok: false, error: "认证服务未配置。" }),
   setPassword: async () => ({ ok: false, error: "认证服务未配置。" }),
   setDisplayName: async () => {},
@@ -241,10 +243,30 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
       const { error } = await getSupabaseClient().auth.signInWithOtp({
         email: normalizedEmail,
         options: {
-          emailRedirectTo:
-            typeof window === "undefined" ? undefined : window.location.href,
           shouldCreateUser: true,
         },
+      });
+
+      return error
+        ? { ok: false, error: getAuthErrorMessage(error.message) }
+        : { ok: true };
+    },
+    [configured],
+  );
+
+  const verifyOtp = useCallback(
+    async (email: string, token: string): Promise<AuthResult> => {
+      if (!configured) return { ok: false, error: "认证服务未配置。" };
+
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!normalizedEmail || !token) {
+        return { ok: false, error: "请输入验证码。" };
+      }
+
+      const { error } = await getSupabaseClient().auth.verifyOtp({
+        email: normalizedEmail,
+        token,
+        type: "email",
       });
 
       return error
@@ -383,12 +405,13 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
       showAuthModal,
       hideAuthModal,
       sendEmailCode,
+      verifyOtp,
       signInWithPassword,
       setPassword,
       setDisplayName,
       signOut,
     };
-  }, [configured, displayName, isLoading, isAdmin, isOwner, adminUserIds, sendEmailCode, session, setDisplayName, setPassword, signInWithPassword, signOut, authModalOpen, showAuthModal, hideAuthModal]);
+  }, [configured, displayName, isLoading, isAdmin, isOwner, adminUserIds, sendEmailCode, verifyOtp, session, setDisplayName, setPassword, signInWithPassword, signOut, authModalOpen, showAuthModal, hideAuthModal]);
 
   return (
     <ForumAuthContext.Provider value={value}>

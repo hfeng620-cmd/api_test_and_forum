@@ -27,6 +27,7 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
     setPassword,
     setDisplayName,
     signOut,
+    verifyOtp,
   } = useForumAuth();
 
   const [mode, setMode] = useState<AuthMode>("password");
@@ -39,6 +40,8 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
   const [notice, setNotice] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const avatarFileRef = useRef<HTMLInputElement | null>(null);
@@ -172,9 +175,26 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
       return;
     }
 
-    setNotice(
-      "验证邮件已发送！请查收邮箱（别忘了检查垃圾邮件箱），点击邮件中的链接即可完成注册。注册成功后回到本页面设置密码。",
-    );
+    setOtpSent(true);
+    setNotice("验证码已发送！请查收邮箱（别忘了检查垃圾邮件箱），输入邮件中的 6 位验证码。");
+  }
+
+  async function handleVerifyOtp() {
+    setLoading(true);
+    setError("");
+    setNotice("");
+
+    const result = await verifyOtp(normalizedEmail, otpCode.trim());
+    setLoading(false);
+
+    if (!result.ok) {
+      setError(result.error ?? "验证失败，请检查验证码是否正确。");
+      return;
+    }
+
+    setOtpSent(false);
+    setOtpCode("");
+    setNotice("✓ 邮箱验证成功！请设置密码完成注册。");
   }
 
   async function handlePasswordLogin() {
@@ -551,6 +571,8 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                         setMode("code");
                         setError("");
                         setNotice("");
+                        setOtpSent(false);
+                        setOtpCode("");
                       }}
                       type="button"
                     >
@@ -560,21 +582,62 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                   </p>
                 </>
               ) : (
-                <p className="text-xs text-[var(--color-muted)]">
-                  已注册过？点击{" "}
-                  <button
-                    className="text-[var(--color-brand)] underline"
-                    onClick={() => {
-                      setMode("password");
-                      setError("");
-                      setNotice("");
-                    }}
-                    type="button"
-                  >
-                    密码登录
-                  </button>{" "}
-                  直接登录
-                </p>
+                <>
+                  {otpSent ? (
+                    <>
+                      <input
+                        className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                        onChange={(event) => {
+                          setOtpCode(event.target.value.replace(/\D/g, "").slice(0, 6));
+                          setError("");
+                        }}
+                        placeholder="输入 6 位验证码"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={otpCode}
+                      />
+                      <div className="flex items-center justify-between">
+                        <button
+                          className="text-xs text-[var(--color-muted)] hover:text-[var(--color-brand)]"
+                          onClick={() => {
+                            setOtpSent(false);
+                            setOtpCode("");
+                            setError("");
+                            setNotice("");
+                          }}
+                          type="button"
+                        >
+                          ← 重新输入邮箱
+                        </button>
+                        <button
+                          className="text-xs text-[var(--color-brand)] hover:underline"
+                          onClick={handleSendCode}
+                          disabled={loading}
+                          type="button"
+                        >
+                          重新发送验证码
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-[var(--color-muted)]">
+                      已注册过？点击{" "}
+                      <button
+                        className="text-[var(--color-brand)] underline"
+                        onClick={() => {
+                          setMode("password");
+                          setError("");
+                          setNotice("");
+                        }}
+                        type="button"
+                      >
+                        密码登录
+                      </button>{" "}
+                      直接登录
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -593,11 +656,11 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
               </button>
               <button
                 className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)] disabled:opacity-60"
-                disabled={loading || !normalizedEmail || (mode === "password" && !password)}
-                onClick={mode === "password" ? handlePasswordLogin : handleSendCode}
+                disabled={loading || !normalizedEmail || (mode === "password" && !password) || (mode === "code" && otpSent && otpCode.length < 6)}
+                onClick={mode === "password" ? handlePasswordLogin : otpSent ? handleVerifyOtp : handleSendCode}
                 type="button"
               >
-                {loading ? "处理中..." : mode === "password" ? "登录" : "发送验证邮件"}
+                {loading ? "处理中..." : mode === "password" ? "登录" : otpSent ? "验证" : "发送验证码"}
               </button>
             </div>
           </div>
