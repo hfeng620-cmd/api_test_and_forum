@@ -23,36 +23,18 @@ export function OnlineIndicator() {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [count, setCount] = useState(0);
 
-  // Heartbeat ping + fetch online users
+  // Fetch online users (for everyone, not just logged-in users)
   useEffect(() => {
-    if (!isSupabaseConfigured() || !isConnected || !user) return;
+    if (!isSupabaseConfigured()) return;
 
     const supabase = getSupabaseClient();
-
-    async function ping() {
-      try {
-        // Upsert presence — use .update + .insert fallback for Supabase
-        const now = new Date().toISOString();
-        const { error: updateError } = await supabase
-          .from("user_presence")
-          .update({ last_seen: now })
-          .eq("user_id", user!.id);
-
-        // If update failed (row doesn't exist), insert
-        if (updateError) {
-          await supabase
-            .from("user_presence")
-            .upsert({ user_id: user!.id, last_seen: now }, { onConflict: "user_id" });
-        }
-      } catch { /* table may not exist yet */ }
-    }
 
     async function fetchOnline() {
       try {
         const cutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString();
         const { data } = await supabase
           .from("user_presence")
-          .select("user_id, last_seen, forum_profiles!inner(display_name, avatar_url)")
+          .select("user_id, last_seen, forum_profiles(display_name, avatar_url)")
           .gt("last_seen", cutoff)
           .order("last_seen", { ascending: false })
           .limit(20);
@@ -75,9 +57,36 @@ export function OnlineIndicator() {
       } catch { /* table may not exist yet */ }
     }
 
-    ping();
     fetchOnline();
-    const interval = setInterval(() => { ping(); fetchOnline(); }, 60_000);
+    const interval = setInterval(fetchOnline, 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Heartbeat ping (only for logged-in users)
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !isConnected || !user) return;
+
+    const supabase = getSupabaseClient();
+
+    async function ping() {
+      try {
+        const now = new Date().toISOString();
+        const { error: updateError } = await supabase
+          .from("user_presence")
+          .update({ last_seen: now })
+          .eq("user_id", user!.id);
+
+        // If update failed (row doesn't exist), insert
+        if (updateError) {
+          await supabase
+            .from("user_presence")
+            .upsert({ user_id: user!.id, last_seen: now }, { onConflict: "user_id" });
+        }
+      } catch { /* table may not exist yet */ }
+    }
+
+    ping();
+    const interval = setInterval(ping, 60_000);
     return () => clearInterval(interval);
   }, [isConnected, user]);
 
