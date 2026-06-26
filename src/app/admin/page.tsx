@@ -63,6 +63,17 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function formatLastSeen(lastSeen: string): string {
+  const diff = Date.now() - new Date(lastSeen).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "刚刚";
+  if (minutes < 60) return `${minutes}分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}小时前`;
+  const days = Math.floor(hours / 24);
+  return `${days}天前`;
+}
+
 export default function AdminPage() {
   const { isConnected, isAdmin, isOwner, email, showAuthModal } = useForumAuth();
   const [adminChecked, setAdminChecked] = useState(false);
@@ -95,6 +106,8 @@ export default function AdminPage() {
   const [announceStation, setAnnounceStation] = useState("");
   const [announceSending, setAnnounceSending] = useState(false);
   const [announceStatus, setAnnounceStatus] = useState("");
+  const [announceConfirmOpen, setAnnounceConfirmOpen] = useState(false);
+  const [announcePopupChecked, setAnnouncePopupChecked] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
 
   // ---- News state ----
@@ -123,7 +136,7 @@ export default function AdminPage() {
 
   // ---- User management state ----
   const [userList, setUserList] = useState<
-    { id: string; display_name: string; avatar_url: string | null; created_at: string; isAdmin: boolean; email: string }[]
+    { id: string; display_name: string; avatar_url: string | null; created_at: string; isAdmin: boolean; email: string; last_seen: string | null; is_online: boolean }[]
   >([]);
   const [userListLoading, setUserListLoading] = useState(false);
   const [userSearch, setUserSearch] = useState("");
@@ -144,43 +157,78 @@ export default function AdminPage() {
     };
   }, []);
 
-  // Load users + admin status
+  // Load users + admin status + online presence
   const loadUsers = useCallback(async () => {
     const requestId = ++userListRequestRef.current;
     setUserListLoading(true);
     try {
       const supabase = getSupabaseClient();
-      const [profilesRes, adminsRes] = await Promise.all([
-        supabase.from("forum_profiles").select("id, display_name, avatar_url, created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("forum_admins").select("user_id"),
-      ]);
-      if (profilesRes.error) throw profilesRes.error;
-      if (adminsRes.error) throw adminsRes.error;
-      const adminIds = new Set(((adminsRes.data ?? []) as { user_id: string }[]).map((a) => a.user_id));
-      // Try to get emails via RPC
-      const emailMap: Record<string, string> = {};
+
+      // Try the enhanced RPC first (includes email, last_seen, is_online)
+      let rpcUsers: { id: string; display_name: string; avatar_url: string | null; created_at: string; isAdmin: boolean; email: string; last_seen: string | null; is_online: boolean }[] | null = null;
       try {
-        const { data: emailData, error } = await supabase.rpc("get_admin_list");
-        if (error) throw error;
-        if (emailData) {
-          for (const row of (emailData as any[])) {
-            emailMap[row.user_id] = row.email || "";
-          }
+        const { data: rpcData, error: rpcError } = await supabase.rpc("get_admin_user_list");
+        if (rpcError) throw rpcError;
+        if (rpcData && (rpcData as any[]).length > 0) {
+          // Need admin IDs for the isAdmin flag
+          const adminsRes = await supabase.from("forum_admins").select("user_id");
+          if (adminsRes.error) throw adminsRes.error;
+          const adminIds = new Set(((adminsRes.data ?? []) as { user_id: string }[]).map((a) => a.user_id));
+          rpcUsers = (rpcData as any[]).map((u: any) => ({
+            id: u.user_id,
+            display_name: u.display_name,
+            avatar_url: u.avatar_url,
+            created_at: u.created_at ?? "",
+            isAdmin: adminIds.has(u.user_id),
+            email: u.email || "—",
+            last_seen: u.last_seen ?? null,
+            is_online: Boolean(u.is_online),
+          }));
         }
       } catch {
-        // RPC may not exist; user list can still render without emails
+        // RPC may not exist; fall back to current behavior
       }
-      const users = ((profilesRes.data ?? []) as any[]).map((u: any) => ({
-        id: u.id,
-        display_name: u.display_name,
-        avatar_url: u.avatar_url,
-        created_at: u.created_at,
-        isAdmin: adminIds.has(u.id),
-        email: emailMap[u.id] || "—",
-      }));
-      if (!isMountedRef.current || requestId !== userListRequestRef.current) return;
-      setUserList(users);
-      setUserActionStatus("");
+
+      if (rpcUsers) {
+        if (!isMountedRef.current || requestId !== userListRequestRef.current) return;
+        setUserList(rpcUsers);
+        setUserActionStatus("");
+      } else {
+        // Fallback: original behavior without online status
+        const [profilesRes, adminsRes] = await Promise.all([
+          supabase.from("forum_profiles").select("id, display_name, avatar_url, created_at").order("created_at", { ascending: false }).limit(100),
+          supabase.from("forum_admins").select("user_id"),
+        ]);
+        if (profilesRes.error) throw profilesRes.error;
+        if (adminsRes.error) throw adminsRes.error;
+        const adminIds = new Set(((adminsRes.data ?? []) as { user_id: string }[]).map((a) => a.user_id));
+        // Try to get emails via RPC
+        const emailMap: Record<string, string> = {};
+        try {
+          const { data: emailData, error } = await supabase.rpc("get_admin_list");
+          if (error) throw error;
+          if (emailData) {
+            for (const row of (emailData as any[])) {
+              emailMap[row.user_id] = row.email || "";
+            }
+          }
+        } catch {
+          // RPC may not exist; user list can still render without emails
+        }
+        const users = ((profilesRes.data ?? []) as any[]).map((u: any) => ({
+          id: u.id,
+          display_name: u.display_name,
+          avatar_url: u.avatar_url,
+          created_at: u.created_at,
+          isAdmin: adminIds.has(u.id),
+          email: emailMap[u.id] || "—",
+          last_seen: null as string | null,
+          is_online: false,
+        }));
+        if (!isMountedRef.current || requestId !== userListRequestRef.current) return;
+        setUserList(users);
+        setUserActionStatus("");
+      }
     } catch (error) {
       if (!isMountedRef.current || requestId !== userListRequestRef.current) return;
       setUserActionStatus(`用户列表加载失败：${getErrorMessage(error, "请稍后重试。")}`);
@@ -470,13 +518,23 @@ export default function AdminPage() {
   }
 
   // ---- New: publish announcement ----
-  async function handlePublishAnnouncement() {
+  function handleAnnouncementClick() {
     const body = announceBody.trim();
-    const station = announceStation.trim();
     if (!body) {
       setAnnounceStatus("公告内容不能为空。");
       return;
     }
+    // Open confirmation dialog
+    setAnnounceConfirmOpen(true);
+    setAnnouncePopupChecked(false);
+  }
+
+  async function handleConfirmPublishAnnouncement() {
+    const body = announceBody.trim();
+    const station = announceStation.trim();
+    const withPopup = announcePopupChecked;
+
+    setAnnounceConfirmOpen(false);
     setAnnounceSending(true);
     setAnnounceStatus("");
     try {
@@ -484,23 +542,52 @@ export default function AdminPage() {
       if (!authorId) {
         throw new Error("当前登录状态无效，请重新登录后再发布公告。");
       }
+
+      // Use "弹窗公告" tag when popup is enabled, otherwise just "公告"
+      const tags = withPopup ? ["公告", "弹窗公告"] : ["公告"];
+      const title = "【公告】" + (station || "管理员公告");
+
       const { error } = await getSupabaseClient()
         .from("forum_posts")
         .insert({
           author_id: authorId,
-          title: "【公告】" + (station || "管理员公告"),
+          title,
           body,
           station: station || null,
-          tags: ["公告"],
+          tags,
           is_hidden: false,
           is_pinned: true,
         });
       if (error) throw error;
+
+      // If popup enabled, broadcast notifications to all users
+      if (withPopup) {
+        const { error: rpcError } = await getSupabaseClient()
+          .rpc("broadcast_notification", {
+            p_content: title,
+            p_link_url: null,
+          });
+        if (rpcError) {
+          // Non-fatal: post was already created, just log the broadcast failure
+          console.error("Broadcast notification failed:", rpcError);
+          setAnnounceStatus("公告已发布并置顶，但弹窗通知发送失败（请检查 broadcast_notification 函数是否已部署）。");
+          setAnnounceBody("");
+          setAnnounceStation("");
+          setStatus("公告已发布并置顶，弹窗通知发送失败。");
+          addAudit("发布公告（通知失败）", station || "管理员公告");
+          void Promise.all([refreshForumHistory(), refreshStats()]);
+          return;
+        }
+      }
+
       setAnnounceBody("");
       setAnnounceStation("");
-      setAnnounceStatus("公告已发布并置顶。");
-      setStatus("公告已发布并置顶。");
-      addAudit("发布公告", station || "管理员公告");
+      const msg = withPopup
+        ? "公告已发布并置顶，已向所有用户发送弹窗通知。"
+        : "公告已发布并置顶。";
+      setAnnounceStatus(msg);
+      setStatus(msg);
+      addAudit(withPopup ? "发布公告（含弹窗通知）" : "发布公告", station || "管理员公告");
       void Promise.all([refreshForumHistory(), refreshStats()]);
     } catch (error) {
       setAnnounceStatus(`发布失败：${getErrorMessage(error, "请重试。")}`);
@@ -874,7 +961,7 @@ export default function AdminPage() {
                   <button
                     className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)] disabled:opacity-50"
                     disabled={announceSending}
-                    onClick={() => void handlePublishAnnouncement()}
+                    onClick={handleAnnouncementClick}
                     type="button"
                   >
                     {announceSending ? "发布中..." : "发布公告"}
@@ -1618,7 +1705,7 @@ export default function AdminPage() {
             <input
               className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-2 text-sm outline-none transition focus:border-[var(--color-brand)]"
               onChange={(e) => setUserSearch(e.target.value)}
-              placeholder="搜索用户..."
+              placeholder="搜索邮箱或昵称..."
               value={userSearch}
             />
             <button
@@ -1634,19 +1721,42 @@ export default function AdminPage() {
           <div className="mt-5 divide-y divide-[var(--color-line)]">
             {userListLoading ? (
               <p className="py-10 text-center text-sm text-[var(--color-muted)]">加载中...</p>
-            ) : userList.filter((u) => !userSearch || u.display_name.includes(userSearch)).length === 0 ? (
+            ) : userList.filter((u) => {
+                if (!userSearch) return true;
+                const q = userSearch.toLowerCase();
+                return u.display_name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+              }).length === 0 ? (
               <p className="py-10 text-center text-sm text-[var(--color-muted)]">暂无匹配用户</p>
             ) : (
               userList
-                .filter((u) => !userSearch || u.display_name.includes(userSearch))
+                .filter((u) => {
+                  if (!userSearch) return true;
+                  const q = userSearch.toLowerCase();
+                  return u.display_name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+                })
                 .map((user) => (
                   <div key={user.id} className="flex items-center gap-4 py-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)]">
+                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)]">
                       {user.avatar_url ? <img alt="" className="h-full w-full rounded-full object-cover" src={user.avatar_url} /> : user.display_name.charAt(0)}
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
+                          user.is_online ? "bg-[#22c55e]" : "bg-[#d1d5db]"
+                        }`}
+                        title={user.is_online ? "在线" : "离线"}
+                      />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-bold text-[var(--color-ink)]">{user.display_name}</p>
-                      <p className="text-xs text-[var(--color-muted)]">{user.email} · {new Date(user.created_at).toLocaleDateString("zh-CN")} 加入</p>
+                      <p className="text-xs text-[var(--color-muted)]">{user.email}</p>
+                      <p className="text-xs text-[var(--color-muted)]">
+                        {user.is_online ? (
+                          <span className="text-[#22c55e]">当前在线</span>
+                        ) : user.last_seen ? (
+                          `最后活跃: ${formatLastSeen(user.last_seen)}`
+                        ) : (
+                          `${new Date(user.created_at).toLocaleDateString("zh-CN")} 加入`
+                        )}
+                      </p>
                     </div>
                     {user.isAdmin && (
                       <span className="rounded-full bg-[#fef3c7] px-2 py-0.5 text-[10px] font-bold text-[#b45309]">管理员</span>
@@ -1671,6 +1781,51 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* ── Announcement confirmation dialog ── */}
+      {announceConfirmOpen && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+            <div className="border-b border-[var(--color-line)] px-6 py-4">
+              <h2 className="text-lg font-bold text-[var(--color-ink)]">发布此公告？</h2>
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-sm leading-7 text-[var(--color-muted)]">
+                即将发布一条置顶公告。
+              </p>
+              <label className="mt-4 flex items-center gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="h-5 w-5 rounded border-[var(--color-line)] accent-[var(--color-brand)]"
+                  checked={announcePopupChecked}
+                  onChange={(e) => setAnnouncePopupChecked(e.target.checked)}
+                />
+                <span className="text-sm font-semibold text-[var(--color-ink)]">
+                  同时弹窗通知所有用户
+                </span>
+              </label>
+              <p className="mt-2 ml-8 text-xs text-[var(--color-muted)]">
+                勾选后，所有注册用户都会收到一条通知，并在访问站点时看到弹窗公告。
+              </p>
+            </div>
+            <div className="border-t border-[var(--color-line)] px-6 py-4 flex justify-end gap-3">
+              <button
+                className="rounded-full border border-[var(--color-line)] bg-white px-5 py-2.5 text-sm font-bold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                onClick={() => setAnnounceConfirmOpen(false)}
+                type="button"
+              >
+                取消
+              </button>
+              <button
+                className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
+                onClick={() => void handleConfirmPublishAnnouncement()}
+                type="button"
+              >
+                确认发布
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -31,7 +31,7 @@ export function OnlineIndicator() {
 
     async function fetchOnline() {
       try {
-        const cutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const cutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString();
 
         // First get the count
         const { count: totalCount, error: countError } = await supabase

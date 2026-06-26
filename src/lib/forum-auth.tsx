@@ -79,6 +79,8 @@ interface ForumAuthState {
   email: string | null;
   token: string | null;
   displayName: string | null;
+  bio: string;
+  tags: string[];
   isConnected: boolean;
   isConfigured: boolean;
   isLoading: boolean;
@@ -95,6 +97,7 @@ interface ForumAuthState {
   signInWithPassword: (email: string, password: string) => Promise<AuthResult>;
   setPassword: (password: string, displayName?: string) => Promise<AuthResult>;
   setDisplayName: (name: string) => Promise<void>;
+  updateProfile: (data: { bio?: string; tags?: string[] }) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -104,6 +107,8 @@ const defaultState: ForumAuthState = {
   email: null,
   token: null,
   displayName: null,
+  bio: "",
+  tags: [],
   isConnected: false,
   isConfigured: false,
   isLoading: true,
@@ -120,6 +125,7 @@ const defaultState: ForumAuthState = {
   signInWithPassword: async () => ({ ok: false, error: "认证服务未配置。" }),
   setPassword: async () => ({ ok: false, error: "认证服务未配置。" }),
   setDisplayName: async () => {},
+  updateProfile: async () => {},
   signOut: async () => {},
 };
 
@@ -165,6 +171,8 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(configured);
   const [displayName, setDisplayNameState] = useState<string | null>(null);
+  const [bio, setBio] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [adminUserIds, setAdminUserIds] = useState<Set<string>>(new Set());
@@ -181,12 +189,18 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data } = await getSupabaseClient()
         .from("forum_profiles")
-        .select("display_name")
+        .select("display_name, bio, tags")
         .eq("id", userId)
         .single();
       if (data?.display_name) {
         setDisplayNameState(data.display_name);
       }
+      setBio((data as Record<string, unknown>)?.bio as string ?? "");
+      setTags(
+        Array.isArray((data as Record<string, unknown>)?.tags)
+          ? ((data as Record<string, unknown>).tags as string[])
+          : [],
+      );
     } catch {
       // profile may not exist yet
     }
@@ -312,6 +326,8 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
           loadOwnerInfo(nextSession.user.id);
         } else {
           setDisplayNameState(null);
+          setBio("");
+          setTags([]);
           setIsAdmin(false);
           setIsOwner(false);
           setAdminUserIds(new Set());
@@ -496,11 +512,60 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
     [configured],
   );
 
+  const updateProfile = useCallback(
+    async (data: { bio?: string; tags?: string[] }) => {
+      if (!configured) return;
+      try {
+        const supabase = getSupabaseClient();
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user) return;
+
+        const updates: Record<string, unknown> = {};
+
+        if (data.bio !== undefined) {
+          const trimmed = data.bio.trim();
+          if (trimmed.length > 500) return;
+          updates.bio = trimmed;
+          setBio(trimmed);
+        }
+
+        if (data.tags !== undefined) {
+          const uniqueTags: string[] = [];
+          const seen = new Set<string>();
+          for (const tag of data.tags) {
+            const t = tag.trim();
+            if (t && !seen.has(t)) {
+              seen.add(t);
+              uniqueTags.push(t.slice(0, 20));
+            }
+            if (uniqueTags.length >= 5) break;
+          }
+          updates.tags = uniqueTags;
+          setTags(uniqueTags);
+        }
+
+        if (Object.keys(updates).length === 0) return;
+
+        const { error } = await supabase
+          .from("forum_profiles")
+          .update(updates)
+          .eq("id", userData.user.id);
+
+        if (error) throw error;
+      } catch {
+        // State already updated optimistically above
+      }
+    },
+    [configured],
+  );
+
   const signOut = useCallback(async () => {
     if (!configured) return;
     await getSupabaseClient().auth.signOut();
     setSession(null);
     setDisplayNameState(null);
+    setBio("");
+    setTags([]);
   }, [configured]);
 
   const value = useMemo<ForumAuthState>(() => {
@@ -512,6 +577,8 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
       email: user?.email ?? null,
       token: session?.access_token ?? null,
       displayName,
+      bio,
+      tags,
       isConnected: Boolean(session?.access_token),
       isConfigured: configured,
       isLoading,
@@ -528,9 +595,10 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
       signInWithPassword,
       setPassword,
       setDisplayName,
+      updateProfile,
       signOut,
     };
-  }, [configured, displayName, isLoading, isAdmin, isOwner, adminUserIds, ownerUserIds, sendEmailCode, verifyOtp, session, setDisplayName, setPassword, signInWithPassword, signOut, authModalOpen, showAuthModal, hideAuthModal]);
+  }, [configured, displayName, bio, tags, isLoading, isAdmin, isOwner, adminUserIds, ownerUserIds, sendEmailCode, verifyOtp, session, setDisplayName, setPassword, signInWithPassword, updateProfile, signOut, authModalOpen, showAuthModal, hideAuthModal]);
 
   return (
     <ForumAuthContext.Provider value={value}>

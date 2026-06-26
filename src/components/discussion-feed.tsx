@@ -19,6 +19,7 @@ import {
   type SearchResult,
 } from "@/lib/discussion-storage";
 import { useForumAuth } from "@/lib/forum-auth";
+import { UserProfileCard } from "@/components/user-profile-card";
 
 type DiscussionFeedProps = {
   compact?: boolean;
@@ -248,11 +249,13 @@ export function DiscussionFeed({
   const [editSaving, setEditSaving] = useState(false);
   const [replySubmitting, setReplySubmitting] = useState<Set<string>>(new Set());
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [likedReplies, setLikedReplies] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<"latest" | "mostReplies" | "mostLikes">("latest");
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarksOnly, setBookmarksOnly] = useState(false);
   const [pinSaving, setPinSaving] = useState(false);
+  const [activeProfileCard, setActiveProfileCard] = useState<{ userId: string; position: { x: number; y: number } } | null>(null);
 
   // ── Server-side search + pagination state ──
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
@@ -699,6 +702,15 @@ export function DiscussionFeed({
     }
   }
 
+  function handleAvatarClick(userId: string | undefined, event: React.MouseEvent) {
+    if (!userId) return;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    setActiveProfileCard({
+      userId,
+      position: { x: rect.left, y: rect.bottom + 8 },
+    });
+  }
+
   if (loading) {
     return (
       <section className="overflow-hidden rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[var(--shadow-card)]">
@@ -935,17 +947,26 @@ export function DiscussionFeed({
                 {post.authorAvatarUrl ? (
                   <img
                     alt={post.author}
-                    className="h-9 w-9 shrink-0 rounded-full object-cover"
+                    className="h-9 w-9 shrink-0 cursor-pointer rounded-full object-cover transition hover:ring-2 hover:ring-[var(--color-brand)]"
                     src={post.authorAvatarUrl}
+                    onClick={(e) => handleAvatarClick(post.authorId, e)}
                   />
                 ) : (
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)]">
+                  <div
+                    className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)] transition hover:ring-2 hover:ring-[var(--color-brand)]"
+                    onClick={(e) => handleAvatarClick(post.authorId, e)}
+                  >
                     {post.author.charAt(0)}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-black">{post.author}</h3>
+                    <h3
+                      className="cursor-pointer font-black transition hover:text-[var(--color-brand)]"
+                      onClick={(e) => handleAvatarClick(post.authorId, e)}
+                    >
+                      {post.author}
+                    </h3>
                     {post.authorId && ownerUserIds.has(post.authorId) ? (
                       <span className="rounded-full bg-[#dbeafe] px-2 py-0.5 text-[10px] font-bold text-[#1d4ed8] ring-1 ring-[#3b82f6]/30">
                         站主
@@ -1131,17 +1152,26 @@ export function DiscussionFeed({
                             {reply.avatar ? (
                               <img
                                 alt={reply.author}
-                                className="h-9 w-9 shrink-0 rounded-full object-cover"
+                                className="h-9 w-9 shrink-0 cursor-pointer rounded-full object-cover transition hover:ring-2 hover:ring-[var(--color-brand)]"
                                 src={reply.avatar}
+                                onClick={(e) => handleAvatarClick(reply.authorId, e)}
                               />
                             ) : (
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)]">
+                              <div
+                                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)] transition hover:ring-2 hover:ring-[var(--color-brand)]"
+                                onClick={(e) => handleAvatarClick(reply.authorId, e)}
+                              >
                                 {reply.author.charAt(0)}
                               </div>
                             )}
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2 text-sm">
-                                <span className="font-bold text-[var(--color-ink)]">{reply.author}</span>
+                                <span
+                                  className="cursor-pointer font-bold text-[var(--color-ink)] transition hover:text-[var(--color-brand)]"
+                                  onClick={(e) => handleAvatarClick(reply.authorId, e)}
+                                >
+                                  {reply.author}
+                                </span>
                                 {reply.authorId && ownerUserIds.has(reply.authorId) ? (
                                   <span className="rounded-full bg-[#dbeafe] px-2 py-0.5 text-[10px] font-bold text-[#1d4ed8] ring-1 ring-[#3b82f6]/30">
                                     站主
@@ -1168,9 +1198,16 @@ export function DiscussionFeed({
                                   回复
                                 </button>
                                 <button
-                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-muted)] transition hover:text-red-400"
+                                  className={`inline-flex items-center gap-1 text-xs font-semibold transition ${likedReplies.has(reply.id) ? "text-[#ef4444]" : "text-[var(--color-muted)] hover:text-red-400"}`}
                                   onClick={async () => {
                                     if (!isConnected) { showAuthModal(); return; }
+                                    const alreadyLiked = likedReplies.has(reply.id);
+                                    setLikedReplies((prev) => {
+                                      const next = new Set(prev);
+                                      if (alreadyLiked) next.delete(reply.id);
+                                      else next.add(reply.id);
+                                      return next;
+                                    });
                                     try {
                                       const newLikes = await likeReply(reply.id);
                                       setCommentsMap((prev) => ({
@@ -1179,11 +1216,19 @@ export function DiscussionFeed({
                                           r.id === reply.id ? { ...r, likes: newLikes } : r
                                         ),
                                       }));
-                                    } catch { /* ignore */ }
+                                    } catch {
+                                      // Revert on error
+                                      setLikedReplies((prev) => {
+                                        const next = new Set(prev);
+                                        if (alreadyLiked) next.add(reply.id);
+                                        else next.delete(reply.id);
+                                        return next;
+                                      });
+                                    }
                                   }}
                                   type="button"
                                 >
-                                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg className="h-3.5 w-3.5" fill={likedReplies.has(reply.id) ? "#ef4444" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M12 20.4s-7-4.355-7-9.24A4.16 4.16 0 0 1 9.2 7a4.62 4.62 0 0 1 2.8 1.1A4.62 4.62 0 0 1 14.8 7A4.16 4.16 0 0 1 19 11.16c0 4.885-7 9.24-7 9.24Z" />
                                   </svg>
                                   {reply.likes > 0 ? reply.likes : null}
@@ -1249,6 +1294,15 @@ export function DiscussionFeed({
                 : "加载更多讨论"}
           </button>
         </div>
+      ) : null}
+
+      {/* User profile popup */}
+      {activeProfileCard ? (
+        <UserProfileCard
+          userId={activeProfileCard.userId}
+          position={activeProfileCard.position}
+          onClose={() => setActiveProfileCard(null)}
+        />
       ) : null}
 
     </section>

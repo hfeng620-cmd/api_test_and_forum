@@ -294,6 +294,31 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
                 setMentionIndex(0);
               }}
               onKeyDown={handleTextareaKeyDown}
+              onPaste={async (e) => {
+                const items = e.clipboardData?.items;
+                if (!items) return;
+                for (const item of items) {
+                  if (item.type.startsWith("image/")) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) { setStatus("图片不能超过 5MB。"); return; }
+                    setUploadingImage(true);
+                    setStatus("图片上传中...");
+                    try {
+                      const url = await uploadForumImage(file);
+                      const ta = textareaRef.current;
+                      const start = ta?.selectionStart ?? body.length;
+                      const before = body.slice(0, start);
+                      const after = body.slice(start);
+                      setBody((before + `\n![图片](${url})\n` + after).trim());
+                      setStatus("图片已插入。");
+                    } catch { setStatus("图片上传失败，请稍后重试。"); }
+                    finally { setUploadingImage(false); }
+                    return;
+                  }
+                }
+              }}
               placeholder="写价格变化、试用活动、模型口径或避坑记录。输入 @ 可以提及其他用户。"
               value={body}
             />
@@ -349,6 +374,7 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
             >
               {uploadingImage ? "上传中..." : "📷 插图"}
             </button>
+            <span className="text-[11px] text-[var(--color-muted)]">支持粘贴图片 (Ctrl+V)</span>
           </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

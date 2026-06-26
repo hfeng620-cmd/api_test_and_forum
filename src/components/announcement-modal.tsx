@@ -32,7 +32,7 @@ export function AnnouncementModal() {
       const { data, error } = await supabase
         .from("forum_posts")
         .select("id, title, body, created_at")
-        .contains("tags", ["公告"])
+        .contains("tags", ["弹窗公告"])
         .eq("is_hidden", false)
         .order("created_at", { ascending: false })
         .limit(1);

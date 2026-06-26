@@ -25,7 +25,7 @@ create policy "Admins can read audit log" on public.forum_audit_log
 create policy "Admins can insert audit log" on public.forum_audit_log
   for insert with check (public.is_forum_admin());
 
--- 2. Hot topics view (trending = most liked + recent activity)
+-- 2. Hot topics view (适配人少的论坛：扩大时间窗口，降低门槛，新帖加权)
 create or replace view public.forum_hot_topics
 with (security_invoker = true)
 as
@@ -40,13 +40,20 @@ select
   count(distinct r.id) filter (where r.is_hidden = false) as reply_count,
   count(distinct l.user_id) filter (where l.post_id is not null) as like_count,
   greatest(p.created_at, max(r.created_at)) as last_activity,
-  (count(distinct l.user_id) * 2 + count(distinct r.id)) as hot_score
+  (
+    -- 点赞：每人 3 分
+    count(distinct l.user_id) * 3
+    -- 回复：每条 2 分
+    + count(distinct r.id) * 2
+    -- 新帖保底 1 分（7天内的帖子）
+    + case when p.created_at > now() - interval '7 days' then 1 else 0 end
+  ) as hot_score
 from public.forum_posts p
 join public.forum_profiles pr on pr.id = p.author_id
 left join public.forum_replies r on r.post_id = p.id and r.is_hidden = false
 left join public.forum_likes l on l.post_id = p.id
 where p.is_hidden = false
-  and p.created_at > now() - interval '7 days'
+  and p.created_at > now() - interval '30 days'
 group by p.id, pr.display_name
 order by hot_score desc, p.created_at desc
 limit 20;

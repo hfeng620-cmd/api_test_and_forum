@@ -774,6 +774,87 @@ export async function updateProfileAvatar(avatarUrl: string): Promise<void> {
   if (error) throw error;
 }
 
+export type UserProfile = {
+  display_name: string;
+  avatar_url: string;
+  bio: string;
+  tags: string[];
+};
+
+/** Update the current user's profile bio and/or custom tags. */
+export async function updateUserProfile(
+  userId: string,
+  data: { bio?: string; tags?: string[] },
+): Promise<void> {
+  assertConfigured();
+  const supabase = getSupabaseClient();
+
+  const updates: Record<string, unknown> = {};
+
+  if (data.bio !== undefined) {
+    const trimmed = data.bio.trim();
+    if (trimmed.length > 500) {
+      throw new Error("个人简介不能超过 500 个字符。");
+    }
+    updates.bio = trimmed;
+  }
+
+  if (data.tags !== undefined) {
+    const normalized = normalizeProfileTags(data.tags);
+    updates.tags = normalized;
+  }
+
+  if (Object.keys(updates).length === 0) return;
+
+  const { error } = await supabase
+    .from("forum_profiles")
+    .update(updates)
+    .eq("id", userId);
+
+  if (error) throw error;
+}
+
+/** Get a user's full profile (display_name, avatar_url, bio, tags). */
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await getSupabaseClient()
+      .from("forum_profiles")
+      .select("display_name, avatar_url, bio, tags")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return null;
+
+    return {
+      display_name: (data as Record<string, unknown>).display_name as string ?? "噜噜",
+      avatar_url: (data as Record<string, unknown>).avatar_url as string ?? "",
+      bio: (data as Record<string, unknown>).bio as string ?? "",
+      tags: Array.isArray((data as Record<string, unknown>).tags)
+        ? ((data as Record<string, unknown>).tags as string[])
+        : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function normalizeProfileTags(tags?: string[]) {
+  if (!Array.isArray(tags)) return [];
+
+  const uniqueTags = new Set<string>();
+  for (const tag of tags) {
+    const trimmed = tag.trim();
+    if (trimmed) {
+      uniqueTags.add(trimmed.slice(0, 20));
+    }
+    if (uniqueTags.size >= 5) break;
+  }
+
+  return Array.from(uniqueTags);
+}
+
 export async function updatePostBody(
   postId: string,
   newBody: string,

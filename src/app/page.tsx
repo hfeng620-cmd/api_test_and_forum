@@ -44,6 +44,54 @@ const decisionRoutes = [
   },
 ];
 
+const productLayers = [
+  {
+    label: "中心任务",
+    title: "先把候选站缩到 2 到 3 个",
+    description:
+      "首页先帮你做第一轮去留判断，不让你一上来就在大量站点里反复横跳。",
+  },
+  {
+    label: "关键输入",
+    title: "把成本、口径和风险放进同一视角",
+    description:
+      "倍率、试用、备注和社区反馈一起看，能更快区分“便宜能用”和“值得长期用”。",
+  },
+  {
+    label: "清晰下一步",
+    title: "每块信息都直接连接下一个动作",
+    description:
+      "榜单负责初筛，社区负责校验，模型页负责定方向，减少无效跳转。",
+  },
+];
+
+const actionFlows = [
+  {
+    step: "01",
+    title: "先建立第一轮候选",
+    description:
+      "如果你已经知道目标模型，先按倍率、试用和入口成本筛掉明显不合适的站点。",
+    href: "/stations",
+    cta: "进入榜单初筛",
+  },
+  {
+    step: "02",
+    title: "再补齐风险信号",
+    description:
+      "把价格变化、群友反馈和特殊口径补进来，避免只凭静态价格做决定。",
+    href: "/community",
+    cta: "查看实时反馈",
+  },
+  {
+    step: "03",
+    title: "最后锁定长期路线",
+    description:
+      "如果目标模型还没定，再回模型页看场景适配，最后再决定长期充值。",
+    href: "/models",
+    cta: "去定模型方向",
+  },
+];
+
 export default function Home() {
   type StationRow = (typeof stationComparisonRows)[number];
   const topRows = prioritizedStationNames
@@ -309,13 +357,100 @@ export default function Home() {
       </section>
 
       <section className="border-b border-[var(--color-line)]">
+        <div className="mx-auto max-w-7xl px-6 py-10 lg:px-10 lg:py-12">
+          <div className="grid gap-6 xl:grid-cols-[1.04fr_0.96fr]">
+            <div className="rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(239,246,255,0.9))] p-6 shadow-[0_22px_60px_rgba(15,23,42,0.06)] lg:p-7">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-deep)]">
+                产品路径
+              </p>
+              <h2 className="mt-4 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl">
+                从首页直接完成第一轮判断，再进入更深的验证。
+              </h2>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-[var(--color-muted)]">
+                先在这里理解该看什么、先做什么、下一步去哪里。这样用户不会只看到信息堆叠，
+                而是能顺着明确路径，把“要不要试”“要不要长期用”拆成连续动作。
+              </p>
+              <div className="mt-6 grid gap-4 lg:grid-cols-3">
+                {productLayers.map((layer) => (
+                  <article
+                    key={layer.title}
+                    className="rounded-[24px] border border-white/80 bg-white/82 px-5 py-5 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                      {layer.label}
+                    </p>
+                    <h3 className="mt-3 text-lg font-black text-[var(--color-ink)]">{layer.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
+                      {layer.description}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <aside className="rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(239,246,255,0.96),rgba(255,255,255,0.92))] p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] lg:p-7">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
+                  已收录 {stationComparisonRows.length} 个站点
+                </span>
+                <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
+                  {lowRateCount} 个低倍率样本
+                </span>
+                <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
+                  {trialReadyCount} 个可先试用
+                </span>
+              </div>
+              <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
+                推荐起步路径
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
+                默认建议是先小成本验证，再补风险信号，最后才做长期选择。每一步都只解决一个问题，
+                决策会更轻，也更接近真实使用场景。
+              </p>
+              <div className="mt-6 space-y-4">
+                {actionFlows.map((flow) => (
+                  <div
+                    key={flow.step}
+                    className="rounded-[24px] border border-white/80 bg-white/84 px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                          Step {flow.step}
+                        </p>
+                        <h3 className="mt-2 text-lg font-black text-[var(--color-ink)]">{flow.title}</h3>
+                      </div>
+                      <Link
+                        href={flow.href}
+                        className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-2 text-xs font-bold text-[var(--color-brand-deep)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+                      >
+                        {flow.cta}
+                      </Link>
+                    </div>
+                    <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
+                      {flow.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-[var(--color-line)]">
         <div className="surface-in mx-auto max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
-                本周精选
+                建立判断基准
               </p>
-              <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">重点站点速览</h2>
+              <h2 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">
+                先从代表性站点看出差异
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
+                这一屏不是给你看完全部信息，而是帮你快速建立价格、倍率和站点口径的参考面。
+              </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -522,6 +657,38 @@ export default function Home() {
                 </article>
               );
             })}
+          </div>
+          <div className="mt-8 rounded-[28px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(239,246,255,0.96),rgba(255,255,255,0.92))] px-6 py-6 shadow-[0_18px_44px_rgba(37,99,235,0.08)]">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
+                  下一步动作
+                </p>
+                <h2 className="mt-3 text-2xl font-black tracking-tight sm:text-3xl">
+                  看完榜单后，把判断继续往前推一步。
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
+                  如果你已经筛出候选，就去社区补风险信息；如果还没定模型路线，就直接回模型页继续收口。
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/community"
+                  className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-black text-[var(--color-on-brand)] shadow-[0_12px_30px_var(--color-panel-glow)] transition hover:scale-105 hover:bg-[var(--color-brand-deep)]"
+                >
+                  去社区补风险
+                </Link>
+                <Link
+                  href="/models"
+                  className="rounded-full border border-[var(--color-line)] bg-white/88 px-5 py-3 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                >
+                  继续定模型方向
+                </Link>
+                <div className="hover:scale-105 transition-transform">
+                  <QqGroupModalButton />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
