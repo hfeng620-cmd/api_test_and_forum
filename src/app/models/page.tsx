@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { NotificationBell } from "@/components/notification-bell";
-import { modelGuideNotes, modelPreviewRows, tickerItems } from "@/lib/site-data";
+import { modelGuideNotes, modelPreviewRows, modelRankings, tickerItems } from "@/lib/site-data";
 
 export default function ModelsPage() {
   return (
@@ -77,6 +77,75 @@ export default function ModelsPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-12 lg:px-10">
+        {/* ---- 模型智商排行榜 ---- */}
+        <div className="mb-10 rounded-[36px] border border-[var(--color-line)] bg-white p-7 shadow-[var(--shadow-card)]">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="inline-flex rounded-full bg-[var(--color-brand-soft)] px-3 py-1 text-sm font-bold text-[var(--color-brand-deep)]">
+                模型智商排行榜
+              </p>
+              <h2 className="mt-4 text-3xl font-black tracking-tight">
+                按使用场景 · 基于 Analysis Intelligence Index
+              </h2>
+              <p className="mt-2 text-sm text-[var(--color-muted)]">
+                智商 index 越高代表模型综合能力越强，中转站价格为各站中位数。数据仅供参考，实际体验可能因站点不同而有差异。
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 overflow-hidden rounded-[28px] border border-[var(--color-line)]">
+            {/* 表头 */}
+            <div className="grid grid-cols-[0.5fr_1.5fr_1fr_1fr_1fr] bg-[var(--color-soft)] px-5 py-4 text-sm font-bold text-[var(--color-muted)]">
+              <span>排名</span>
+              <span>模型</span>
+              <span>智商 index</span>
+              <span>中转站中位数价格</span>
+              <span>厂商</span>
+            </div>
+            {/* 数据行 */}
+            {modelRankings.map((model, index) => {
+              // 前三名特殊样式
+              const isTop3 = model.rank <= 3;
+              const rankColors: Record<number, string> = {
+                1: "bg-yellow-400 text-yellow-900",
+                2: "bg-gray-300 text-gray-800",
+                3: "bg-orange-300 text-orange-900",
+              };
+
+              return (
+                <article
+                  key={model.rank}
+                  className={`grid grid-cols-[0.5fr_1.5fr_1fr_1fr_1fr] items-center px-5 py-4 ${
+                    index % 2 === 0 ? "bg-white" : "bg-[var(--color-row-alt)]"
+                  }`}
+                >
+                  <div>
+                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${
+                      isTop3 ? rankColors[model.rank] : "bg-[var(--color-soft)] text-[var(--color-muted)]"
+                    }`}>
+                      {model.rank}
+                    </span>
+                  </div>
+                  <div className="font-bold">{model.name}</div>
+                  <div>
+                    <span className="font-black text-[var(--color-brand)]">{model.intelligenceIndex}</span>
+                  </div>
+                  <div className="font-semibold">{model.medianPrice}</div>
+                  <div className="text-sm text-[var(--color-muted)]">{model.provider}</div>
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 rounded-[20px] bg-[var(--color-soft)] px-5 py-4 text-sm text-[var(--color-muted)]">
+            <p className="font-semibold text-[var(--color-ink)]">💡 怎么看这个榜？</p>
+            <p className="mt-2 leading-7">
+              智商 index 高的模型适合复杂推理、长文分析和高质量写作；价格低的模型适合日常对话、简单问答和批量任务。
+              建议先确定你的主要使用场景，再在中转站榜单里找支持该模型的站点比价。
+            </p>
+          </div>
+        </div>
+
         <div className="rounded-[36px] border border-[var(--color-line)] bg-white p-7 shadow-[var(--shadow-card)]">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
