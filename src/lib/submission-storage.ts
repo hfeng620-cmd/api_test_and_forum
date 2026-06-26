@@ -1,3 +1,5 @@
+import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+
 export type SubmissionStatus = "pending" | "approved" | "rejected";
 
 export type StationSubmission = {
@@ -121,6 +123,61 @@ export function loadStationSubmissions(): StationSubmission[] {
   }
 }
 
+/** Load all submissions from Supabase (for admin use). */
+export async function loadAllSubmissions(): Promise<StationSubmission[]> {
+  if (!isSupabaseConfigured()) {
+    return loadStationSubmissions();
+  }
+
+  try {
+    const { data, error } = await getSupabaseClient()
+      .from("station_submissions")
+      .select("*")
+      .order("submitted_at", { ascending: false })
+      .limit(100);
+
+    if (error) throw error;
+
+    return (data ?? []).map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      kind: row.kind as StationSubmission["kind"],
+      stationName: row.station_name as string,
+      url: (row.url as string) ?? "",
+      priceOrRate: (row.price_or_rate as string) ?? "",
+      note: row.note as string,
+      contact: (row.contact as string) ?? "",
+      status: row.status as SubmissionStatus,
+      adminNote: (row.admin_note as string) ?? "",
+      submittedAt: row.submitted_at as string,
+      reviewedAt: row.reviewed_at as string | undefined,
+    }));
+  } catch {
+    return loadStationSubmissions();
+  }
+}
+
+/** Update submission review status in Supabase. */
+export async function updateSubmissionReviewSupabase(
+  id: string,
+  updates: { status: SubmissionStatus; adminNote: string },
+): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    updateSubmissionReview(id, updates);
+    return;
+  }
+
+  const { error } = await getSupabaseClient()
+    .from("station_submissions")
+    .update({
+      status: updates.status,
+      admin_note: updates.adminNote,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) throw new Error("审核更新失败，请稍后重试。");
+}
+
 export function saveStationSubmissions(submissions: StationSubmission[]) {
   if (typeof window === "undefined") {
     return;
@@ -136,6 +193,67 @@ export function saveStationSubmissions(submissions: StationSubmission[]) {
 export function createSubmission(
   input: StationSubmissionInput,
 ) {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    return createSubmissionSupabase(input);
+  }
+  // Fallback to localStorage
+  return createSubmissionLocal(input);
+}
+
+async function createSubmissionSupabase(
+  input: StationSubmissionInput,
+): Promise<StationSubmission> {
+  const supabase = getSupabaseClient();
+
+  // Check for recent duplicate
+  const fiveMinutesAgo = new Date(Date.now() - RECENT_DUPLICATE_WINDOW_MS).toISOString();
+  const { data: existing } = await supabase
+    .from("station_submissions")
+    .select("id")
+    .eq("station_name", input.stationName)
+    .eq("note", input.note)
+    .eq("status", "pending")
+    .gte("submitted_at", fiveMinutesAgo)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    throw new Error("相同内容已在最近 5 分钟内提交，无需重复提交。");
+  }
+
+  const { data, error } = await supabase
+    .from("station_submissions")
+    .insert({
+      kind: input.kind,
+      station_name: input.stationName,
+      url: input.url,
+      price_or_rate: input.priceOrRate,
+      note: input.note,
+      contact: input.contact,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error("提交失败，请稍后重试。");
+
+  return {
+    id: data.id,
+    kind: data.kind,
+    stationName: data.station_name,
+    url: data.url,
+    priceOrRate: data.price_or_rate,
+    note: data.note,
+    contact: data.contact,
+    status: data.status,
+    adminNote: data.admin_note,
+    submittedAt: data.submitted_at,
+    reviewedAt: data.reviewed_at,
+  };
+}
+
+function createSubmissionLocal(
+  input: StationSubmissionInput,
+): StationSubmission {
   const current = loadStationSubmissions();
   const now = Date.now();
   const duplicate = current.find((item) =>
