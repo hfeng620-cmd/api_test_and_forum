@@ -93,6 +93,14 @@ export default function CommunityPage() {
       { key: "content", node: contentRef.current },
     ].filter((entry): entry is { key: "hero" | "desk" | "content"; node: HTMLDivElement } => Boolean(entry.node));
 
+    // Immediately reveal elements that are already in viewport
+    entries.forEach(({ key, node }) => {
+      const bounds = node.getBoundingClientRect();
+      if (bounds.top < window.innerHeight && bounds.bottom > 0) {
+        setRevealedSections((current) => ({ ...current, [key]: true }));
+      }
+    });
+
     const observer = new IntersectionObserver(
       (items) => {
         items.forEach((item) => {
@@ -105,7 +113,7 @@ export default function CommunityPage() {
           observer.unobserve(item.target);
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px -2% 0px" },
+      { threshold: 0.05, rootMargin: "0px 0px" },
     );
 
     entries.forEach(({ key, node }) => {
@@ -113,10 +121,10 @@ export default function CommunityPage() {
       observer.observe(node);
     });
 
-    // Safety fallback: reveal all sections after 1.5s if observer doesn't fire
+    // Safety fallback: reveal all sections after 500ms
     const fallbackTimer = setTimeout(() => {
       setRevealedSections({ hero: true, desk: true, content: true });
-    }, 1500);
+    }, 500);
 
     return () => {
       observer.disconnect();
