@@ -166,7 +166,7 @@ export function GitHubDiscussionsEmbed({
       return;
     }
 
-    container.innerHTML = "";
+    container.replaceChildren();
 
     const script = document.createElement("script");
     script.src = giscusScriptSrc;
@@ -192,7 +192,7 @@ export function GitHubDiscussionsEmbed({
     container.appendChild(script);
 
     return () => {
-      container.innerHTML = "";
+      container.replaceChildren();
     };
   }, [giscusScriptSrc, isConfigured, scriptAttributes]);
 

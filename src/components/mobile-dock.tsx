@@ -9,7 +9,6 @@ const navItems = [
   { label: "首页", href: "/", tone: "utility" },
   { label: "榜单", href: "/stations", tone: "primary" },
   { label: "模型", href: "/models", tone: "primary" },
-  { label: "指南", href: "/guides", tone: "primary" },
   { label: "社区", href: "/community", tone: "primary" },
   { label: "我的", href: "/profile", tone: "utility" },
 ] as const;
@@ -21,7 +20,7 @@ export function MobileDock() {
     <>
       <nav
         aria-label="站内主导航"
-        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel-strong)] p-1.5 shadow-[0_18px_60px_var(--color-panel-glow)] backdrop-blur lg:hidden"
+        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel-strong)] p-1.5 shadow-[0_18px_60px_var(--color-panel-glow)] backdrop-blur lg:hidden"
         data-selection-comments="off"
       >
         {navItems.map((item) => {

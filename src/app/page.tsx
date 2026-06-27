@@ -126,6 +126,10 @@ export default function Home() {
           from { opacity: 0; transform: translate3d(0, 10px, 0); }
           to { opacity: 1; transform: translate3d(0, 0, 0); }
         }
+        @keyframes ambient-drift {
+          0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.72; }
+          50% { transform: translate3d(18px, -14px, 0) scale(1.06); opacity: 0.96; }
+        }
         .logo-pulse {
           animation: logo-pulse 3.6s ease-in-out infinite;
         }
@@ -160,6 +164,12 @@ export default function Home() {
         .home-flow-tight > :nth-child(1) { animation-delay: 60ms; }
         .home-flow-tight > :nth-child(2) { animation-delay: 110ms; }
         .home-flow-tight > :nth-child(3) { animation-delay: 160ms; }
+        .home-ambient {
+          animation: ambient-drift 12s ease-in-out infinite;
+        }
+        .home-ambient-fast {
+          animation: ambient-drift 8.5s ease-in-out infinite reverse;
+        }
         .stagger-in:nth-child(5) { animation-delay: 160ms; }
         .stagger-in:nth-child(6) { animation-delay: 200ms; }
         .stagger-in:nth-child(7) { animation-delay: 240ms; }
@@ -169,6 +179,8 @@ export default function Home() {
           .ticker-enter,
           .home-reveal,
           .home-reveal-soft,
+          .home-ambient,
+          .home-ambient-fast,
           .home-flow > *,
           .home-flow-tight > * { animation: none; opacity: 1; transform: none; }
         }
@@ -395,10 +407,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-b border-[var(--color-line)]">
-        <div className="mx-auto max-w-7xl px-6 py-9 lg:px-10 lg:py-11">
+      <section className="relative overflow-hidden border-b border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-surface-rgb),0.14),rgba(var(--theme-glow-rgb),0.045))]">
+        <div className="home-ambient pointer-events-none absolute -left-24 top-12 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-glow-rgb),0.14),transparent_68%)] blur-2xl" />
+        <div className="home-ambient-fast pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-secondary-rgb),0.14),transparent_70%)] blur-2xl" />
+        <div className="relative mx-auto max-w-7xl px-6 py-9 lg:px-10 lg:py-11">
           <div className="grid gap-6 xl:grid-cols-[1.04fr_0.96fr]">
-            <div className="home-reveal rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(239,246,255,0.9))] p-6 shadow-[0_22px_60px_rgba(15,23,42,0.06)] lg:p-7">
+            <div className="home-reveal relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(var(--theme-surface-rgb),0.96),rgba(var(--theme-glow-rgb),0.07))] p-6 shadow-[0_22px_60px_rgba(15,23,42,0.06)] lg:p-7">
+              <div className="pointer-events-none absolute right-0 top-0 h-32 w-48 rounded-bl-full bg-[radial-gradient(circle_at_top_right,rgba(var(--theme-glow-rgb),0.16),transparent_70%)]" />
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-deep)]">
                 产品路径
               </p>
@@ -409,14 +424,20 @@ export default function Home() {
                 首页先帮你定顺序，不让动作断在半路。
               </p>
               <div className="home-flow mt-6 grid gap-4 lg:grid-cols-3">
-                {productLayers.map((layer) => (
+                {productLayers.map((layer, index) => (
                   <article
                     key={layer.title}
-                    className="rounded-[24px] border border-white/80 bg-white/82 px-5 py-5 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur"
+                    className="group relative overflow-hidden rounded-[24px] border border-white/80 bg-white/82 px-5 py-5 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--color-brand)] hover:shadow-[0_20px_42px_rgba(15,23,42,0.09)]"
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                      {layer.label}
-                    </p>
+                    <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,var(--color-brand),rgba(var(--theme-secondary-rgb),0.64))] opacity-0 transition group-hover:opacity-100" />
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                        {layer.label}
+                      </p>
+                      <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--color-brand-soft)] text-sm font-black text-[var(--color-brand-deep)]">
+                        {(index + 1).toString().padStart(2, "0")}
+                      </span>
+                    </div>
                     <h3 className="mt-3 text-lg font-black text-[var(--color-ink)]">{layer.title}</h3>
                     <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
                       {layer.description}
@@ -426,7 +447,8 @@ export default function Home() {
               </div>
             </div>
 
-            <aside className="home-reveal home-delay-2 rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(239,246,255,0.96),rgba(255,255,255,0.92))] p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] lg:p-7">
+            <aside className="home-reveal home-delay-2 relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-glow-rgb),0.08),rgba(var(--theme-surface-rgb),0.94))] p-6 shadow-[0_22px_60px_rgba(37,99,235,0.08)] lg:p-7">
+              <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-glow-rgb),0.18),transparent_70%)] blur-xl" />
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
                   已收录 {stationComparisonRows.length} 个站点
@@ -444,12 +466,17 @@ export default function Home() {
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
                 先低成本试，再补风险，最后定长期路线。
               </p>
-              <div className="home-flow mt-6 space-y-4">
-                {actionFlows.map((flow) => (
+              <div className="relative mt-6">
+                <div className="absolute bottom-4 left-[18px] top-4 hidden w-px bg-[linear-gradient(180deg,var(--color-brand),transparent)] sm:block" />
+                <div className="home-flow space-y-4">
+                  {actionFlows.map((flow) => (
                   <div
                     key={flow.step}
-                    className="rounded-[24px] border border-white/80 bg-white/84 px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)]"
+                    className="relative rounded-[24px] border border-white/80 bg-white/84 px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_38px_rgba(15,23,42,0.08)] sm:pl-14"
                   >
+                    <span className="absolute left-5 top-5 hidden h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-white/80 bg-[var(--color-brand)] text-[10px] font-black text-[var(--color-on-brand)] shadow-[0_10px_22px_var(--color-panel-glow)] sm:flex">
+                      {flow.step}
+                    </span>
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
@@ -468,15 +495,17 @@ export default function Home() {
                       {flow.description}
                     </p>
                   </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </aside>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-[var(--color-line)]">
-        <div className="surface-in mx-auto max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
+      <section className="relative overflow-hidden border-b border-[var(--color-line)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(var(--theme-glow-rgb),0.055),transparent)]" />
+        <div className="surface-in relative mx-auto max-w-7xl px-6 py-8 lg:px-10 lg:py-10">
           <div className="home-reveal mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
@@ -630,14 +659,18 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-[var(--color-line)]">
-        <div className="mx-auto max-w-7xl px-6 py-10 lg:px-10 lg:py-12">
+      <section className="relative overflow-hidden border-t border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-surface-rgb),0),rgba(var(--theme-glow-rgb),0.055))]">
+        <div className="home-ambient pointer-events-none absolute -right-24 top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-glow-rgb),0.13),transparent_70%)] blur-2xl" />
+        <div className="relative mx-auto max-w-7xl px-6 py-10 lg:px-10 lg:py-12">
           <div className="home-reveal flex items-end justify-between gap-6 border-b border-[var(--color-line)] pb-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
                 更多中转站
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight">更多站点</h2>
+              <p className="mt-2 max-w-xl text-sm leading-7 text-[var(--color-muted)]">
+                作为补充池保留，适合在主候选之外继续横向比价。
+              </p>
             </div>
             <Link
               href="/stations"
@@ -646,7 +679,7 @@ export default function Home() {
               完整榜单 →
             </Link>
           </div>
-          <div className="mt-3">
+          <div className="mt-5 overflow-hidden rounded-[26px] border border-[var(--color-line)] bg-[var(--surface-gradient)] px-5 shadow-[0_18px_46px_rgba(15,23,42,0.055)]">
             {moreRows.map((row, index) => {
               const url = stationLinkMap[row.name];
               const baseClasses =

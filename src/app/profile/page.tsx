@@ -41,6 +41,12 @@ type ActivityEmptyState = {
   secondaryAction: { href: string; label: string };
 };
 
+type EmptyStateMetric = {
+  label: string;
+  value: string;
+  hint: string;
+};
+
 type ShowcaseRow = {
   label: string;
   value: string;
@@ -52,6 +58,57 @@ const activityTabs: { key: ActivityTab; label: string }[] = [
   { key: "replies", label: "回复" },
   { key: "likes", label: "点赞" },
 ];
+
+function ActivityEmptyCard({
+  state,
+  metrics,
+  style,
+}: {
+  state: ActivityEmptyState;
+  metrics: EmptyStateMetric[];
+  style?: CSSProperties;
+}) {
+  return (
+    <div
+      className="mx-auto max-w-2xl rounded-[26px] border border-[var(--color-line)] bg-[linear-gradient(135deg,var(--color-brand-soft),var(--color-panel-strong))] px-4 py-7 text-center shadow-[var(--shadow-card)] sm:px-6 sm:py-8"
+      style={style}
+    >
+      <span className="inline-flex rounded-full bg-[var(--color-panel)] px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)] ring-1 ring-[var(--color-line)]">
+        {state.eyebrow}
+      </span>
+      <h3 className="mt-4 text-2xl font-black tracking-tight text-[var(--color-ink)]">{state.title}</h3>
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)]">{state.detail}</p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        {metrics.map((metric) => (
+          <div
+            key={metric.label}
+            className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 text-left"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
+              {metric.label}
+            </p>
+            <p className="mt-2 text-sm font-black text-[var(--color-ink)]">{metric.value}</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{metric.hint}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
+        <Link
+          className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
+          href={state.primaryAction.href}
+        >
+          {state.primaryAction.label}
+        </Link>
+        <Link
+          className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+          href={state.secondaryAction.href}
+        >
+          {state.secondaryAction.label}
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 function formatDateLabel(value?: string | null) {
   if (!value) return "暂无记录";
@@ -100,9 +157,19 @@ function useRevealInView<T extends HTMLElement>(threshold = 0.18) {
   useEffect(() => {
     if (isVisible || typeof window === "undefined") return;
     const node = ref.current;
-    if (!node) return;
+    if (!node) {
+      setIsVisible(true);
+      return;
+    }
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setIsVisible(true);
+      return;
+    }
+
+    // Immediately reveal if already in viewport
+    const bounds = node.getBoundingClientRect();
+    if (bounds.top < window.innerHeight && bounds.bottom > 0) {
       setIsVisible(true);
       return;
     }
@@ -116,12 +183,21 @@ function useRevealInView<T extends HTMLElement>(threshold = 0.18) {
       },
       {
         threshold,
-        rootMargin: "0px 0px -10% 0px",
+        rootMargin: "0px 0px -5% 0px",
       },
     );
 
     observer.observe(node);
-    return () => observer.disconnect();
+
+    // Safety fallback: reveal after 800ms
+    const fallbackTimer = setTimeout(() => {
+      setIsVisible(true);
+    }, 800);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimer);
+    };
   }, [isVisible, threshold]);
 
   return { ref, isVisible };
@@ -525,6 +601,54 @@ export default function ProfilePage() {
     },
   };
   const activeEmptyState = activityEmptyStates[activeTab];
+  const nextProfileSteps = profileCompletionItems
+    .filter((item) => !item.done)
+    .slice(0, 2)
+    .map((item) => item.label);
+  const activeEmptyStateMetrics: EmptyStateMetric[] =
+    activeTab === "posts"
+      ? [
+          {
+            label: "账号阶段",
+            value: profileStage,
+            hint: profileStageHint,
+          },
+          {
+            label: "资料完成度",
+            value: `${completenessPercent}% · ${profileCompleteness}/4`,
+            hint: completionTone,
+          },
+        ]
+      : activeTab === "replies"
+        ? [
+            {
+              label: "已有发帖",
+              value: `${postCount} 条`,
+              hint: postCount > 0 ? "你已经有公开表达，可以继续补足对话层。" : "还没有发帖和回复记录。",
+            },
+            {
+              label: "关注站点",
+              value: `${uniqueStations} 个`,
+              hint: mostDiscussedStation
+                ? `目前最常提及 ${mostDiscussedStation.station}。`
+                : "继续参与站点话题后会逐步形成焦点。",
+            },
+          ]
+        : [
+            {
+              label: "点赞记录",
+              value: `${likedCount} 条`,
+              hint: "认可过的内容会在这里逐步沉淀成你的兴趣侧写。",
+            },
+            {
+              label: "补完建议",
+              value: `${profileCompleteness}/4 已填写`,
+              hint:
+                nextProfileSteps.length > 0
+                  ? `优先补 ${nextProfileSteps.join("、")}，个人主页会更容易被读懂。`
+                  : "资料已经完整，可以继续用点赞和互动沉淀关注方向。",
+            },
+          ];
   const activeArchiveCount =
     activeTab === "posts"
       ? posts.length
@@ -595,12 +719,12 @@ export default function ProfilePage() {
       </section>
 
       <section className="relative overflow-hidden border-b border-[var(--color-line)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.18),transparent_34%),radial-gradient(circle_at_85%_20%,rgba(125,211,252,0.22),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,247,251,0.84))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--color-brand-soft),transparent_34%),radial-gradient(circle_at_85%_20%,var(--color-panel-glow),transparent_22%),linear-gradient(180deg,var(--color-panel),var(--color-soft))]" />
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
           {!isConnected ? (
             <div
               ref={heroSectionRef}
-              className="overflow-hidden rounded-[28px] border border-white/70 bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.08)]"
+              className="overflow-hidden rounded-[28px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.08)]"
               style={createRevealStyle(heroSectionVisible, 0, 34, 0.978)}
             >
               <div className="border-b border-[var(--color-line)] px-6 py-8 sm:px-8">
@@ -625,7 +749,7 @@ export default function ProfilePage() {
                     ].map((item) => (
                       <div
                         key={item.value}
-                        className="rounded-[20px] border border-white/70 bg-white/82 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)]"
+                        className="rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel-strong)] px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)]"
                         style={createRevealStyle(heroSectionVisible, 150 + ["资料", "互动", "足迹"].indexOf(item.value) * 70, 20, 0.99)}
                       >
                         <p className="text-lg font-black text-[var(--color-ink)]">{item.value}</p>
@@ -656,10 +780,10 @@ export default function ProfilePage() {
             <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
               <div
                 ref={heroSectionRef}
-                className="overflow-hidden rounded-[28px] border border-white/70 bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.08)] transition-[transform,box-shadow] duration-700 hover:-translate-y-0.5 hover:shadow-[0_28px_92px_rgba(15,23,42,0.12)]"
+                className="overflow-hidden rounded-[28px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.08)] transition-[transform,box-shadow] duration-700 hover:-translate-y-0.5 hover:shadow-[0_28px_92px_rgba(15,23,42,0.12)]"
                 style={createRevealStyle(heroSectionVisible, 0, 34, 0.978)}
               >
-                <div className="border-b border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(37,99,235,0.08),rgba(255,255,255,0.86)_55%,rgba(191,219,254,0.42))] px-6 py-8 sm:px-8">
+                <div className="border-b border-[var(--color-line)] bg-[linear-gradient(135deg,var(--color-brand-soft),var(--color-panel-strong)_55%,var(--color-soft))] px-5 py-7 sm:px-8 sm:py-8">
                   <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     <button
                       className="group relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[28px] bg-[var(--color-soft)] ring-1 ring-[var(--color-line)] transition hover:-translate-y-0.5 hover:ring-[var(--color-brand)]"
@@ -704,7 +828,7 @@ export default function ProfilePage() {
                             {identityFacts.map((item) => (
                               <div
                                 key={item.label}
-                                className="rounded-full border border-white/80 bg-white/74 px-3 py-1.5 text-xs text-[var(--color-muted)] shadow-[0_10px_22px_rgba(15,23,42,0.04)]"
+                                className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-3 py-1.5 text-xs text-[var(--color-muted)] shadow-[0_10px_22px_rgba(15,23,42,0.04)]"
                                 style={createRevealStyle(heroSectionVisible, 120 + identityFacts.indexOf(item) * 45, 12, 0.996)}
                               >
                                 <span className="font-semibold text-[var(--color-muted)]">{item.label}</span>
@@ -718,9 +842,9 @@ export default function ProfilePage() {
                           </p>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
                           <button
-                            className="rounded-full border border-[var(--color-line)] bg-white/82 px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                            className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
                             onClick={() => {
                               setEditingName(true);
                               setNewName(name);
@@ -733,7 +857,7 @@ export default function ProfilePage() {
                             编辑资料
                           </button>
                           <Link
-                            className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
+                            className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-center text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
                             href="/community"
                           >
                             去讨论区
@@ -742,7 +866,7 @@ export default function ProfilePage() {
                       </div>
 
                       <div className="mt-5 grid gap-4 lg:grid-cols-[1.12fr_0.88fr]">
-                        <div className="rounded-[22px] border border-white/80 bg-white/76 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                        <div className="rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                           <div className="flex flex-wrap items-center justify-between gap-3">
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                               个人说明
@@ -757,7 +881,7 @@ export default function ProfilePage() {
                           <p className="mt-4 text-xs leading-6 text-[var(--color-muted)]">{profilePresentationTone}</p>
                         </div>
 
-                        <div className="rounded-[22px] border border-white/80 bg-white/76 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                        <div className="rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                           <div className="flex items-center justify-between gap-3">
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                               展示摘要
@@ -770,7 +894,7 @@ export default function ProfilePage() {
                             {showcaseRows.map((row) => (
                               <div
                                 key={row.label}
-                                className="rounded-[16px] border border-[var(--color-line)] bg-white/72 px-3 py-3"
+                                className="rounded-[16px] border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-3"
                                 style={createRevealStyle(heroSectionVisible, 200 + showcaseRows.indexOf(row) * 55, 16, 0.994)}
                               >
                                 <div className="flex items-center justify-between gap-3">
@@ -806,7 +930,7 @@ export default function ProfilePage() {
                         {profileMeta.map((item) => (
                           <div
                             key={item.label}
-                            className="rounded-[20px] border border-white/80 bg-white/72 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] backdrop-blur"
+                            className="rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] backdrop-blur"
                             style={createRevealStyle(heroSectionVisible, 260 + profileMeta.indexOf(item) * 60, 18, 0.992)}
                           >
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -820,7 +944,7 @@ export default function ProfilePage() {
                         ))}
                       </div>
 
-                      <div className="mt-4 rounded-[22px] border border-white/80 bg-white/76 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
+                      <div className="mt-4 rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)]">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -850,7 +974,7 @@ export default function ProfilePage() {
                     {profileSignals.map((signal) => (
                       <div
                         key={signal.label}
-                        className="rounded-[20px] border border-[var(--color-line)] bg-white/78 px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition-transform duration-500 hover:-translate-y-0.5"
+                        className="rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 shadow-[0_12px_28px_rgba(15,23,42,0.04)] transition-transform duration-500 hover:-translate-y-0.5"
                         style={createRevealStyle(heroSectionVisible, 360 + profileSignals.indexOf(signal) * 65, 20, 0.992)}
                       >
                         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -908,7 +1032,7 @@ export default function ProfilePage() {
                           {nameSaving ? "保存中..." : "保存资料"}
                         </button>
                         <button
-                          className="rounded-full border border-[var(--color-line)] px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-white"
+                          className="rounded-full border border-[var(--color-line)] px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-panel)]"
                           onClick={() => setEditingName(false)}
                           type="button"
                         >
@@ -974,7 +1098,7 @@ export default function ProfilePage() {
               <aside className="space-y-6">
                 <div
                   ref={quickActionsRef}
-                  className="rounded-[28px] border border-white/70 bg-[var(--color-panel)] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)]"
+                  className="rounded-[28px] border border-[var(--color-line)] bg-[var(--color-panel)] p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] sm:p-6"
                   style={createRevealStyle(quickActionsVisible, 80, 28, 0.984)}
                 >
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
@@ -984,7 +1108,7 @@ export default function ProfilePage() {
                     {quickActions.map((action) => (
                       <Link
                         key={action.title}
-                        className="block rounded-[20px] border border-[var(--color-line)] bg-white/82 px-4 py-4 transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
+                        className="block rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:bg-[var(--color-soft)] hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
                         href={action.href}
                         style={createRevealStyle(quickActionsVisible, 140 + quickActions.indexOf(action) * 65, 18, 0.992)}
                       >
@@ -997,7 +1121,7 @@ export default function ProfilePage() {
 
                 <div
                   ref={showcaseAsideRef}
-                  className="rounded-[28px] border border-white/70 bg-[var(--color-panel)] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)]"
+                  className="rounded-[28px] border border-[var(--color-line)] bg-[var(--color-panel)] p-5 shadow-[0_24px_80px_rgba(15,23,42,0.08)] sm:p-6"
                   style={createRevealStyle(showcaseAsideVisible, 150, 28, 0.984)}
                 >
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
@@ -1005,7 +1129,7 @@ export default function ProfilePage() {
                   </p>
                   <div className="mt-4 space-y-4">
                     <div
-                      className="rounded-[20px] border border-[var(--color-line)] bg-white/78 px-4 py-4"
+                      className="rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4"
                       style={createRevealStyle(showcaseAsideVisible, 220, 18, 0.992)}
                     >
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -1019,7 +1143,7 @@ export default function ProfilePage() {
                       </p>
                     </div>
                     <div
-                      className="rounded-[20px] border border-[var(--color-line)] bg-white/78 px-4 py-4"
+                      className="rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4"
                       style={createRevealStyle(showcaseAsideVisible, 290, 18, 0.992)}
                     >
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -1075,7 +1199,7 @@ export default function ProfilePage() {
               </div>
 
               <div
-                className="mt-5 rounded-[22px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(37,99,235,0.06),rgba(255,255,255,0.72))] px-4 py-4"
+                className="mt-5 rounded-[22px] border border-[var(--color-line)] bg-[linear-gradient(135deg,var(--color-brand-soft),var(--color-panel))] px-4 py-4"
                 style={createRevealStyle(overviewVisible, 340, 20, 0.992)}
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
@@ -1090,7 +1214,7 @@ export default function ProfilePage() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-start gap-3 rounded-[16px] border border-[var(--color-line)] bg-white/76 px-3 py-3"
+                      className="flex items-start gap-3 rounded-[16px] border border-[var(--color-line)] bg-[var(--color-panel)] px-3 py-3"
                     >
                       <span
                         className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black ${
@@ -1203,53 +1327,12 @@ export default function ProfilePage() {
               <>
                 {activeTab === "posts" ? (
                   posts.length === 0 ? (
-                    <div className="px-6 py-10">
-                      <div
-                        className="mx-auto max-w-2xl rounded-[26px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(37,99,235,0.08),rgba(255,255,255,0.92))] px-6 py-8 text-center shadow-[0_18px_48px_rgba(15,23,42,0.05)]"
+                    <div className="px-4 py-8 sm:px-6 sm:py-10">
+                      <ActivityEmptyCard
+                        metrics={activeEmptyStateMetrics}
+                        state={activeEmptyState}
                         style={createRevealStyle(archiveVisible, 120, 22, 0.992)}
-                      >
-                        <span className="inline-flex rounded-full bg-white/86 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)] ring-1 ring-[var(--color-line)]">
-                          {activeEmptyState.eyebrow}
-                        </span>
-                        <h3 className="mt-4 text-2xl font-black tracking-tight text-[var(--color-ink)]">
-                          {activeEmptyState.title}
-                        </h3>
-                        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)]">
-                          {activeEmptyState.detail}
-                        </p>
-                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-[18px] border border-[var(--color-line)] bg-white/80 px-4 py-4 text-left">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                              账号阶段
-                            </p>
-                            <p className="mt-2 text-sm font-black text-[var(--color-ink)]">{profileStage}</p>
-                            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{profileStageHint}</p>
-                          </div>
-                          <div className="rounded-[18px] border border-[var(--color-line)] bg-white/80 px-4 py-4 text-left">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                              资料完成度
-                            </p>
-                            <p className="mt-2 text-sm font-black text-[var(--color-ink)]">
-                              {completenessPercent}% · {profileCompleteness}/4
-                            </p>
-                            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{completionTone}</p>
-                          </div>
-                        </div>
-                        <div className="mt-6 flex flex-wrap justify-center gap-3">
-                          <Link
-                            className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
-                            href={activeEmptyState.primaryAction.href}
-                          >
-                            {activeEmptyState.primaryAction.label}
-                          </Link>
-                          <Link
-                            className="rounded-full border border-[var(--color-line)] bg-white/82 px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
-                            href={activeEmptyState.secondaryAction.href}
-                          >
-                            {activeEmptyState.secondaryAction.label}
-                          </Link>
-                        </div>
-                      </div>
+                      />
                     </div>
                   ) : (
                     <div className="divide-y divide-[var(--color-line)]">
@@ -1286,59 +1369,12 @@ export default function ProfilePage() {
 
                 {activeTab === "replies" ? (
                   replies.length === 0 ? (
-                    <div className="px-6 py-10">
-                      <div
-                        className="mx-auto max-w-2xl rounded-[26px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(37,99,235,0.08),rgba(255,255,255,0.92))] px-6 py-8 text-center shadow-[0_18px_48px_rgba(15,23,42,0.05)]"
+                    <div className="px-4 py-8 sm:px-6 sm:py-10">
+                      <ActivityEmptyCard
+                        metrics={activeEmptyStateMetrics}
+                        state={activeEmptyState}
                         style={createRevealStyle(archiveVisible, 120, 22, 0.992)}
-                      >
-                        <span className="inline-flex rounded-full bg-white/86 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)] ring-1 ring-[var(--color-line)]">
-                          {activeEmptyState.eyebrow}
-                        </span>
-                        <h3 className="mt-4 text-2xl font-black tracking-tight text-[var(--color-ink)]">
-                          {activeEmptyState.title}
-                        </h3>
-                        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)]">
-                          {activeEmptyState.detail}
-                        </p>
-                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-[18px] border border-[var(--color-line)] bg-white/80 px-4 py-4 text-left">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                              已有发帖
-                            </p>
-                            <p className="mt-2 text-sm font-black text-[var(--color-ink)]">{postCount} 条</p>
-                            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                              {postCount > 0 ? "你已经有公开表达，可以继续补足对话层。" : "还没有发帖和回复记录。"}
-                            </p>
-                          </div>
-                          <div className="rounded-[18px] border border-[var(--color-line)] bg-white/80 px-4 py-4 text-left">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                              关注站点
-                            </p>
-                            <p className="mt-2 text-sm font-black text-[var(--color-ink)]">
-                              {uniqueStations} 个
-                            </p>
-                            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                              {mostDiscussedStation
-                                ? `目前最常提及 ${mostDiscussedStation.station}。`
-                                : "继续参与站点话题后会逐步形成焦点。"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="mt-6 flex flex-wrap justify-center gap-3">
-                          <Link
-                            className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
-                            href={activeEmptyState.primaryAction.href}
-                          >
-                            {activeEmptyState.primaryAction.label}
-                          </Link>
-                          <Link
-                            className="rounded-full border border-[var(--color-line)] bg-white/82 px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
-                            href={activeEmptyState.secondaryAction.href}
-                          >
-                            {activeEmptyState.secondaryAction.label}
-                          </Link>
-                        </div>
-                      </div>
+                      />
                     </div>
                   ) : (
                     <div className="divide-y divide-[var(--color-line)]">
@@ -1365,58 +1401,12 @@ export default function ProfilePage() {
 
                 {activeTab === "likes" ? (
                   likedPosts.length === 0 ? (
-                    <div className="px-6 py-10">
-                      <div
-                        className="mx-auto max-w-2xl rounded-[26px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(37,99,235,0.08),rgba(255,255,255,0.92))] px-6 py-8 text-center shadow-[0_18px_48px_rgba(15,23,42,0.05)]"
+                    <div className="px-4 py-8 sm:px-6 sm:py-10">
+                      <ActivityEmptyCard
+                        metrics={activeEmptyStateMetrics}
+                        state={activeEmptyState}
                         style={createRevealStyle(archiveVisible, 120, 22, 0.992)}
-                      >
-                        <span className="inline-flex rounded-full bg-white/86 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)] ring-1 ring-[var(--color-line)]">
-                          {activeEmptyState.eyebrow}
-                        </span>
-                        <h3 className="mt-4 text-2xl font-black tracking-tight text-[var(--color-ink)]">
-                          {activeEmptyState.title}
-                        </h3>
-                        <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[var(--color-muted)]">
-                          {activeEmptyState.detail}
-                        </p>
-                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-[18px] border border-[var(--color-line)] bg-white/80 px-4 py-4 text-left">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                              点赞记录
-                            </p>
-                            <p className="mt-2 text-sm font-black text-[var(--color-ink)]">{likedCount} 条</p>
-                            <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
-                              认可过的内容会在这里逐步沉淀成你的兴趣侧写。
-                            </p>
-                          </div>
-                          <div className="rounded-[18px] border border-[var(--color-line)] bg-white/80 px-4 py-4 text-left">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                              补完建议
-                            </p>
-                            <div className="mt-2 space-y-2">
-                              {profileCompletionItems.slice(0, 2).map((item) => (
-                                <p key={item.label} className="text-sm leading-6 text-[var(--color-muted)]">
-                                  {item.done ? "已补" : "待补"} {item.label}，{item.hint}
-                                </p>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-6 flex flex-wrap justify-center gap-3">
-                          <Link
-                            className="rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
-                            href={activeEmptyState.primaryAction.href}
-                          >
-                            {activeEmptyState.primaryAction.label}
-                          </Link>
-                          <Link
-                            className="rounded-full border border-[var(--color-line)] bg-white/82 px-5 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
-                            href={activeEmptyState.secondaryAction.href}
-                          >
-                            {activeEmptyState.secondaryAction.label}
-                          </Link>
-                        </div>
-                      </div>
+                      />
                     </div>
                   ) : (
                     <div className="divide-y divide-[var(--color-line)]">

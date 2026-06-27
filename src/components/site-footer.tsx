@@ -49,17 +49,6 @@ const collaborationLinks = [
   },
 ] as const;
 
-const utilityLinks = [
-  {
-    label: "首页",
-    href: "/",
-  },
-  {
-    label: "个人主页",
-    href: "/profile",
-  },
-] as const;
-
 export function SiteFooter() {
   const { isAdmin } = useForumAuth();
 
@@ -160,26 +149,7 @@ export function SiteFooter() {
                 </Link>
               ) : null}
             </div>
-            <div className="mt-5">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                辅助入口
-              </p>
-              <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
-                {utilityLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    className="inline-flex items-center justify-between rounded-2xl border border-[var(--color-line)] px-4 py-3 font-medium text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-soft)] hover:text-[var(--color-brand-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] motion-reduce:transition-none"
-                    href={item.href}
-                  >
-                    <span>{item.label}</span>
-                    <span className="text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">
-                      进入
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div className="mt-5 space-y-2 text-sm leading-7 text-[var(--color-muted)]">
+            <div className="mt-5 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3 text-sm leading-7 text-[var(--color-muted)]">
               <p>QQ群：602190132</p>
               <p>维护提示：发现变化时，欢迎补充样本和提醒。</p>
             </div>

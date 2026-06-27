@@ -744,7 +744,7 @@ export function StationsBoard() {
   return (
     <>
       {/* ---- Hero + Filters ---- */}
-      <section className="mx-auto max-w-[1680px] px-5 py-6 lg:px-8">
+      <section className="relative mx-auto max-w-[1680px] px-4 py-5 sm:px-5 lg:px-8 lg:py-6">
         <div className="border-b border-[var(--color-line)] pb-4">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div className="max-w-4xl">
@@ -759,7 +759,7 @@ export function StationsBoard() {
               </p>
             </div>
 
-            <div className="grid min-w-[280px] grid-cols-3 gap-3 rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] px-5 py-3.5 text-sm shadow-[var(--shadow-card)]">
+            <div className="grid w-full grid-cols-3 gap-2 rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3 text-sm shadow-[var(--shadow-card)] sm:w-auto sm:min-w-[280px] sm:gap-3 sm:px-5 sm:py-3.5">
               <div>
                 <p className="text-[var(--color-muted)]">站点</p>
                 <p className="mt-1 text-2xl font-black">{stations.length}</p>
@@ -776,7 +776,7 @@ export function StationsBoard() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-stretch">
           {featuredStations.length > 0 ? (
             <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
               {featuredStations.map((station, index) => {
@@ -797,7 +797,7 @@ export function StationsBoard() {
 
                     <p className="mt-3 line-clamp-2 text-sm leading-6 text-[var(--color-muted)]">{station.note}</p>
 
-                    <div className="mt-4 grid grid-cols-3 gap-2.5 border-t border-[var(--color-line)] pt-3.5 text-sm">
+                    <div className="mt-4 grid grid-cols-3 gap-2 border-t border-[var(--color-line)] pt-3.5 text-sm">
                       <div>
                         <p className="text-[var(--color-muted)]">价格</p>
                         <p className="mt-1 font-black">{station.price}</p>
@@ -812,7 +812,7 @@ export function StationsBoard() {
                       </div>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                       {stationHref ? (
                         <div className="inline-flex items-center text-sm font-bold text-[var(--color-brand-deep)]">
                           打开站点入口
@@ -845,7 +845,7 @@ export function StationsBoard() {
                       href={stationHref}
                       rel="noopener noreferrer"
                       target="_blank"
-                      className="stagger-in card-lift group min-h-[202px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)]"
+                      className="stagger-in card-lift group min-h-[202px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)] sm:p-5"
                     >
                       {cardContent}
                     </a>
@@ -855,7 +855,7 @@ export function StationsBoard() {
                 return (
                   <div
                     key={`${station.id}-hero`}
-                    className="stagger-in card-lift group min-h-[202px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-5 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)]"
+                    className="stagger-in card-lift group min-h-[202px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)] sm:p-5"
                   >
                     {cardContent}
                   </div>
@@ -866,7 +866,7 @@ export function StationsBoard() {
             <div />
           )}
 
-          <aside className="surface-in rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-card)]">
+          <aside className="surface-in rounded-[24px] border border-[var(--color-line)] bg-[linear-gradient(180deg,var(--color-panel),color-mix(in_srgb,var(--color-brand-soft)_42%,var(--color-panel)))] p-4 shadow-[var(--shadow-card)]">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
               先这样看
             </p>
@@ -911,8 +911,8 @@ export function StationsBoard() {
           </aside>
         </div>
 
-        <div className="surface-in mt-5 rounded-[26px] border border-[var(--color-line)] bg-[var(--color-panel)] p-5 shadow-[var(--shadow-card)] backdrop-blur">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px] xl:items-start">
+        <div className="surface-in mt-5 rounded-[26px] border border-[var(--color-line)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-card)] backdrop-blur sm:p-5">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                 快速查找
@@ -948,12 +948,12 @@ export function StationsBoard() {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <div className="relative min-w-[280px] flex-1">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 flex-1">
               <input
                 id="station-search"
                 ref={searchInputRef}
-                className="w-full rounded-full border border-[var(--color-line)] bg-[var(--color-soft)] py-3.5 pl-5 pr-[88px] text-sm outline-none transition focus:border-[var(--color-brand)] focus:bg-white"
+                className="w-full rounded-[20px] border border-[var(--color-line)] bg-[var(--color-soft)] py-3.5 pl-5 pr-[88px] text-sm outline-none transition focus:border-[var(--color-brand)] focus:bg-white sm:rounded-full"
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="搜站点名、倍率、试用、免费、Claude、Grok、入口域名都可以"
                 value={query}
@@ -975,7 +975,7 @@ export function StationsBoard() {
               </div>
             </div>
             <select
-              className="cursor-pointer appearance-none rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3.5 pr-9 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-brand)]"
+              className="w-full cursor-pointer appearance-none rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3.5 pr-9 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-brand)] sm:w-auto sm:rounded-full"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               style={{
@@ -1039,8 +1039,8 @@ export function StationsBoard() {
       </section>
 
       {/* ---- Table ---- */}
-      <section className="mx-auto max-w-[1680px] px-5 pb-12 lg:px-8">
-        <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_280px] 2xl:items-start">
+      <section className="relative mx-auto max-w-[1680px] px-4 pb-12 sm:px-5 lg:px-8">
+        <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_300px] 2xl:items-start">
           <div className="surface-in overflow-hidden rounded-[26px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[var(--shadow-card)]">
           {/* Table header */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-line)] px-5 py-4">
@@ -1084,7 +1084,7 @@ export function StationsBoard() {
           </div>
 
           {/* ---- Mobile card layout (below lg) ---- */}
-          <div className="lg:hidden space-y-4">
+          <div className="space-y-3 p-3 lg:hidden">
             {visibleRows.length === 0 ? (
               <div className="rounded-[20px] shadow-[var(--shadow-card)] bg-[var(--color-panel)] px-6 py-16 text-center">
                 {stations.length === 0 ? (
@@ -1118,7 +1118,7 @@ export function StationsBoard() {
 
                 return (
                   <div key={station.id}>
-                    <div className="rounded-[20px] shadow-[var(--shadow-card)] bg-[var(--color-panel)] p-5">
+                    <div className="rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-card)] sm:p-5">
                       {/* Header row: rank + name + badge */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -1159,12 +1159,12 @@ export function StationsBoard() {
                       </div>
 
                       {/* Price + Multiplier */}
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <div>
+                      <div className="mt-4 grid grid-cols-2 gap-2.5">
+                        <div className="rounded-[16px] bg-[var(--color-soft)] px-3 py-2.5">
                           <p className="text-xs text-[var(--color-muted)]">标称价格</p>
                           <p className="mt-1 font-bold">{station.price}</p>
                         </div>
-                        <div>
+                        <div className="rounded-[16px] bg-[var(--color-soft)] px-3 py-2.5">
                           <p className="text-xs text-[var(--color-muted)]">倍率</p>
                           <p className="mt-1 font-bold">{station.multiplier}</p>
                         </div>
@@ -1182,13 +1182,13 @@ export function StationsBoard() {
                       </div>
 
                       {/* Actions */}
-                      <div className="mt-4 flex items-center gap-4 border-t border-[var(--color-line)] pt-3">
+                      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--color-line)] pt-3">
                         {stationHref ? (
                           <a
                             href={stationHref}
                             rel="noopener noreferrer"
                             target="_blank"
-                            className="text-sm font-semibold text-[var(--color-brand-deep)] transition hover:text-[var(--color-brand)]"
+                            className="rounded-full bg-[var(--color-brand-soft)] px-3 py-2 text-sm font-semibold text-[var(--color-brand-deep)] transition hover:text-[var(--color-brand)]"
                           >
                             打开站点 →
                           </a>
@@ -1199,7 +1199,7 @@ export function StationsBoard() {
                         )}
                         {/* Discussion button */}
                         <button
-                          className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)] transition hover:text-[var(--color-brand-deep)]"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-line)] px-3 py-2 text-sm text-[var(--color-muted)] transition hover:text-[var(--color-brand-deep)]"
                           onClick={() => setDiscussionStation(station)}
                           title="查看站点讨论"
                           type="button"
@@ -1209,10 +1209,10 @@ export function StationsBoard() {
                           </svg>
                           讨论
                         </button>
-                        <div className="ml-auto flex items-center gap-3">
+                        <div className="ml-auto flex items-center gap-2">
                           {isConnected && (
                             <button
-                              className="text-sm text-[var(--color-muted)] hover:text-[var(--color-brand-deep)] transition"
+                              className="rounded-full px-2 py-2 text-sm text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-brand-deep)]"
                               onClick={() => startEdit(station)}
                               title="编辑此站点"
                               type="button"
@@ -1221,7 +1221,7 @@ export function StationsBoard() {
                             </button>
                           )}
                           <button
-                            className="text-sm text-[var(--color-muted)] hover:text-[var(--color-brand-deep)] transition underline underline-offset-2"
+                            className="rounded-full px-2 py-2 text-sm text-[var(--color-muted)] underline underline-offset-2 transition hover:bg-[var(--color-soft)] hover:text-[var(--color-brand-deep)]"
                             onClick={() => toggleHistory(station.id)}
                             type="button"
                           >
@@ -1482,7 +1482,7 @@ export function StationsBoard() {
           </div>
 
           <aside className="hidden 2xl:block">
-            <div className="surface-in sticky top-24 rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] p-4 shadow-[var(--shadow-card)]">
+            <div className="surface-in sticky top-24 rounded-[24px] border border-[var(--color-line)] bg-[linear-gradient(180deg,var(--color-panel),color-mix(in_srgb,var(--color-soft)_68%,var(--color-panel)))] p-4 shadow-[var(--shadow-card)]">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">右侧协作栏</p>
               <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
                 这里只保留看表时最常用的辅助动作，不和总表抢视觉重心。
@@ -1565,7 +1565,7 @@ export function StationsBoard() {
       </section>
 
       {/* ---- Submission ---- */}
-      <section className="mx-auto max-w-[1680px] px-5 pb-16 lg:px-8">
+      <section className="relative mx-auto max-w-[1680px] px-4 pb-16 sm:px-5 lg:px-8">
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.52fr)] xl:items-start">
           <SubmissionPanel />
 
@@ -1631,7 +1631,7 @@ export function StationsBoard() {
       {/* ---- Station Discussion Modal ---- */}
       {discussionStation && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="relative flex h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+          <div className="relative flex h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-[var(--color-line)] px-6 py-4">
               <div className="flex items-center gap-3">

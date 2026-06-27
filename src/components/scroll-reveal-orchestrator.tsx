@@ -18,47 +18,17 @@ export function ScrollRevealOrchestrator() {
     const root = document.getElementById("main-content");
     if (!root) return;
 
-    const targets = Array.from(document.querySelectorAll<HTMLElement>(REVEAL_SELECTOR)).filter(
-      (element, index, array) => array.indexOf(element) === index,
-    );
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const observedTargets = new Set<HTMLElement>();
+    const visibleTargets = new WeakSet<HTMLElement>();
+    let currentTargets: HTMLElement[] = [];
+    let scanFrame = 0;
 
-    if (targets.length === 0) return;
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) {
-      targets.forEach((element) => {
-        element.classList.remove("reveal-hidden");
-        element.classList.add("reveal-visible");
-      });
-      return;
-    }
-
-    // Check if we're in fullscreen mode
-    const isFullscreen = document.fullscreenElement !== null;
-
-    targets.forEach((element, index) => {
-      element.style.setProperty("--reveal-delay", `${Math.min(index, 10) * 60}ms`);
-      element.classList.add("reveal-ready");
-
-      const bounds = element.getBoundingClientRect();
-      if (isFullscreen || (bounds.top < window.innerHeight * 0.84 && bounds.bottom > window.innerHeight * 0.08)) {
-        element.classList.remove("reveal-hidden");
-        element.classList.add("reveal-visible");
-        return;
-      }
-
-      element.classList.remove("reveal-visible");
-      element.classList.add("reveal-hidden");
-    });
-
-    // In fullscreen mode, skip IntersectionObserver to prevent flickering
-    if (isFullscreen) {
-      targets.forEach((element) => {
-        element.classList.remove("reveal-hidden");
-        element.classList.add("reveal-visible");
-      });
-      return;
-    }
+    const revealImmediately = (element: HTMLElement) => {
+      element.classList.remove("reveal-hidden");
+      element.classList.add("reveal-ready", "reveal-visible");
+      element.style.removeProperty("--reveal-delay");
+    };
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -67,23 +37,96 @@ export function ScrollRevealOrchestrator() {
           if (entry.isIntersecting) {
             element.classList.remove("reveal-hidden");
             element.classList.add("reveal-visible");
+            visibleTargets.add(element);
             return;
           }
 
+          if (visibleTargets.has(element)) return;
           element.classList.remove("reveal-visible");
           element.classList.add("reveal-hidden");
         });
       },
       {
         threshold: [0, 0.12, 0.28],
-        rootMargin: "-8% 0px -14% 0px",
+        rootMargin: "0px 0px -10% 0px",
       },
     );
 
-    targets.forEach((element) => observer.observe(element));
+    const disconnectTargets = () => {
+      observedTargets.forEach((target) => observer.unobserve(target));
+      observedTargets.clear();
+    };
+
+    const collectTargets = () =>
+      Array.from(document.querySelectorAll<HTMLElement>(REVEAL_SELECTOR)).filter(
+        (element, index, array) => array.indexOf(element) === index,
+      );
+
+    const isInInitialViewport = (element: HTMLElement) => {
+      const bounds = element.getBoundingClientRect();
+      return bounds.top < window.innerHeight * 0.92 && bounds.bottom > 0;
+    };
+
+    const prepareTargets = () => {
+      currentTargets = collectTargets();
+      disconnectTargets();
+
+      if (currentTargets.length === 0) return;
+
+      const reduceMotion = motionQuery.matches;
+      const isFullscreen = document.fullscreenElement !== null;
+
+      currentTargets.forEach((element, index) => {
+        if (reduceMotion || isFullscreen) {
+          revealImmediately(element);
+          return;
+        }
+
+        element.style.setProperty("--reveal-delay", `${Math.min(index, 10) * 60}ms`);
+        element.classList.add("reveal-ready");
+
+        if (isInInitialViewport(element)) {
+          element.classList.remove("reveal-hidden");
+          element.classList.add("reveal-visible");
+          visibleTargets.add(element);
+        } else if (!visibleTargets.has(element)) {
+          element.classList.remove("reveal-visible");
+          element.classList.add("reveal-hidden");
+        }
+
+        observer.observe(element);
+        observedTargets.add(element);
+      });
+    };
+
+    const schedulePrepare = () => {
+      if (scanFrame) return;
+      scanFrame = window.requestAnimationFrame(() => {
+        scanFrame = 0;
+        prepareTargets();
+      });
+    };
+
+    const mutationObserver = new MutationObserver(schedulePrepare);
+
+    prepareTargets();
+    const settleTimer = window.setTimeout(prepareTargets, 120);
+    mutationObserver.observe(root, { childList: true, subtree: true });
+    motionQuery.addEventListener("change", schedulePrepare);
+    document.addEventListener("fullscreenchange", schedulePrepare);
 
     return () => {
+      if (scanFrame) {
+        window.cancelAnimationFrame(scanFrame);
+      }
+      window.clearTimeout(settleTimer);
+      mutationObserver.disconnect();
+      motionQuery.removeEventListener("change", schedulePrepare);
+      document.removeEventListener("fullscreenchange", schedulePrepare);
       observer.disconnect();
+      currentTargets.forEach((element) => {
+        element.style.removeProperty("--reveal-delay");
+      });
     };
   }, [pathname]);
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { getSupabaseClient } from "@/lib/supabase";
 
-const CARD_WIDTH = 320;
+const CARD_WIDTH = 360;
 const CARD_EDGE_PADDING = 12;
 const CLOSE_ANIMATION_MS = 200;
 
@@ -250,6 +250,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
       ? "这张主页已经具备对外自我说明和标签侧写。"
       : "简介已经补上，再加几个标签会更像完整名片。"
     : "还缺一句能代表自己的介绍，进入主页补完后展示会更完整。";
+  const profilePreviewHint = "这是从讨论区头像或昵称打开的公开档案预览；完整个人主页用于管理自己的资料。";
   const identityRows = [
     { label: "档案编号", value: archiveId },
     { label: "加入 Timix", value: joinDate },
@@ -265,7 +266,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
   return (
     <div
       ref={cardRef}
-      className="z-50 max-h-[calc(100vh-24px)] w-[320px] max-w-[calc(100vw-24px)] overflow-y-auto overscroll-contain rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
+      className="z-50 max-h-[calc(100vh-24px)] w-[min(360px,calc(100vw-24px))] overflow-y-auto overscroll-contain rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
       onContextMenu={(event) => event.stopPropagation()}
       onMouseDown={(event) => event.stopPropagation()}
       style={{
@@ -302,12 +303,12 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
       ) : (
         <>
           <div
-            className="relative overflow-hidden border-b border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(37,99,235,0.1),rgba(255,255,255,0.94)_55%,rgba(191,219,254,0.32))] px-5 pb-5 pt-4"
+            className="relative overflow-hidden border-b border-[var(--color-line)] bg-[linear-gradient(135deg,var(--color-brand-soft),var(--color-panel-strong)_58%,var(--color-soft))] px-5 pb-5 pt-4"
             style={createCardMotionStyle(isAnimating, 40, 12, 0.994, prefersReducedMotion)}
           >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.72),transparent_34%),radial-gradient(circle_at_12%_18%,rgba(96,165,250,0.18),transparent_28%)] opacity-90" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--color-panel-glow),transparent_34%),radial-gradient(circle_at_12%_18%,var(--color-brand-soft),transparent_28%)] opacity-90" />
             <button
-              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/72 text-xs text-[var(--color-muted)] transition hover:bg-white hover:text-[var(--color-ink)]"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-panel)] text-xs text-[var(--color-muted)] ring-1 ring-[var(--color-line)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
               onClick={handleClose}
               type="button"
               aria-label="关闭"
@@ -350,7 +351,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
               {identityRows.map((item) => (
                 <span
                   key={item.label}
-                  className="rounded-full border border-white/80 bg-white/76 px-2.5 py-1 text-[10px] font-medium text-[var(--color-muted)]"
+                  className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-2.5 py-1 text-[10px] font-medium text-[var(--color-muted)]"
                 >
                   <span>{item.label}</span>
                   <span className="mx-1 text-[var(--color-line)]">·</span>
@@ -377,7 +378,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
             </div>
 
             <div
-              className="rounded-[18px] border border-[var(--color-line)] bg-[linear-gradient(135deg,var(--color-brand-soft),rgba(255,255,255,0.76))] px-4 py-3.5"
+              className="rounded-[18px] border border-[var(--color-line)] bg-[linear-gradient(135deg,var(--color-brand-soft),var(--color-panel))] px-4 py-3.5"
               style={createCardMotionStyle(isAnimating, 210, 14, 0.996, prefersReducedMotion)}
             >
               <div className="flex items-center justify-between gap-3">
@@ -402,7 +403,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
                   ? "已经有自己的标签侧写，再补一点内容互动会更完整。"
                   : "再补简介、标签或内容记录，这张主页会更像完整名片。"}
               </p>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/72">
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-soft)]">
                 <div
                   className="h-full rounded-full bg-[var(--color-brand)] transition-[width]"
                   style={{ width: `${completenessPercent}%` }}
@@ -426,7 +427,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
                 {completionItems.map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-[14px] border border-[var(--color-line)] bg-white/72 px-3 py-2"
+                    className="rounded-[14px] border border-[var(--color-line)] bg-[var(--color-panel)] px-3 py-2"
                   >
                     <p className="text-[11px] font-semibold text-[var(--color-muted)]">{item.label}</p>
                     <p className="mt-1 text-xs font-bold text-[var(--color-ink)]">
@@ -438,7 +439,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
             </div>
 
             <div
-              className="rounded-[18px] border border-[var(--color-line)] bg-white/72 px-4 py-3.5"
+              className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3.5"
               style={createCardMotionStyle(isAnimating, 300, 14, 0.996, prefersReducedMotion)}
             >
               <div className="flex items-center justify-between gap-3">
@@ -488,15 +489,22 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2" style={createCardMotionStyle(isAnimating, 390, 12, 0.998, prefersReducedMotion)}>
+            <p
+              className="rounded-[16px] border border-dashed border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-2 text-xs leading-5 text-[var(--color-muted)]"
+              style={createCardMotionStyle(isAnimating, 370, 12, 0.998, prefersReducedMotion)}
+            >
+              {profilePreviewHint}
+            </p>
+
+            <div className="grid gap-2 sm:grid-cols-2" style={createCardMotionStyle(isAnimating, 410, 12, 0.998, prefersReducedMotion)}>
               <Link
                 className="block rounded-full bg-[var(--color-brand)] py-2.5 text-center text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
                 href="/profile"
               >
-                查看主页
+                我的主页
               </Link>
               <Link
-                className="block rounded-full border border-[var(--color-line)] bg-white/82 py-2.5 text-center text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                className="block rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] py-2.5 text-center text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
                 href="/community"
               >
                 去讨论区

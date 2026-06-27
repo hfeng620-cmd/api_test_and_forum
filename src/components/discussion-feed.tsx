@@ -213,7 +213,7 @@ function ActionButton({
 
   return (
     <button
-      className="inline-flex items-center gap-2 text-[15px] text-[var(--color-muted)] transition hover:text-[var(--color-ink)] min-h-[44px] min-w-[44px]"
+      className="inline-flex min-h-[40px] min-w-[40px] items-center gap-2 rounded-full px-2 text-[15px] text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)] sm:min-h-[44px] sm:min-w-[44px]"
       onClick={onClick}
       type="button"
     >
@@ -817,7 +817,7 @@ export function DiscussionFeed({
       }`}
       data-selection-comments="off"
     >
-      <div className="border-b border-[var(--color-line)] bg-[linear-gradient(145deg,var(--color-header),var(--color-panel)_58%,var(--color-brand-soft))] px-5 py-5 sm:px-6">
+      <div className="border-b border-[var(--color-line)] bg-[linear-gradient(145deg,var(--color-header),var(--color-panel)_58%,var(--color-brand-soft))] px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
@@ -830,7 +830,7 @@ export function DiscussionFeed({
                 : "把新动态、筛选和重点讨论收在同一工作台里。"}
             </p>
           </div>
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-3 lg:min-w-[420px]">
             <div className="rounded-[18px] border border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-panel)_76%,transparent)] px-4 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.05)] backdrop-blur">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                 结果
@@ -863,9 +863,9 @@ export function DiscussionFeed({
               value={searchQuery}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
             <select
-              className="cursor-pointer appearance-none rounded-full border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-brand)]"
+              className="w-full cursor-pointer appearance-none rounded-[18px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm text-[var(--color-ink)] outline-none transition focus:border-[var(--color-brand)] sm:w-auto sm:rounded-full"
               value={sortOption}
               onChange={(e) => setSortOption(e.target.value as "latest" | "mostReplies" | "mostLikes")}
               style={{
@@ -881,7 +881,7 @@ export function DiscussionFeed({
             </select>
             {hasActiveFilters ? (
               <button
-                className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3 text-sm font-semibold text-[var(--color-muted)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-soft)] hover:text-[var(--color-brand-deep)]"
+                className="rounded-[18px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3 text-sm font-semibold text-[var(--color-muted)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-soft)] hover:text-[var(--color-brand-deep)] sm:rounded-full"
                 onClick={() => {
                   setSearchQuery("");
                   setSelectedTag(null);
@@ -919,7 +919,7 @@ export function DiscussionFeed({
       </div>
 
       {!hideComposer ? (
-        <div className="border-b border-[var(--color-line)] bg-[var(--color-soft)]/40 px-5 py-5 sm:px-6">
+        <div className="border-b border-[var(--color-line)] bg-[var(--color-soft)]/40 px-4 py-5 sm:px-6">
           <div className="rounded-[24px] border border-[var(--color-line)] bg-[linear-gradient(180deg,var(--color-panel),var(--color-soft))] p-5 shadow-[inset_0_1px_0_var(--color-panel)]">
             <textarea
               className="min-h-28 w-full resize-none bg-transparent text-base leading-7 text-[var(--color-ink)] outline-none placeholder:text-[var(--color-muted)]"
@@ -1066,9 +1066,9 @@ export function DiscussionFeed({
         </div>
       ) : null}
 
-      <div className="space-y-4 bg-[var(--color-soft)]/35 p-4 sm:p-5">
+      <div className="grid gap-4 bg-[var(--color-soft)]/35 p-3 sm:p-5 xl:grid-cols-2">
         {visiblePosts.length === 0 ? (
-          <div className="rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] px-5 py-10 text-center sm:px-6">
+          <div className="rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] px-5 py-10 text-center sm:px-6 xl:col-span-2">
             {bookmarksOnly ? (
               <>
                 <p className="text-base font-bold text-[var(--color-ink)]">还没有收藏过帖子。</p>
@@ -1116,7 +1116,7 @@ export function DiscussionFeed({
           return (
             <article id={post.issueNumber} key={post.issueNumber} className={`card-lift rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-4 transition duration-200 hover:border-[var(--color-brand)] hover:bg-[linear-gradient(180deg,var(--color-panel),var(--color-soft))] sm:px-5 ${
                 post.is_pinned ? "bg-[linear-gradient(180deg,var(--color-brand-soft),var(--color-panel))] shadow-[0_16px_44px_var(--color-panel-glow)]" : ""
-              }`}>
+              } ${expanded || stationFilter ? "xl:col-span-2" : ""}`}>
               <div className="flex items-start gap-3 sm:gap-4">
                 {post.authorAvatarUrl ? (
                   <img
@@ -1303,9 +1303,9 @@ export function DiscussionFeed({
                       </button>
                     ))}
                   </div>
-                  <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-[var(--color-line)] pt-3 sm:gap-3">
+                  <div className="mt-5 grid grid-cols-2 gap-2 border-t border-[var(--color-line)] pt-3 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
                     <button
-                      className="rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)]"
+                      className="rounded-full bg-[var(--color-brand)] px-3 py-2.5 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)] sm:px-4"
                       onClick={() => openReplyBox(post.issueNumber)}
                       type="button"
                     >
@@ -1315,7 +1315,7 @@ export function DiscussionFeed({
                     <ActionButton count={post.likes} icon="like" liked={likedPosts.has(post.issueNumber)} onClick={() => handleLike(post.issueNumber)} />
                     {/* Bookmark button */}
                     <button
-                      className="inline-flex min-h-[44px] min-w-[44px] items-center gap-2 rounded-full px-2 text-[15px] text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                      className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center gap-2 rounded-full px-2 text-[15px] text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)] sm:min-h-[44px] sm:min-w-[44px] sm:justify-start"
                       onClick={() => handleToggleBookmark(post.issueNumber)}
                       type="button"
                       title={isBookmarked ? "取消收藏" : "收藏"}
@@ -1326,7 +1326,7 @@ export function DiscussionFeed({
                     {/* Sync to main discussion button (only in station view) */}
                     {showSyncButton && stationFilter && (
                       <a
-                        className="inline-flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold text-[var(--color-brand-deep)] transition hover:bg-[var(--color-brand-soft)]"
+                        className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold text-[var(--color-brand-deep)] transition hover:bg-[var(--color-brand-soft)] sm:min-h-[44px] sm:min-w-[44px]"
                         href="/community"
                         title="同步到站内讨论区"
                       >
@@ -1339,7 +1339,7 @@ export function DiscussionFeed({
                       </a>
                     )}
                     <button
-                      className="min-h-[44px] rounded-full border border-[var(--color-line)] px-3 py-2 text-xs font-bold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-brand-deep)]"
+                      className="min-h-[40px] rounded-full border border-[var(--color-line)] px-3 py-2 text-xs font-bold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-brand-deep)] sm:min-h-[44px]"
                       onClick={() => togglePost(post.issueNumber, expanded)}
                       type="button"
                     >

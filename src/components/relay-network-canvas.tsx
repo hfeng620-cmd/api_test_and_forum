@@ -25,6 +25,15 @@ type RelayNetworkCanvasProps = {
   className?: string;
 };
 
+type RgbTuple = [number, number, number];
+
+type CanvasTheme = {
+  glow: RgbTuple;
+  secondary: RgbTuple;
+  surface: RgbTuple;
+  ink: RgbTuple;
+};
+
 type SceneProfile = {
   compact: boolean;
   nodeCount: number;
@@ -45,6 +54,63 @@ const NODE_COUNT = 22;
 const PARTICLE_COUNT = 18;
 const BASE_CONNECTION_DISTANCE = 148;
 const POINTER_EASE = 0.08;
+const MAX_CANVAS_PIXELS = 1_650_000;
+const FALLBACK_THEME: CanvasTheme = {
+  glow: [37, 99, 235],
+  secondary: [56, 189, 248],
+  surface: [255, 255, 255],
+  ink: [15, 23, 42],
+};
+
+function clampChannel(value: number) {
+  return Math.min(Math.max(Math.round(value), 0), 255);
+}
+
+function parseRgb(value: string): RgbTuple | null {
+  const raw = value.trim();
+  if (!raw) return null;
+
+  const hex = raw.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (hex) {
+    const fullHex =
+      hex[1].length === 3
+        ? hex[1]
+            .split("")
+            .map((part) => `${part}${part}`)
+            .join("")
+        : hex[1];
+
+    return [
+      Number.parseInt(fullHex.slice(0, 2), 16),
+      Number.parseInt(fullHex.slice(2, 4), 16),
+      Number.parseInt(fullHex.slice(4, 6), 16),
+    ];
+  }
+
+  const match = raw.match(/(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+
+  return [clampChannel(Number(match[1])), clampChannel(Number(match[2])), clampChannel(Number(match[3]))];
+}
+
+function readRgbVariable(styles: CSSStyleDeclaration, name: string, fallback: RgbTuple) {
+  return parseRgb(styles.getPropertyValue(name)) ?? fallback;
+}
+
+function getCanvasTheme(): CanvasTheme {
+  const styles = getComputedStyle(document.documentElement);
+
+  return {
+    glow: readRgbVariable(styles, "--theme-glow-rgb", FALLBACK_THEME.glow),
+    secondary: readRgbVariable(styles, "--theme-secondary-rgb", FALLBACK_THEME.secondary),
+    surface: readRgbVariable(styles, "--theme-surface-rgb", FALLBACK_THEME.surface),
+    ink: readRgbVariable(styles, "--color-ink", FALLBACK_THEME.ink),
+  };
+}
+
+function rgba([red, green, blue]: RgbTuple, alpha: number) {
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
 
 function getSceneProfile(width: number, height: number): SceneProfile {
   const compact = width < 760 || height < 560;
@@ -129,15 +195,21 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
     let width = 0;
     let height = 0;
     let frameId = 0;
+    let resizeFrameId = 0;
     let isVisible = document.visibilityState === "visible";
+    let isInViewport = true;
     let nodes: RelayNode[] = [];
     let particles: AtmosphereParticle[] = [];
     let sceneProfile = getSceneProfile(container.clientWidth || 1, container.clientHeight || 1);
+    let canvasTheme = getCanvasTheme();
     let ambientGlow: CanvasGradient | null = null;
     let horizonGlow: CanvasGradient | null = null;
     let atmosphereGlow: CanvasGradient | null = null;
+    const useLiteScene = (navigator.hardwareConcurrency ?? 8) <= 4;
 
     const rebuildGradients = () => {
+      if (width <= 0 || height <= 0) return;
+
       ambientGlow = context.createRadialGradient(
         width * 0.72,
         height * 0.2,
@@ -146,14 +218,14 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
         height * 0.2,
         Math.max(width, height) * 0.55,
       );
-      ambientGlow.addColorStop(0, "rgba(37, 99, 235, 0.22)");
-      ambientGlow.addColorStop(0.4, "rgba(56, 189, 248, 0.10)");
-      ambientGlow.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ambientGlow.addColorStop(0, rgba(canvasTheme.glow, 0.2));
+      ambientGlow.addColorStop(0.4, rgba(canvasTheme.secondary, 0.1));
+      ambientGlow.addColorStop(1, rgba(canvasTheme.surface, 0));
 
       horizonGlow = context.createLinearGradient(0, height * 0.18, 0, height);
-      horizonGlow.addColorStop(0, "rgba(255, 255, 255, 0)");
-      horizonGlow.addColorStop(0.58, "rgba(148, 163, 184, 0.04)");
-      horizonGlow.addColorStop(1, "rgba(15, 23, 42, 0.07)");
+      horizonGlow.addColorStop(0, rgba(canvasTheme.surface, 0));
+      horizonGlow.addColorStop(0.58, rgba(canvasTheme.secondary, 0.04));
+      horizonGlow.addColorStop(1, rgba(canvasTheme.ink, 0.07));
 
       atmosphereGlow = context.createRadialGradient(
         width * 0.5,
@@ -163,17 +235,26 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
         height * 0.56,
         Math.max(width * 0.34, height * 0.2),
       );
-      atmosphereGlow.addColorStop(0, "rgba(255, 255, 255, 0.07)");
-      atmosphereGlow.addColorStop(0.55, "rgba(191, 219, 254, 0.04)");
-      atmosphereGlow.addColorStop(1, "rgba(255, 255, 255, 0)");
+      atmosphereGlow.addColorStop(0, rgba(canvasTheme.surface, 0.07));
+      atmosphereGlow.addColorStop(0.55, rgba(canvasTheme.secondary, 0.045));
+      atmosphereGlow.addColorStop(1, rgba(canvasTheme.surface, 0));
     };
 
     const resizeCanvas = () => {
       width = Math.max(container.clientWidth, 1);
       height = Math.max(container.clientHeight, 1);
       sceneProfile = getSceneProfile(width, height);
+      if (useLiteScene) {
+        sceneProfile = {
+          ...sceneProfile,
+          nodeCount: Math.min(sceneProfile.nodeCount, sceneProfile.compact ? 12 : 16),
+          particleCount: Math.min(sceneProfile.particleCount, sceneProfile.compact ? 8 : 12),
+          dprCap: Math.min(sceneProfile.dprCap, 1.25),
+        };
+      }
 
-      const dpr = Math.min(window.devicePixelRatio || 1, sceneProfile.dprCap);
+      const maxDprByPixels = Math.sqrt(MAX_CANVAS_PIXELS / Math.max(width * height, 1));
+      const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, sceneProfile.dprCap, maxDprByPixels));
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       canvas.style.width = `${width}px`;
@@ -186,6 +267,12 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
       pointer.y = height * sceneProfile.pointerAnchorY;
       pointer.targetX = pointer.x;
       pointer.targetY = pointer.y;
+      rebuildGradients();
+      drawFrame(performance.now(), true);
+    };
+
+    const refreshTheme = () => {
+      canvasTheme = getCanvasTheme();
       rebuildGradients();
       drawFrame(performance.now(), true);
     };
@@ -240,14 +327,14 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
         pointer.easedPresence > 0.01 ? pointer.y : height * sceneProfile.pointerAnchorY,
         minDimension * (0.34 + pointer.easedPresence * 0.1),
       );
-      pointerGlow.addColorStop(0, `rgba(125, 211, 252, ${0.06 + pointer.easedPresence * 0.1})`);
-      pointerGlow.addColorStop(1, "rgba(125, 211, 252, 0)");
+      pointerGlow.addColorStop(0, rgba(canvasTheme.secondary, 0.06 + pointer.easedPresence * 0.1));
+      pointerGlow.addColorStop(1, rgba(canvasTheme.secondary, 0));
       context.fillStyle = pointerGlow;
       context.fillRect(0, 0, width, height);
       context.restore();
 
       context.save();
-      context.strokeStyle = "rgba(37, 99, 235, 0.08)";
+      context.strokeStyle = rgba(canvasTheme.glow, 0.08);
       context.lineWidth = 1;
       context.beginPath();
       context.ellipse(
@@ -260,7 +347,7 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
         Math.PI * 2,
       );
       context.stroke();
-      context.strokeStyle = "rgba(125, 211, 252, 0.05)";
+      context.strokeStyle = rgba(canvasTheme.secondary, 0.05);
       context.beginPath();
       context.ellipse(
         centerX - tiltX * 12,
@@ -321,8 +408,8 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
           particle.y,
           particle.radius,
         );
-        haze.addColorStop(0, `rgba(191, 219, 254, ${particle.alpha})`);
-        haze.addColorStop(1, "rgba(191, 219, 254, 0)");
+        haze.addColorStop(0, rgba(canvasTheme.secondary, particle.alpha));
+        haze.addColorStop(1, rgba(canvasTheme.secondary, 0));
         context.fillStyle = haze;
         context.beginPath();
         context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
@@ -364,7 +451,7 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
           const alpha = 1 - distance / (connectionDistance * depthBoost);
           if (alpha < sceneProfile.minConnectionAlpha) continue;
 
-          context.strokeStyle = `rgba(59, 130, 246, ${0.06 + alpha * 0.16 + (node.depth + target.depth) * 0.03})`;
+          context.strokeStyle = rgba(canvasTheme.glow, 0.06 + alpha * 0.16 + (node.depth + target.depth) * 0.03);
           context.lineWidth = 0.5 + (node.depth + target.depth) * 0.22;
           context.beginPath();
           context.moveTo(node.drawX, node.drawY);
@@ -380,7 +467,7 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
 
           if (pointerDistance < pointerReach) {
             const alpha = (1 - pointerDistance / pointerReach) * pointer.easedPresence;
-            context.strokeStyle = `rgba(125, 211, 252, ${0.04 + alpha * 0.14 + node.depth * 0.04})`;
+            context.strokeStyle = rgba(canvasTheme.secondary, 0.04 + alpha * 0.14 + node.depth * 0.04);
             context.lineWidth = 0.8 + node.depth * 0.25;
             context.beginPath();
             context.moveTo(node.drawX, node.drawY);
@@ -391,7 +478,7 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
       }
 
       for (const node of projectedNodes) {
-        context.fillStyle = `rgba(15, 23, 42, ${0.04 + node.depth * 0.05})`;
+        context.fillStyle = rgba(canvasTheme.ink, 0.04 + node.depth * 0.05);
         context.beginPath();
         context.ellipse(
           node.drawX + tiltX * (1.2 + node.depth * 1.8),
@@ -409,17 +496,17 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
       context.globalCompositeOperation = "screen";
       for (const node of projectedNodes) {
         const pulse = 0.75 + Math.sin(node.pulse + time * 0.0005) * 0.25;
-        context.fillStyle = `rgba(255, 255, 255, ${0.72 + pulse * 0.16})`;
+        context.fillStyle = rgba(canvasTheme.surface, 0.72 + pulse * 0.16);
         context.beginPath();
         context.arc(node.drawX, node.drawY, node.drawRadius + pulse * 0.45, 0, Math.PI * 2);
         context.fill();
 
-        context.fillStyle = `rgba(37, 99, 235, ${0.1 + node.depth * 0.08 + pulse * 0.08})`;
+        context.fillStyle = rgba(canvasTheme.glow, 0.1 + node.depth * 0.08 + pulse * 0.08);
         context.beginPath();
         context.arc(node.drawX, node.drawY, node.drawRadius * (2.6 + node.depth * 1.1), 0, Math.PI * 2);
         context.fill();
 
-        context.fillStyle = `rgba(255, 255, 255, ${0.18 + node.depth * 0.08 + pulse * 0.08})`;
+        context.fillStyle = rgba(canvasTheme.surface, 0.18 + node.depth * 0.08 + pulse * 0.08);
         context.beginPath();
         context.arc(
           node.drawX - node.drawRadius * (0.34 + node.depth * 0.05),
@@ -433,6 +520,8 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
       context.restore();
     };
 
+    const shouldAnimate = () => !reduceMotion && isVisible && isInViewport;
+
     const stopAnimation = () => {
       if (frameId) {
         window.cancelAnimationFrame(frameId);
@@ -443,7 +532,13 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
     const animate = (time: number) => {
       frameId = 0;
       drawFrame(time);
-      if (!reduceMotion && isVisible) {
+      if (shouldAnimate()) {
+        frameId = window.requestAnimationFrame(animate);
+      }
+    };
+
+    const startAnimation = () => {
+      if (!frameId && shouldAnimate()) {
         frameId = window.requestAnimationFrame(animate);
       }
     };
@@ -475,9 +570,7 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
       reduceMotion = event.matches;
       stopAnimation();
       drawFrame(performance.now(), true);
-      if (!reduceMotion && isVisible) {
-        frameId = window.requestAnimationFrame(animate);
-      }
+      startAnimation();
     };
 
     const handleVisibilityChange = () => {
@@ -488,21 +581,46 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
       }
 
       drawFrame(performance.now(), true);
-      if (!reduceMotion && !frameId) {
-        frameId = window.requestAnimationFrame(animate);
-      }
+      startAnimation();
     };
 
-    const resizeObserver = new ResizeObserver(() => {
-      resizeCanvas();
-    });
+    const scheduleResize = () => {
+      if (resizeFrameId) return;
+      resizeFrameId = window.requestAnimationFrame(() => {
+        resizeFrameId = 0;
+        resizeCanvas();
+        startAnimation();
+      });
+    };
+
+    const resizeObserver = new ResizeObserver(scheduleResize);
+    const themeObserver = new MutationObserver(refreshTheme);
+    const intersectionObserver =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(
+            (entries) => {
+              isInViewport = entries.some((entry) => entry.isIntersecting);
+              if (!isInViewport) {
+                stopAnimation();
+                return;
+              }
+
+              drawFrame(performance.now(), true);
+              startAnimation();
+            },
+            { rootMargin: "160px 0px" },
+          )
+        : null;
 
     resizeCanvas();
-    if (!reduceMotion) {
-      frameId = window.requestAnimationFrame(animate);
-    }
+    startAnimation();
 
     resizeObserver.observe(container);
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-theme-mode"],
+    });
+    intersectionObserver?.observe(container);
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
     window.addEventListener("pointerleave", handlePointerLeave);
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -510,7 +628,12 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
 
     return () => {
       stopAnimation();
+      if (resizeFrameId) {
+        window.cancelAnimationFrame(resizeFrameId);
+      }
       resizeObserver.disconnect();
+      themeObserver.disconnect();
+      intersectionObserver?.disconnect();
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerleave", handlePointerLeave);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -519,10 +642,10 @@ export function RelayNetworkCanvas({ className }: RelayNetworkCanvasProps) {
   }, []);
 
   return (
-    <div className={`pointer-events-none absolute inset-0 overflow-hidden ${className ?? ""}`}>
+    <div className={`relay-network-canvas pointer-events-none absolute inset-0 overflow-hidden ${className ?? ""}`}>
       <canvas ref={canvasRef} aria-hidden="true" className="h-full w-full" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.26),transparent_42%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,rgba(244,247,251,0),rgba(244,247,251,0.82))]" />
+      <div className="relay-network-canvas__sheen absolute inset-0" />
+      <div className="relay-network-canvas__fade absolute inset-x-0 bottom-0 h-24" />
     </div>
   );
 }

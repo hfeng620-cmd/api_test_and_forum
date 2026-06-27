@@ -13,24 +13,61 @@ interface Particle {
   createdAt: number;
 }
 
+type RgbTuple = [number, number, number];
+
 const MAX_PARTICLES = 16;
 const PARTICLE_LIFETIME_MS = 800;
 const PARTICLE_RADIUS = 3.5;
 const PARTICLE_MAX_OPACITY = 0.5;
+const MAX_CANVAS_PIXELS = 1_200_000;
+const FALLBACK_GLOW_RGB: RgbTuple = [37, 99, 235];
+const FALLBACK_SECONDARY_RGB: RgbTuple = [56, 189, 248];
+
+function clampChannel(value: number) {
+  return Math.min(Math.max(Math.round(value), 0), 255);
+}
+
+function parseRgb(value: string): RgbTuple | null {
+  const raw = value.trim();
+  if (!raw) return null;
+
+  const hex = raw.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (hex) {
+    const fullHex =
+      hex[1].length === 3
+        ? hex[1]
+            .split("")
+            .map((part) => `${part}${part}`)
+            .join("")
+        : hex[1];
+
+    return [
+      Number.parseInt(fullHex.slice(0, 2), 16),
+      Number.parseInt(fullHex.slice(2, 4), 16),
+      Number.parseInt(fullHex.slice(4, 6), 16),
+    ];
+  }
+
+  const match = raw.match(/(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)[,\s]+(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+
+  return [clampChannel(Number(match[1])), clampChannel(Number(match[2])), clampChannel(Number(match[3]))];
+}
 
 /**
  * Reads a CSS custom property from the document root and extracts
  * R, G, B channel values as numbers 0-255.
  */
-function getBrandRgb(): [number, number, number] {
-  const raw = getComputedStyle(document.documentElement).getPropertyValue("--color-brand").trim();
-  // Handles "r g b", "r,g,b", "rgb(r,g,b)", "#rrggbb", etc.
-  const match = raw.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
-  if (match) {
-    return [Number(match[1]), Number(match[2]), Number(match[3])];
-  }
-  // Default: a neutral indigo-ish fallback so the trail is never invisible
-  return [99, 102, 241];
+function getThemeRgb(): { glow: RgbTuple; secondary: RgbTuple } {
+  const styles = getComputedStyle(document.documentElement);
+
+  return {
+    glow:
+      parseRgb(styles.getPropertyValue("--theme-glow-rgb")) ??
+      parseRgb(styles.getPropertyValue("--color-brand")) ??
+      FALLBACK_GLOW_RGB,
+    secondary: parseRgb(styles.getPropertyValue("--theme-secondary-rgb")) ?? FALLBACK_SECONDARY_RGB,
+  };
 }
 
 export function MouseGlowLayer() {
@@ -49,7 +86,10 @@ export function MouseGlowLayer() {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const finePointer = window.matchMedia("(pointer: fine)");
-    const isActive = !reducedMotion.matches && finePointer.matches;
+    const hoverPointer = window.matchMedia("(hover: hover)");
+    const compactViewport = window.matchMedia("(max-width: 720px)");
+    let isDocumentVisible = document.visibilityState === "visible";
+    let isActive = false;
 
     // ── CSS radial-glow (existing behaviour, fully preserved) ──────────
     let glowRafId = 0;
@@ -78,8 +118,8 @@ export function MouseGlowLayer() {
       }
     }
 
-    root.dataset.mouseGlow = isActive ? "on" : "off";
-    root.style.setProperty("--mouse-glow-opacity", isActive ? "0.58" : "0");
+    root.dataset.mouseGlow = "off";
+    root.style.setProperty("--mouse-glow-opacity", "0");
     root.style.setProperty("--mouse-x", `${currentX}px`);
     root.style.setProperty("--mouse-y", `${currentY}px`);
 
@@ -90,29 +130,47 @@ export function MouseGlowLayer() {
     let particles: Particle[] = [];
     let canvasRafId = 0;
     let ctx: CanvasRenderingContext2D | null = null;
-    let brandR = 99;
-    let brandG = 102;
-    let brandB = 241;
+    let glowRgb = FALLBACK_GLOW_RGB;
+    let secondaryRgb = FALLBACK_SECONDARY_RGB;
+
+    function clearCanvas() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+
+    function cancelCanvasLoop() {
+      if (canvasRafId !== 0) {
+        window.cancelAnimationFrame(canvasRafId);
+        canvasRafId = 0;
+      }
+    }
+
+    function refreshTheme() {
+      const theme = getThemeRgb();
+      glowRgb = theme.glow;
+      secondaryRgb = theme.secondary;
+    }
 
     function initCanvas() {
       if (!canvas) return;
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      const maxDprByPixels = Math.sqrt(MAX_CANVAS_PIXELS / Math.max(window.innerWidth * window.innerHeight, 1));
+      const dprCap = compactViewport.matches ? 1.1 : 1.45;
+      const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, dprCap, maxDprByPixels));
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
       ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
-      // Resolve --color-brand once; re-read on resize in case theme changes
-      [brandR, brandG, brandB] = getBrandRgb();
+      refreshTheme();
     }
 
     function drawParticles(now: number) {
       const c = canvas;
       if (!ctx || !c) return;
-      ctx.clearRect(0, 0, c.width, c.height);
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       // Cull expired particles
       particles = particles.filter((p) => now - p.createdAt < PARTICLE_LIFETIME_MS);
@@ -125,13 +183,18 @@ export function MouseGlowLayer() {
 
         ctx.beginPath();
         ctx.arc(p.x + p.ox, p.y + p.oy, radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${brandR},${brandG},${brandB},${alpha})`;
+        ctx.fillStyle = `rgba(${glowRgb[0]},${glowRgb[1]},${glowRgb[2]},${alpha})`;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(p.x + p.ox * 0.7, p.y + p.oy * 0.7, radius * 0.48, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${secondaryRgb[0]},${secondaryRgb[1]},${secondaryRgb[2]},${alpha * 0.46})`;
         ctx.fill();
       }
     }
 
     function shouldAnimate() {
-      return particles.length > 0;
+      return isActive && particles.length > 0 && isDocumentVisible;
     }
 
     function runCanvasLoop(now: number) {
@@ -144,7 +207,7 @@ export function MouseGlowLayer() {
     }
 
     // Throttle particle spawn to ~30 Hz so the trail is sparse and subtle
-    let spawnThrottle: ReturnType<typeof setTimeout> | null = null;
+    let lastSpawnedAt = 0;
 
     function spawnParticle(clientX: number, clientY: number) {
       const ox = (Math.random() - 0.5) * 6; // ±3 px jitter
@@ -157,35 +220,73 @@ export function MouseGlowLayer() {
       }
     }
 
+    function shouldUseGlow() {
+      return (
+        enabled &&
+        isDocumentVisible &&
+        !reducedMotion.matches &&
+        finePointer.matches &&
+        hoverPointer.matches &&
+        !compactViewport.matches
+      );
+    }
+
+    function deactivateGlow() {
+      isActive = false;
+      particles = [];
+      root.dataset.mouseGlow = "off";
+      root.style.setProperty("--mouse-glow-opacity", "0");
+      cancelCanvasLoop();
+      clearCanvas();
+    }
+
+    function syncActiveState() {
+      const nextActive = shouldUseGlow();
+      if (!nextActive) {
+        deactivateGlow();
+        return;
+      }
+
+      if (!isActive) {
+        isActive = true;
+        initCanvas();
+      } else {
+        refreshTheme();
+      }
+
+      root.dataset.mouseGlow = "on";
+      root.style.setProperty("--mouse-glow-opacity", "var(--mouse-glow-idle-opacity)");
+      queueGlowRender();
+    }
+
     function startCanvasLoopIfNeeded() {
-      if (canvasRafId === 0 && particles.length > 0) {
+      if (canvasRafId === 0 && shouldAnimate()) {
         canvasRafId = requestAnimationFrame(runCanvasLoop);
       }
     }
 
     function handlePointerMove(event: PointerEvent) {
-      if (reducedMotion.matches || !finePointer.matches) return;
+      if (!isActive) return;
 
       // ── CSS glow ──
       root.dataset.mouseGlow = "on";
-      root.style.setProperty("--mouse-glow-opacity", "1");
+      root.style.setProperty("--mouse-glow-opacity", "var(--mouse-glow-active-opacity)");
       targetX = event.clientX;
       targetY = event.clientY;
       queueGlowRender();
 
       // ── Particle trail ──
-      if (!spawnThrottle) {
+      const now = performance.now();
+      if (now - lastSpawnedAt > 32) {
         spawnParticle(event.clientX, event.clientY);
         startCanvasLoopIfNeeded();
-        spawnThrottle = setTimeout(() => {
-          spawnThrottle = null;
-        }, 32);
+        lastSpawnedAt = now;
       }
     }
 
     function handlePointerLeave() {
       // CSS glow — drift back to hero position
-      root.style.setProperty("--mouse-glow-opacity", "0.3");
+      root.style.setProperty("--mouse-glow-opacity", isActive ? "var(--mouse-glow-rest-opacity)" : "0");
       targetX = window.innerWidth * 0.62;
       targetY = 220;
       queueGlowRender();
@@ -194,32 +295,57 @@ export function MouseGlowLayer() {
     }
 
     function handleResize() {
+      if (!isActive) {
+        syncActiveState();
+        return;
+      }
+
       initCanvas();
+      clearCanvas();
     }
 
-    if (isActive) {
-      initCanvas();
-      window.addEventListener("pointermove", handlePointerMove, { passive: true });
-      window.addEventListener("pointerleave", handlePointerLeave);
-      window.addEventListener("resize", handleResize);
+    function handleVisibilityChange() {
+      isDocumentVisible = document.visibilityState === "visible";
+      syncActiveState();
     }
+
+    function handleMediaChange() {
+      syncActiveState();
+    }
+
+    const themeObserver = new MutationObserver(() => {
+      refreshTheme();
+      if (isActive) {
+        clearCanvas();
+      }
+    });
+
+    syncActiveState();
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave);
+    window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    reducedMotion.addEventListener("change", handleMediaChange);
+    finePointer.addEventListener("change", handleMediaChange);
+    hoverPointer.addEventListener("change", handleMediaChange);
+    compactViewport.addEventListener("change", handleMediaChange);
+    themeObserver.observe(root, { attributes: true, attributeFilter: ["data-theme", "data-theme-mode"] });
 
     return () => {
-      root.dataset.mouseGlow = "off";
-      root.style.setProperty("--mouse-glow-opacity", "0");
+      deactivateGlow();
+      themeObserver.disconnect();
 
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerleave", handlePointerLeave);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      reducedMotion.removeEventListener("change", handleMediaChange);
+      finePointer.removeEventListener("change", handleMediaChange);
+      hoverPointer.removeEventListener("change", handleMediaChange);
+      compactViewport.removeEventListener("change", handleMediaChange);
 
       if (glowRafId !== 0) {
         window.cancelAnimationFrame(glowRafId);
-      }
-      if (canvasRafId !== 0) {
-        window.cancelAnimationFrame(canvasRafId);
-      }
-      if (spawnThrottle) {
-        clearTimeout(spawnThrottle);
       }
     };
   }, [pathname]);
@@ -236,7 +362,7 @@ export function MouseGlowLayer() {
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0"
+        className="mouse-glow-canvas pointer-events-none fixed inset-0"
         style={{ zIndex: 1 }}
       />
     </>
