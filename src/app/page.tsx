@@ -196,6 +196,40 @@ export default function Home() {
         .home-hero-title {
           text-wrap: balance;
         }
+        .home-hero-wash {
+          background:
+            radial-gradient(circle at 18% 14%, rgba(var(--theme-glow-rgb),0.15), transparent 34%),
+            radial-gradient(circle at 88% 8%, rgba(var(--theme-secondary-rgb),0.16), transparent 32%),
+            linear-gradient(135deg, rgba(var(--theme-surface-rgb),0.78), rgba(var(--theme-surface-rgb),0.34) 56%, rgba(var(--theme-glow-rgb),0.13));
+        }
+        .home-hero-grid {
+          background-image:
+            linear-gradient(rgba(var(--theme-glow-rgb),0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(var(--theme-glow-rgb),0.08) 1px, transparent 1px);
+          background-size: 46px 46px;
+          mask-image: radial-gradient(circle at 50% 26%, black, transparent 72%);
+          opacity: 0.42;
+        }
+        .home-card-sheen {
+          isolation: isolate;
+          position: relative;
+        }
+        .home-card-sheen::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          border-radius: inherit;
+          background:
+            linear-gradient(145deg, rgba(255,255,255,0.34), transparent 36%),
+            radial-gradient(circle at 88% 8%, rgba(var(--theme-secondary-rgb),0.14), transparent 30%);
+          opacity: 0.7;
+        }
+        .home-card-sheen > * {
+          position: relative;
+          z-index: 1;
+        }
         .home-glass-edge {
           position: relative;
         }
@@ -313,7 +347,8 @@ export default function Home() {
 
       <section className="relative overflow-hidden border-b border-[var(--color-line)]">
         <RelayNetworkCanvas className="opacity-90" />
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(244,247,251,0.28)_55%,rgba(219,234,254,0.62))]" />
+        <div className="home-hero-wash absolute inset-0" />
+        <div className="home-hero-grid absolute inset-0" />
         <div className="absolute inset-x-6 top-8 h-px bg-[linear-gradient(90deg,transparent,rgba(var(--theme-glow-rgb),0.34),transparent)] lg:inset-x-10" />
         <div className="relative mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-10 lg:py-14">
           <div className="grid gap-6 lg:grid-cols-[1.12fr_0.88fr] lg:items-end xl:gap-10">
@@ -321,7 +356,7 @@ export default function Home() {
               <p className="inline-flex rounded-full border border-white/70 bg-white/72 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-[var(--color-brand-deep)] shadow-[0_12px_30px_rgba(15,23,42,0.05)] backdrop-blur sm:text-xs">
                 Relay Signal Desk
               </p>
-              <h1 className="home-hero-title mt-5 max-w-4xl text-[2.65rem] font-black leading-[0.98] tracking-tight text-[var(--color-ink)] sm:text-6xl lg:text-[4.75rem]">
+              <h1 className="home-hero-title mt-5 max-w-4xl bg-[linear-gradient(112deg,var(--color-ink)_0%,var(--color-brand-deep)_48%,var(--color-ink)_92%)] bg-clip-text text-[2.65rem] font-black leading-[0.98] tracking-tight text-transparent sm:text-6xl lg:text-[4.75rem]">
                 把中转站从“能用”，筛到“值得长期用”。
               </h1>
               <p className="home-mobile-balance mt-5 max-w-2xl text-base leading-8 text-[var(--color-muted)] sm:text-lg">
@@ -350,7 +385,7 @@ export default function Home() {
                   <Link
                     key={route.title}
                     href={route.href}
-                    className="rounded-[22px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_36px_rgba(15,23,42,0.10)]"
+                    className="home-card-sheen card-lift rounded-[22px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_36px_rgba(15,23,42,0.10)]"
                   >
                     <p className="text-sm font-black text-[var(--color-ink)]">{route.title}</p>
                     <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{route.description}</p>
@@ -359,19 +394,19 @@ export default function Home() {
                 </div>
               </div>
               <div className="home-flow-tight mt-7 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="home-card-sheen rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                     收录站点
                   </p>
                   <p className="mt-2 text-3xl font-black">{stationComparisonRows.length}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="home-card-sheen rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                     低倍率样本
                   </p>
                   <p className="mt-2 text-3xl font-black">{lowRateCount}</p>
                 </div>
-                <div className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="home-card-sheen rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                     可先试用
                   </p>
@@ -380,8 +415,8 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="home-reveal home-delay-2 home-glass-edge relative overflow-hidden rounded-[30px] border border-white/70 bg-white/78 p-5 shadow-[0_24px_74px_rgba(15,23,42,0.10)] backdrop-blur sm:p-6">
-              <div className="absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.16),transparent_70%)]" />
+            <div className="home-reveal home-delay-2 home-glass-edge home-card-sheen relative overflow-hidden rounded-[30px] border border-white/70 bg-white/78 p-5 shadow-[0_24px_74px_rgba(15,23,42,0.10)] backdrop-blur sm:p-6">
+              <div className="absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,rgba(var(--theme-glow-rgb),0.16),transparent_70%)]" />
               <div className="relative">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-deep)]">
                   当前主观察面
@@ -464,7 +499,7 @@ export default function Home() {
         <div className="home-ambient-fast pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-secondary-rgb),0.14),transparent_70%)] blur-2xl" />
         <div className="relative mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-9 lg:px-10 lg:py-11">
           <div className="grid gap-6 xl:grid-cols-[1.04fr_0.96fr]">
-            <div className="home-reveal home-glass-edge relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(var(--theme-surface-rgb),0.96),rgba(var(--theme-glow-rgb),0.07))] p-5 shadow-[0_22px_60px_rgba(15,23,42,0.06)] sm:p-6 lg:p-7">
+            <div className="home-reveal home-glass-edge home-card-sheen relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(var(--theme-surface-rgb),0.96),rgba(var(--theme-glow-rgb),0.07))] p-5 shadow-[0_22px_60px_rgba(15,23,42,0.06)] sm:p-6 lg:p-7">
               <div className="pointer-events-none absolute right-0 top-0 h-32 w-48 rounded-bl-full bg-[radial-gradient(circle_at_top_right,rgba(var(--theme-glow-rgb),0.16),transparent_70%)]" />
               <div className="relative">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-deep)]">
@@ -481,7 +516,7 @@ export default function Home() {
                 {productLayers.map((layer, index) => (
                   <article
                     key={layer.title}
-                    className="group relative overflow-hidden rounded-[24px] border border-white/80 bg-white/82 px-5 py-5 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--color-brand)] hover:shadow-[0_20px_42px_rgba(15,23,42,0.09)]"
+                    className="home-card-sheen group relative overflow-hidden rounded-[24px] border border-white/80 bg-white/82 px-5 py-5 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--color-brand)] hover:shadow-[0_20px_42px_rgba(15,23,42,0.09)]"
                   >
                     <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,var(--color-brand),rgba(var(--theme-secondary-rgb),0.64))] opacity-0 transition group-hover:opacity-100" />
                     <div className="flex items-center justify-between gap-4">
@@ -501,7 +536,7 @@ export default function Home() {
               </div>
             </div>
 
-            <aside className="home-reveal home-delay-2 relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-glow-rgb),0.08),rgba(var(--theme-surface-rgb),0.94))] p-5 shadow-[0_22px_60px_rgba(37,99,235,0.08)] sm:p-6 lg:p-7">
+            <aside className="home-reveal home-delay-2 relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-glow-rgb),0.08),rgba(var(--theme-surface-rgb),0.94))] p-5 shadow-[0_22px_60px_rgba(var(--theme-glow-rgb),0.08)] sm:p-6 lg:p-7">
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-glow-rgb),0.18),transparent_70%)] blur-xl" />
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
@@ -526,7 +561,7 @@ export default function Home() {
                   {actionFlows.map((flow) => (
                   <div
                     key={flow.step}
-                    className="relative rounded-[24px] border border-white/80 bg-white/84 px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_38px_rgba(15,23,42,0.08)] sm:pl-14"
+                    className="home-card-sheen relative rounded-[24px] border border-white/80 bg-white/84 px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_38px_rgba(15,23,42,0.08)] sm:pl-14"
                   >
                     <span className="absolute left-5 top-5 hidden h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-white/80 bg-[var(--color-brand)] text-[10px] font-black text-[var(--color-on-brand)] shadow-[0_10px_22px_var(--color-panel-glow)] sm:flex">
                       {flow.step}
@@ -782,7 +817,7 @@ export default function Home() {
               );
             })}
           </div>
-          <div data-reveal className="home-reveal home-delay-2 mt-8 rounded-[28px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(239,246,255,0.96),rgba(255,255,255,0.92))] px-5 py-6 shadow-[0_18px_44px_rgba(37,99,235,0.08)] sm:px-6">
+          <div data-reveal className="home-reveal home-delay-2 home-card-sheen mt-8 rounded-[28px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(var(--theme-glow-rgb),0.12),rgba(var(--theme-surface-rgb),0.94))] px-5 py-6 shadow-[0_18px_44px_rgba(var(--theme-glow-rgb),0.10)] sm:px-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
