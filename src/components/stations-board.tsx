@@ -776,9 +776,9 @@ export function StationsBoard() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-stretch">
+        <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
           {featuredStations.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
+            <div className="grid items-start gap-3 md:grid-cols-2 2xl:grid-cols-4">
               {featuredStations.map((station, index) => {
                 const stationHref = getSafeExternalHref(station.url);
                 const cardContent = (
@@ -845,7 +845,7 @@ export function StationsBoard() {
                       href={stationHref}
                       rel="noopener noreferrer"
                       target="_blank"
-                      className="stagger-in card-lift group min-h-[202px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)] sm:p-5"
+                      className="stagger-in card-lift group min-h-[178px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)] sm:min-h-[190px] sm:p-5"
                     >
                       {cardContent}
                     </a>
@@ -855,7 +855,7 @@ export function StationsBoard() {
                 return (
                   <div
                     key={`${station.id}-hero`}
-                    className="stagger-in card-lift group min-h-[202px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)] sm:p-5"
+                    className="stagger-in card-lift group min-h-[178px] rounded-[22px] border border-[var(--color-line)] bg-[var(--surface-gradient)] p-4 shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-[3px] hover:border-[var(--color-brand)] hover:shadow-[0_28px_72px_rgba(15,23,42,0.10)] sm:min-h-[190px] sm:p-5"
                   >
                     {cardContent}
                   </div>
@@ -1630,10 +1630,14 @@ export function StationsBoard() {
 
       {/* ---- Station Discussion Modal ---- */}
       {discussionStation && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="relative flex h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50"
+          style={{ backdropFilter: 'blur(4px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setDiscussionStation(null); }}
+        >
+          <div className="relative flex h-[85vh] w-[95vw] max-w-4xl flex-col overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[var(--color-line)] px-6 py-4">
+            <div className="shrink-0 flex items-center justify-between border-b border-[var(--color-line)] px-6 py-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-brand-soft)]">
                   <svg className="h-5 w-5 text-[var(--color-brand-deep)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1656,8 +1660,8 @@ export function StationsBoard() {
                 </svg>
               </button>
             </div>
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto">
+            {/* Content - scrollable area */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
               <div className="p-4">
                 <DiscussionFeed
                   hideComposer={true}
