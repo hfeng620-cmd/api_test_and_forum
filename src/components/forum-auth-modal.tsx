@@ -21,7 +21,8 @@ type PendingRegistrationState = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const OTP_CODE_LENGTH = 6;
+const OTP_CODE_MIN_LENGTH = 6;
+const OTP_CODE_MAX_LENGTH = 8;
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_UPPERCASE_PATTERN = /[A-Z]/;
 const PASSWORD_NUMBER_PATTERN = /\d/;
@@ -339,8 +340,8 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
       setError("两次输入的密码不一致。");
       return;
     }
-    if (otpCode.trim().length !== OTP_CODE_LENGTH) {
-      setError(`请输入 ${OTP_CODE_LENGTH} 位数字验证码。`);
+    if (otpCode.trim().length < OTP_CODE_MIN_LENGTH || otpCode.trim().length > OTP_CODE_MAX_LENGTH) {
+      setError(`请输入 ${OTP_CODE_MIN_LENGTH}-${OTP_CODE_MAX_LENGTH} 位数字验证码。`);
       return;
     }
 
@@ -837,10 +838,10 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                           setOtpCode(event.target.value.replace(/\D/g, ""));
                           setError("");
                         }}
-                        placeholder={`输入 ${OTP_CODE_LENGTH} 位验证码`}
+                        placeholder={`输入 ${OTP_CODE_MIN_LENGTH}-${OTP_CODE_MAX_LENGTH} 位验证码`}
                         type="text"
                         inputMode="numeric"
-                        maxLength={OTP_CODE_LENGTH}
+                        maxLength={OTP_CODE_MAX_LENGTH}
                         value={otpCode}
                         autoFocus
                       />
@@ -894,7 +895,7 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                   (mode === "register" &&
                     !otpSent &&
                     (!displayNameInput.trim() || !password || !confirmPassword || Boolean(registrationPasswordError))) ||
-                  (mode === "register" && otpSent && otpCode.length !== OTP_CODE_LENGTH)
+                  (mode === "register" && otpSent && (otpCode.length < OTP_CODE_MIN_LENGTH || otpCode.length > OTP_CODE_MAX_LENGTH))
                 }
                 onClick={mode === "login" ? handlePasswordLogin : otpSent ? handleVerifyAndRegister : handleSendCode}
                 type="button"

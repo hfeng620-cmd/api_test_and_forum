@@ -21,7 +21,8 @@ type AuthResult = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const OTP_CODE_LENGTH = 6;
+const OTP_CODE_MIN_LENGTH = 6;
+const OTP_CODE_MAX_LENGTH = 8;
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_UPPERCASE_PATTERN = /[A-Z]/;
 const PASSWORD_NUMBER_PATTERN = /\d/;
@@ -380,8 +381,8 @@ export function ForumAuthProvider({ children }: { children: React.ReactNode }) {
       if (!isValidEmail(normalizedEmail)) {
         return { ok: false, error: "请输入有效的邮箱地址。" };
       }
-      if (!/^\d+$/.test(normalizedToken) || normalizedToken.length !== OTP_CODE_LENGTH) {
-        return { ok: false, error: `请输入 ${OTP_CODE_LENGTH} 位数字验证码。` };
+      if (!/^\d+$/.test(normalizedToken) || normalizedToken.length < OTP_CODE_MIN_LENGTH || normalizedToken.length > OTP_CODE_MAX_LENGTH) {
+        return { ok: false, error: `请输入 ${OTP_CODE_MIN_LENGTH}-${OTP_CODE_MAX_LENGTH} 位数字验证码。` };
       }
 
       // 先尝试 signup 类型，失败则尝试 email 类型
