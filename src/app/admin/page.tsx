@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { GithubIssueReviewPanel } from "@/components/github-issue-review-panel";
 import { useForumAuth } from "@/lib/forum-auth";
@@ -187,6 +188,9 @@ export default function AdminPage() {
   const [newStationSaving, setNewStationSaving] = useState(false);
   const [deletingStationId, setDeletingStationId] = useState<string | null>(null);
   const [stationMgmtStatus, setStationMgmtStatus] = useState("");
+  const [editModalStation, setEditModalStation] = useState<Station | null>(null);
+  const [editModalForm, setEditModalForm] = useState<Partial<Station>>({});
+  const [editModalSaving, setEditModalSaving] = useState(false);
 
   // ---- User management state ----
   const [userList, setUserList] = useState<
@@ -685,7 +689,7 @@ export default function AdminPage() {
   }
 
   // ---- Existing handlers preserved verbatim ----
-  function updateStation(index: number, field: keyof HomeFeaturedStation, value: string) {
+  function updateFeaturedStation(index: number, field: keyof HomeFeaturedStation, value: string) {
     setStations((current) =>
       current.map((station, si) =>
         si === index ? { ...station, [field]: value } : station,
@@ -1778,6 +1782,14 @@ export default function AdminPage() {
                               {s.url || "无网址"}
                             </span>
                             <button
+                              className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-[var(--color-brand-deep)] hover:bg-[var(--color-brand-soft)]"
+                              onClick={() => { setEditModalStation(s); setEditModalForm({ ...s }); }}
+                              type="button"
+                              title="编辑全部字段"
+                            >
+                              编辑
+                            </button>
+                            <button
                               className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
                               disabled={deletingStationId === s.id}
                               onClick={() => handleDeleteStation(s.id, s.name)}
@@ -1836,7 +1848,7 @@ export default function AdminPage() {
                         <span className="text-sm font-semibold text-[var(--color-muted)]">价格</span>
                         <input
                           className="w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
-                          onChange={(e) => updateStation(index, "price", e.target.value)}
+                          onChange={(e) => updateFeaturedStation(index, "price", e.target.value)}
                           value={station.price}
                         />
                       </label>
@@ -1844,7 +1856,7 @@ export default function AdminPage() {
                         <span className="text-sm font-semibold text-[var(--color-muted)]">倍率</span>
                         <input
                           className="w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
-                          onChange={(e) => updateStation(index, "multiplier", e.target.value)}
+                          onChange={(e) => updateFeaturedStation(index, "multiplier", e.target.value)}
                           value={station.multiplier}
                         />
                       </label>
@@ -1853,7 +1865,7 @@ export default function AdminPage() {
                       <span className="text-sm font-semibold text-[var(--color-muted)]">首页简介</span>
                       <textarea
                         className="min-h-24 w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
-                        onChange={(e) => updateStation(index, "summary", e.target.value)}
+                        onChange={(e) => updateFeaturedStation(index, "summary", e.target.value)}
                         value={station.summary}
                       />
                     </label>
@@ -1861,7 +1873,7 @@ export default function AdminPage() {
                       <span className="text-sm font-semibold text-[var(--color-muted)]">推荐理由</span>
                       <textarea
                         className="min-h-24 w-full rounded-2xl border border-[var(--color-line)] bg-white px-4 py-3 outline-none transition focus:border-[var(--color-brand)]"
-                        onChange={(e) => updateStation(index, "reason", e.target.value)}
+                        onChange={(e) => updateFeaturedStation(index, "reason", e.target.value)}
                         value={station.reason}
                       />
                     </label>
@@ -2187,6 +2199,92 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ---- Station Edit Modal (portal) ---- */}
+        {editModalStation && typeof document !== "undefined" && createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+            style={{ backdropFilter: "blur(4px)", position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+            onClick={(e) => { if (e.target === e.currentTarget) setEditModalStation(null); }}
+          >
+            <div className="relative flex max-h-[90vh] w-[95vw] max-w-2xl flex-col overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+              <div className="shrink-0 flex items-center justify-between border-b border-[var(--color-line)] px-6 py-4">
+                <div>
+                  <h2 className="text-lg font-black">编辑 {editModalStation.name}</h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-[var(--color-on-brand)] disabled:opacity-50"
+                    disabled={editModalSaving}
+                    onClick={async () => {
+                      setEditModalSaving(true);
+                      try {
+                        const result = await updateStation(editModalStation.id, editModalForm, "管理员");
+                        if (!result.needsReview) {
+                          setEditModalStation(null);
+                          void refreshAllStations();
+                        }
+                      } catch (err) {
+                        alert(err instanceof Error ? err.message : "保存失败");
+                      } finally {
+                        setEditModalSaving(false);
+                      }
+                    }}
+                    type="button"
+                  >
+                    {editModalSaving ? "保存中..." : "保存"}
+                  </button>
+                  <button
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-muted)] hover:bg-[var(--color-soft)]"
+                    onClick={() => setEditModalStation(null)}
+                    type="button"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { key: "name", label: "站点名" },
+                    { key: "url", label: "网址" },
+                    { key: "badge", label: "标签" },
+                    { key: "price", label: "价格" },
+                    { key: "multiplier", label: "倍率" },
+                    { key: "entry", label: "入口地址" },
+                    { key: "packageType", label: "收费方式" },
+                    { key: "status", label: "状态" },
+                    { key: "models", label: "模型" },
+                    { key: "uptime", label: "在线率" },
+                    { key: "latency", label: "延迟" },
+                    { key: "source", label: "来源" },
+                    { key: "verdict", label: "评价" },
+                    { key: "groupName", label: "分组" },
+                  ].map(({ key, label }) => (
+                    <div key={key} className={key === "models" || key === "verdict" ? "col-span-2" : ""}>
+                      <label className="mb-1 block text-[11px] font-semibold text-[var(--color-muted)]">{label}</label>
+                      {key === "models" || key === "verdict" ? (
+                        <textarea
+                          className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-input)] px-3 py-2 text-sm outline-none focus:border-[var(--color-brand)]"
+                          rows={2}
+                          value={String(editModalForm[key as keyof Station] ?? "")}
+                          onChange={(e) => setEditModalForm({ ...editModalForm, [key]: e.target.value })}
+                        />
+                      ) : (
+                        <input
+                          className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-input)] px-3 py-2 text-sm outline-none focus:border-[var(--color-brand)]"
+                          value={String(editModalForm[key as keyof Station] ?? "")}
+                          onChange={(e) => setEditModalForm({ ...editModalForm, [key]: e.target.value })}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
         )}
 
         {/* ---- Tab: 数据导入导出 ---- */}
