@@ -43,7 +43,8 @@ function isRouteActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-type AppearancePanel = Extract<ThemeToggleView, "theme" | "palette">;
+type AppearanceCollection = Extract<ThemeToggleView, "theme" | "palette">;
+type AppearancePanel = "home" | AppearanceCollection;
 
 export function FloatingQuickPanel() {
   const [open, setOpen] = useState(false);
@@ -98,9 +99,9 @@ export function FloatingQuickPanel() {
     }
   }
 
-  function openAppearancePanel(panel: AppearancePanel) {
+  function openAppearanceCenter() {
     setOpen(false);
-    setAppearancePanel(panel);
+    setAppearancePanel("home");
     dismissHint();
   }
 
@@ -121,20 +122,23 @@ export function FloatingQuickPanel() {
                 Timix
               </span>
             </div>
-            <div className="mt-2 grid grid-cols-2 gap-1.5">
+            <div className="mt-2">
               <button
-                className="rounded-[14px] border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-2 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)]"
-                onClick={() => openAppearancePanel("theme")}
+                className="group flex w-full items-center justify-between gap-3 rounded-[16px] border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-2.5 text-left transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]"
+                onClick={openAppearanceCenter}
                 type="button"
               >
-                主题
-              </button>
-              <button
-                className="rounded-[14px] border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-2 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)]"
-                onClick={() => openAppearancePanel("palette")}
-                type="button"
-              >
-                配色
+                <span className="min-w-0">
+                  <span className="block text-sm font-black text-[var(--color-ink)] group-hover:text-[var(--color-brand-deep)]">
+                    外观
+                  </span>
+                  <span className="mt-0.5 block text-[11px] leading-4 text-[var(--color-muted)]">
+                    主题背景板与配色色彩系统
+                  </span>
+                </span>
+                <span className="rounded-full bg-[var(--color-panel)] px-2 py-1 text-[10px] font-bold text-[var(--color-brand-deep)]">
+                  打开
+                </span>
               </button>
             </div>
           </div>
@@ -220,7 +224,7 @@ export function FloatingQuickPanel() {
       ) : null}
 
       <button
-        aria-label="打开导航与主题面板"
+        aria-label="打开快捷菜单"
         aria-controls="quick-panel-menu"
         aria-expanded={open}
         className={`relative flex h-11 min-w-11 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 text-sm font-bold text-[var(--color-brand-deep)] shadow-[0_12px_34px_rgba(15,23,42,0.14)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)] ${showHint ? "theme-hint-pulse" : ""}`}
@@ -231,7 +235,7 @@ export function FloatingQuickPanel() {
         type="button"
       >
         <span className="mr-1.5 text-base leading-none" aria-hidden="true">✦</span>
-        导航 / 主题
+        快捷菜单
       </button>
     </div>
     {appearancePanel ? (
@@ -257,21 +261,70 @@ export function FloatingQuickPanel() {
                 外观中心
               </p>
               <h2 id="appearance-dialog-title" className="mt-1 text-xl font-black text-[var(--color-ink)]">
-                {appearancePanel === "theme" ? "主题" : "配色"}
+                {appearancePanel === "home" ? "外观入口" : appearancePanel === "theme" ? "主题" : "配色"}
               </h2>
+              <p className="mt-1 text-xs leading-5 text-[var(--color-muted)]">
+                {appearancePanel === "home"
+                  ? "先选集合：主题负责背景板与动效，配色负责整站色彩系统。"
+                  : appearancePanel === "theme"
+                    ? "更换星幕、气泡、轨道等背景板氛围，不改变主色。"
+                    : "更换按钮、描边、面板和强调色，不改变背景动效。"}
+              </p>
             </div>
-            <button
-              aria-label="关闭外观弹窗"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-soft)] text-lg leading-none text-[var(--color-muted)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
-              onClick={() => setAppearancePanel(null)}
-              ref={closeButtonRef}
-              type="button"
-            >
-              x
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              {appearancePanel !== "home" ? (
+                <button
+                  className="rounded-full border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-2 text-xs font-bold text-[var(--color-muted)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
+                  onClick={() => setAppearancePanel("home")}
+                  type="button"
+                >
+                  返回
+                </button>
+              ) : null}
+              <button
+                aria-label="关闭外观弹窗"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-soft)] text-lg leading-none text-[var(--color-muted)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
+                onClick={() => setAppearancePanel(null)}
+                ref={closeButtonRef}
+                type="button"
+              >
+                x
+              </button>
+            </div>
           </div>
-          <div className="max-h-[calc(82vh-74px)] overflow-y-auto px-5 py-5">
-            <ThemeToggleInline compact view={appearancePanel} />
+          <div className="max-h-[calc(82vh-118px)] overflow-y-auto px-5 py-5">
+            {appearancePanel === "home" ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  className="rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel-strong)] p-4 text-left transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]"
+                  onClick={() => setAppearancePanel("theme")}
+                  type="button"
+                >
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                    Background + Motion
+                  </span>
+                  <span className="mt-2 block text-lg font-black text-[var(--color-ink)]">主题</span>
+                  <span className="mt-2 block text-sm leading-6 text-[var(--color-muted)]">
+                    星幕、气泡、轨道、雨幕等背景板与动效，只改变页面氛围。
+                  </span>
+                </button>
+                <button
+                  className="rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel-strong)] p-4 text-left transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]"
+                  onClick={() => setAppearancePanel("palette")}
+                  type="button"
+                >
+                  <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                    Color System
+                  </span>
+                  <span className="mt-2 block text-lg font-black text-[var(--color-ink)]">配色</span>
+                  <span className="mt-2 block text-sm leading-6 text-[var(--color-muted)]">
+                    白蓝、深夜蓝、石墨灰等色彩系统，控制按钮、描边与强调色。
+                  </span>
+                </button>
+              </div>
+            ) : (
+              <ThemeToggleInline compact view={appearancePanel} />
+            )}
           </div>
         </div>
       </div>

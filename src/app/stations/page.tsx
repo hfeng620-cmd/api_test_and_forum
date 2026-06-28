@@ -7,10 +7,7 @@ import { StationsBoard } from "@/components/stations-board";
 
 export default function StationsPage() {
   return (
-    <main
-      className="theme-stage relative min-h-screen overflow-hidden bg-transparent text-[var(--color-ink)]"
-      data-route-reveal="off"
-    >
+    <main className="theme-stage relative min-h-screen overflow-hidden bg-transparent text-[var(--color-ink)]">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-[920px] bg-[radial-gradient(circle_at_8%_10%,var(--color-brand-soft),transparent_31%),radial-gradient(circle_at_88%_16%,var(--color-panel-glow),transparent_29%),linear-gradient(180deg,var(--color-header),transparent_76%)] opacity-80"
@@ -32,6 +29,34 @@ export default function StationsPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 移动端导航 */}
+            <nav aria-label="页面导航" className="flex items-center gap-1.5 lg:hidden">
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/"
+              >
+                首页
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/community"
+              >
+                社区
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/models"
+              >
+                模型
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/guides"
+              >
+                指南
+              </Link>
+            </nav>
+            {/* 桌面端导航 */}
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] p-1 lg:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"

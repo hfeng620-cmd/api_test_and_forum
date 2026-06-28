@@ -28,6 +28,7 @@ type UserProfile = {
 type UserProfileCardProps = {
   userId: string;
   position: { x: number; y: number };
+  viewerUserId?: string;
   onClose: () => void;
 };
 
@@ -117,7 +118,7 @@ function clampCardPosition(
   };
 }
 
-export function UserProfileCard({ userId, position, onClose }: UserProfileCardProps) {
+export function UserProfileCard({ userId, position, viewerUserId, onClose }: UserProfileCardProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [cardPosition, setCardPosition] = useState(position);
@@ -250,7 +251,8 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
       ? "这张主页已经具备对外自我说明和标签侧写。"
       : "简介已经补上，再加几个标签会更像完整名片。"
     : "还缺一句能代表自己的介绍，进入主页补完后展示会更完整。";
-  const profilePreviewHint = "这是从讨论区头像或昵称打开的公开档案预览；完整个人主页用于管理自己的资料。";
+  const isOwnProfile = viewerUserId === userId;
+  const profilePreviewHint = "点击或右键讨论区头像/昵称会打开这张公开档案预览；完整个人主页仍用于管理自己的资料。";
   const identityRows = [
     { label: "档案编号", value: archiveId },
     { label: "加入 Timix", value: joinDate },
@@ -267,7 +269,9 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
     <div
       ref={cardRef}
       className="z-50 max-h-[calc(100vh-24px)] w-[min(360px,calc(100vw-24px))] overflow-y-auto overscroll-contain rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_22px_60px_rgba(15,23,42,0.18)]"
-      onContextMenu={(event) => event.stopPropagation()}
+      aria-label={`${name} 的公开主页预览`}
+      onContextMenu={(event) => { event.preventDefault(); event.stopPropagation(); }}
+      role="dialog"
       onMouseDown={(event) => event.stopPropagation()}
       style={{
         position: "fixed",
@@ -327,6 +331,7 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
                 <img
                   alt={name}
                   className="h-16 w-16 shrink-0 rounded-[22px] object-cover ring-1 ring-[var(--color-line)]"
+                  referrerPolicy="no-referrer"
                   src={profile.avatar_url}
                 />
               ) : (
@@ -497,12 +502,22 @@ export function UserProfileCard({ userId, position, onClose }: UserProfileCardPr
             </p>
 
             <div className="grid gap-2 sm:grid-cols-2" style={createCardMotionStyle(isAnimating, 410, 12, 0.998, prefersReducedMotion)}>
-              <Link
-                className="block rounded-full bg-[var(--color-brand)] py-2.5 text-center text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
-                href="/profile"
-              >
-                我的主页
-              </Link>
+              {isOwnProfile ? (
+                <Link
+                  className="block rounded-full bg-[var(--color-brand)] py-2.5 text-center text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
+                  href="/profile"
+                >
+                  编辑我的主页
+                </Link>
+              ) : (
+                <button
+                  className="rounded-full bg-[var(--color-brand)] py-2.5 text-center text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
+                  onClick={handleClose}
+                  type="button"
+                >
+                  收起预览
+                </button>
+              )}
               <Link
                 className="block rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] py-2.5 text-center text-sm font-semibold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
                 href="/community"

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 
 const DISMISS_PERMANENT_KEY = "timin-announce-dismissed-permanent";
@@ -22,6 +23,7 @@ export function AnnouncementModal() {
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [visible, setVisible] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -129,17 +131,39 @@ export function AnnouncementModal() {
     }
   }
 
+  // Keyboard handling: Escape to close
+  useEffect(() => {
+    if (!visible) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setVisible(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    const unlockBodyScroll = lockBodyScroll();
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      unlockBodyScroll();
+    };
+  }, [visible]);
+
   if (loadFailed) return null;
   if (!visible || !announcement) return null;
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm">
-      <div className="modal-enter w-full max-w-lg overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+    <div
+      aria-modal="true"
+      className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+      role="dialog"
+    >
+      <div ref={panelRef} aria-labelledby="announcement-title" className="modal-enter w-full max-w-lg overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
         {/* Header */}
         <div className="border-b border-[var(--color-line)] px-6 py-4">
           <div className="flex items-center gap-2">
-            <span className="text-lg">📢</span>
-            <h2 className="text-lg font-bold text-[var(--color-ink)]">{announcement.title}</h2>
+            <span className="text-lg" aria-hidden="true">📢</span>
+            <h2 className="text-lg font-bold text-[var(--color-ink)]" id="announcement-title">{announcement.title}</h2>
           </div>
         </div>
 

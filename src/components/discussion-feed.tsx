@@ -19,6 +19,7 @@ import {
   type DiscussionReply,
   type SearchResult,
 } from "@/lib/discussion-storage";
+import { FORUM_IMAGE_ACCEPT } from "@/lib/forum-image-safety";
 import { useForumAuth } from "@/lib/forum-auth";
 import { getSafeImageSrc } from "@/lib/url-safety";
 import { UserProfileCard } from "@/components/user-profile-card";
@@ -31,6 +32,12 @@ type DiscussionFeedProps = {
   limit?: number;
   stationFilter?: string;
   showSyncButton?: boolean;
+};
+
+type ActiveProfileCard = {
+  id: number;
+  userId: string;
+  position: { x: number; y: number };
 };
 
 function getBookmarkKey(uid: string) {
@@ -275,7 +282,8 @@ export function DiscussionFeed({
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarksOnly, setBookmarksOnly] = useState(false);
   const [pinSaving, setPinSaving] = useState(false);
-  const [activeProfileCard, setActiveProfileCard] = useState<{ userId: string; position: { x: number; y: number } } | null>(null);
+  const [activeProfileCard, setActiveProfileCard] = useState<ActiveProfileCard | null>(null);
+  const profileCardSequenceRef = useRef(0);
   const sectionRef = useRef<HTMLElement | null>(null);
   const [isSectionRevealed, setIsSectionRevealed] = useState(false);
 
@@ -792,12 +800,19 @@ export function DiscussionFeed({
     event.stopPropagation();
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const isContextMenu = event.type === "contextmenu";
+    profileCardSequenceRef.current += 1;
     setActiveProfileCard({
+      id: profileCardSequenceRef.current,
       userId,
       position: isContextMenu
         ? { x: event.clientX, y: event.clientY }
         : { x: rect.left, y: rect.bottom + 8 },
     });
+  }
+
+  function handleProfileKeyDown(userId: string | undefined, event: React.KeyboardEvent<HTMLElement>) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    handleAvatarClick(userId, event as unknown as React.MouseEvent);
   }
 
   if (loading) {
@@ -981,7 +996,7 @@ export function DiscussionFeed({
                   value={station}
                 />
                 <input
-                  accept="image/*"
+                  accept={FORUM_IMAGE_ACCEPT}
                   className="hidden"
                   onChange={async (event) => {
                     const file = event.target.files?.[0];
@@ -1194,14 +1209,26 @@ export function DiscussionFeed({
                 {post.authorAvatarUrl ? (
                   <img
                     alt={post.author}
-                    className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-[var(--color-line)] object-cover transition hover:ring-2 hover:ring-[var(--color-brand)]"
+                    aria-haspopup="dialog"
+                    className="h-10 w-10 shrink-0 cursor-pointer rounded-full border border-[var(--color-line)] object-cover transition hover:ring-2 hover:ring-[var(--color-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
                     src={post.authorAvatarUrl}
                     onClick={(e) => handleAvatarClick(post.authorId, e)}
+                    onContextMenu={(e) => handleAvatarClick(post.authorId, e)}
+                    onKeyDown={(e) => handleProfileKeyDown(post.authorId, e)}
+                    role="button"
+                    tabIndex={0}
+                    title="查看公开主页"
                   />
                 ) : (
                   <div
-                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)] transition hover:ring-2 hover:ring-[var(--color-brand)]"
+                    aria-haspopup="dialog"
+                    className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[var(--color-line)] bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)] transition hover:ring-2 hover:ring-[var(--color-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
                     onClick={(e) => handleAvatarClick(post.authorId, e)}
+                    onContextMenu={(e) => handleAvatarClick(post.authorId, e)}
+                    onKeyDown={(e) => handleProfileKeyDown(post.authorId, e)}
+                    role="button"
+                    tabIndex={0}
+                    title="查看公开主页"
                   >
                     {post.author.charAt(0)}
                   </div>
@@ -1209,8 +1236,14 @@ export function DiscussionFeed({
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <h3
-                      className="cursor-pointer text-base font-black text-[var(--color-ink)] transition hover:text-[var(--color-brand)]"
+                      aria-haspopup="dialog"
+                      className="cursor-pointer rounded-md text-base font-black text-[var(--color-ink)] transition hover:text-[var(--color-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
                       onClick={(e) => handleAvatarClick(post.authorId, e)}
+                      onContextMenu={(e) => handleAvatarClick(post.authorId, e)}
+                      onKeyDown={(e) => handleProfileKeyDown(post.authorId, e)}
+                      role="button"
+                      tabIndex={0}
+                      title="查看公开主页"
                     >
                       {post.author}
                     </h3>
@@ -1436,14 +1469,26 @@ export function DiscussionFeed({
                             {reply.avatar ? (
                               <img
                                 alt={reply.author}
-                                className="h-9 w-9 shrink-0 cursor-pointer rounded-full object-cover transition hover:ring-2 hover:ring-[var(--color-brand)]"
+                                aria-haspopup="dialog"
+                                className="h-9 w-9 shrink-0 cursor-pointer rounded-full object-cover transition hover:ring-2 hover:ring-[var(--color-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
                                 src={reply.avatar}
                                 onClick={(e) => handleAvatarClick(reply.authorId, e)}
+                                onContextMenu={(e) => handleAvatarClick(reply.authorId, e)}
+                                onKeyDown={(e) => handleProfileKeyDown(reply.authorId, e)}
+                                role="button"
+                                tabIndex={0}
+                                title="查看公开主页"
                               />
                             ) : (
                               <div
-                                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)] transition hover:ring-2 hover:ring-[var(--color-brand)]"
+                                aria-haspopup="dialog"
+                                className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)] transition hover:ring-2 hover:ring-[var(--color-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
                                 onClick={(e) => handleAvatarClick(reply.authorId, e)}
+                                onContextMenu={(e) => handleAvatarClick(reply.authorId, e)}
+                                onKeyDown={(e) => handleProfileKeyDown(reply.authorId, e)}
+                                role="button"
+                                tabIndex={0}
+                                title="查看公开主页"
                               >
                                 {reply.author.charAt(0)}
                               </div>
@@ -1451,8 +1496,14 @@ export function DiscussionFeed({
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2 text-sm">
                                 <span
-                                  className="cursor-pointer font-bold text-[var(--color-ink)] transition hover:text-[var(--color-brand)]"
+                                  aria-haspopup="dialog"
+                                  className="cursor-pointer rounded-md font-bold text-[var(--color-ink)] transition hover:text-[var(--color-brand)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
                                   onClick={(e) => handleAvatarClick(reply.authorId, e)}
+                                  onContextMenu={(e) => handleAvatarClick(reply.authorId, e)}
+                                  onKeyDown={(e) => handleProfileKeyDown(reply.authorId, e)}
+                                  role="button"
+                                  tabIndex={0}
+                                  title="查看公开主页"
                                 >
                                   {reply.author}
                                 </span>
@@ -1614,9 +1665,15 @@ export function DiscussionFeed({
       {/* User profile popup */}
       {activeProfileCard ? (
         <UserProfileCard
+          key={activeProfileCard.id}
           userId={activeProfileCard.userId}
           position={activeProfileCard.position}
-          onClose={() => setActiveProfileCard(null)}
+          viewerUserId={user?.id}
+          onClose={() =>
+            setActiveProfileCard((current) =>
+              current?.id === activeProfileCard.id ? null : current,
+            )
+          }
         />
       ) : null}
 

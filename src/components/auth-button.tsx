@@ -55,7 +55,7 @@ export function AuthButton() {
           title={email ?? undefined}
         >
           {avatarUrl ? (
-            <img alt={label} className="h-full w-full object-cover" src={avatarUrl} />
+            <img alt={label} className="h-full w-full object-cover" referrerPolicy="no-referrer" src={avatarUrl} />
           ) : (
             <span className="flex h-full w-full items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: bgColor }}>
               {initial}

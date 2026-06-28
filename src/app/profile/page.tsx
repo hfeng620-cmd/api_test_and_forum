@@ -14,6 +14,7 @@ import {
   updateProfileAvatar,
   uploadAvatar,
 } from "@/lib/discussion-storage";
+import { FORUM_IMAGE_ACCEPT } from "@/lib/forum-image-safety";
 import { useForumAuth } from "@/lib/forum-auth";
 import { getSupabaseClient } from "@/lib/supabase";
 
@@ -707,6 +708,34 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 移动端导航 */}
+            <nav aria-label="页面导航" className="flex items-center gap-1.5 md:hidden">
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/"
+              >
+                首页
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/stations"
+              >
+                榜单
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/community"
+              >
+                社区
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/guides"
+              >
+                指南
+              </Link>
+            </nav>
+            {/* 桌面端导航 */}
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] p-1 md:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
@@ -811,7 +840,7 @@ export default function ProfilePage() {
                       type="button"
                     >
                       {avatarUrl ? (
-                        <img alt={name} className="h-full w-full object-cover" src={avatarUrl} />
+                        <img alt={name} className="h-full w-full object-cover" referrerPolicy="no-referrer" src={avatarUrl} />
                       ) : (
                         <span className="text-4xl font-black text-[var(--color-muted)]">{initial}</span>
                       )}
@@ -820,7 +849,7 @@ export default function ProfilePage() {
                       </span>
                       <input
                         ref={avatarInputRef}
-                        accept="image/*"
+                        accept={FORUM_IMAGE_ACCEPT}
                         className="hidden"
                         onChange={(event) => {
                           const file = event.target.files?.[0];
@@ -1358,6 +1387,7 @@ export default function ProfilePage() {
                             ? "bg-[var(--color-brand)] text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)]"
                             : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                         }`}
+                        aria-pressed={activeTab === tab.key}
                         onClick={() => setActiveTab(tab.key)}
                         type="button"
                       >
@@ -1374,7 +1404,7 @@ export default function ProfilePage() {
                 <p className="text-sm text-[var(--color-muted)]">正在加载你的个人内容档案...</p>
               </div>
             ) : (
-              <>
+              <div key={activeTab} className="profile-tab-panel">
                 {activeTab === "posts" ? (
                   posts.length === 0 ? (
                     <div className="px-4 py-8 sm:px-6 sm:py-10">
@@ -1488,11 +1518,36 @@ export default function ProfilePage() {
                     </div>
                   )
                 ) : null}
-              </>
+              </div>
             )}
           </div>
         </section>
       ) : null}
+      <style jsx>{`
+        .profile-tab-panel {
+          animation: profileTabIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+          transform-origin: top center;
+        }
+
+        @keyframes profileTabIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.992);
+            filter: blur(6px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .profile-tab-panel {
+            animation: none;
+          }
+        }
+      `}</style>
     </main>
   );
 }

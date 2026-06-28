@@ -187,7 +187,7 @@ export function OnlineIndicator() {
             title={user && u.id === user.id ? `${u.display_name} (我)` : u.display_name}
           >
             {u.avatar_url ? (
-              <img alt={u.display_name} className="h-full w-full object-cover" src={u.avatar_url} />
+              <img alt={u.display_name} className="h-full w-full object-cover" referrerPolicy="no-referrer" src={u.avatar_url} />
             ) : (
               u.display_name.charAt(0)
             )}

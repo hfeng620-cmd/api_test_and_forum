@@ -126,6 +126,34 @@ export default function GuidesPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 移动端导航 */}
+            <nav aria-label="页面导航" className="flex items-center gap-1.5 md:hidden">
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/"
+              >
+                首页
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/stations"
+              >
+                榜单
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/community"
+              >
+                社区
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/models"
+              >
+                模型
+              </Link>
+            </nav>
+            {/* 桌面端导航 */}
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] p-1 md:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
@@ -471,7 +499,7 @@ export default function GuidesPage() {
                 <p className="text-sm text-[var(--color-muted)]">加载中...</p>
               ) : userGuides.length === 0 ? (
                 <div className="rounded-[24px] bg-[var(--color-soft)] px-4 py-5 text-sm leading-7 text-[var(--color-muted)]">
-                  还没有用户投稿的指南。点击上面的"投稿指南"按钮成为第一个贡献者！
+                  还没有用户投稿的指南。点击上面的&ldquo;投稿指南&rdquo;按钮成为第一个贡献者！
                 </div>
               ) : (
                 userGuides.map((guide) => (

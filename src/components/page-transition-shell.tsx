@@ -15,15 +15,29 @@ export function PageTransitionShell({ children }: PageTransitionShellProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useLayoutEffect(() => {
+    if (previousPathnameRef.current === pathname) {
+      return;
+    }
+
     const root = document.documentElement;
     const previousScrollBehavior = root.style.scrollBehavior;
     const previousScrollRestoration = window.history.scrollRestoration;
     const shouldRestoreTop = !window.location.hash;
+    let userInterruptedScroll = false;
+    let nestedScrollFrame = 0;
+    const scrollSettleTimers: number[] = [];
     const scrollTop = () => {
-      if (!shouldRestoreTop) return;
+      if (!shouldRestoreTop || userInterruptedScroll) return;
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
+    };
+    const stopRouteScrollRestore = () => {
+      userInterruptedScroll = true;
+      scrollSettleTimers.forEach((timer) => window.clearTimeout(timer));
+      if (nestedScrollFrame) {
+        window.cancelAnimationFrame(nestedScrollFrame);
+      }
     };
 
     root.dataset.routeHydrating = "true";
@@ -33,11 +47,14 @@ export function PageTransitionShell({ children }: PageTransitionShellProps) {
 
     const scrollFrame = window.requestAnimationFrame(() => {
       scrollTop();
-      window.requestAnimationFrame(scrollTop);
+      nestedScrollFrame = window.requestAnimationFrame(scrollTop);
     });
-    const scrollSettleTimers = [60, 160, 320, 640].map((delay) =>
-      window.setTimeout(scrollTop, delay),
+    scrollSettleTimers.push(
+      ...[60, 160, 320, 640].map((delay) => window.setTimeout(scrollTop, delay)),
     );
+    window.addEventListener("wheel", stopRouteScrollRestore, { passive: true });
+    window.addEventListener("touchmove", stopRouteScrollRestore, { passive: true });
+    window.addEventListener("keydown", stopRouteScrollRestore);
 
     const clearHydrationFlag = window.setTimeout(() => {
       delete root.dataset.routeHydrating;
@@ -47,8 +64,14 @@ export function PageTransitionShell({ children }: PageTransitionShellProps) {
 
     return () => {
       window.cancelAnimationFrame(scrollFrame);
+      if (nestedScrollFrame) {
+        window.cancelAnimationFrame(nestedScrollFrame);
+      }
       scrollSettleTimers.forEach((timer) => window.clearTimeout(timer));
       window.clearTimeout(clearHydrationFlag);
+      window.removeEventListener("wheel", stopRouteScrollRestore);
+      window.removeEventListener("touchmove", stopRouteScrollRestore);
+      window.removeEventListener("keydown", stopRouteScrollRestore);
       delete root.dataset.routeHydrating;
       root.style.scrollBehavior = previousScrollBehavior;
       window.history.scrollRestoration = previousScrollRestoration;

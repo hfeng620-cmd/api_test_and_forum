@@ -46,43 +46,59 @@ const decisionRoutes = [
 
 const productLayers = [
   {
-    label: "第一步",
-    title: "先缩到 2 到 3 个候选",
-    description: "先完成第一轮筛选。",
+    label: "低门槛",
+    title: "虎虎、星见雅先验证",
+    description: "注册送额和免费入口先看能不能用。",
   },
   {
-    label: "判断面",
-    title: "把成本、口径、风险放一起看",
-    description: "倍率、试用、备注、反馈同屏判断。",
+    label: "低倍率",
+    title: "杂货铺、ai8 单独核价",
+    description: "低倍率先看稳定性，不直接当长期结论。",
   },
   {
-    label: "下一步",
-    title: "每一屏都通向下一个动作",
-    description: "榜单初筛，社区校验，模型页收口。",
+    label: "主力候选",
+    title: "Aether、秋天继续补样本",
+    description: "稳定反馈和新入口分开沉淀。",
   },
 ];
 
 const actionFlows = [
   {
     step: "01",
-    title: "先拉出候选",
-    description: "按倍率、试用和入口成本先筛一轮。",
+    title: "低门槛先试",
+    description: "虎虎注册送额、星见雅公益免费入口，适合先验证能不能用。",
     href: "/stations",
-    cta: "去筛候选",
+    cta: "看试用",
   },
   {
     step: "02",
-    title: "再补风险信号",
-    description: "补价格变化、群友反馈和特殊口径。",
-    href: "/community",
-    cta: "去看反馈",
+    title: "低倍率重点看",
+    description: "杂货铺 GPT 0.058x、ai8.my 0.06x，但要继续核验稳定性。",
+    href: "/stations",
+    cta: "看低倍率",
   },
   {
     step: "03",
-    title: "最后定长期路线",
-    description: "模型没定，就回模型页做最后收口。",
+    title: "主力候选留意",
+    description: "Aether 反馈偏稳，秋天中转站已收录入口，等社区继续补样本。",
     href: "/models",
-    cta: "去定模型",
+    cta: "看模型",
+  },
+];
+
+const homeVerseLines = [
+  {
+    line: "遥望齐州九点烟，一泓海水杯中泻。",
+    source: "李贺《梦天》",
+    note: "把尺度先放大，再回到眼前的一条判断。",
+  },
+  {
+    line: "云散月明谁点缀？天容海色本澄清。",
+    source: "苏轼《六月二十日夜渡海》",
+  },
+  {
+    line: "向使当初身便死，一生真伪复谁知？",
+    source: "白居易《放言五首·其三》",
   },
 ];
 
@@ -135,6 +151,13 @@ export default function Home() {
         }
         .ticker-enter {
           animation: ticker-slide 420ms 140ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .ticker-enter::-webkit-scrollbar {
+          display: none;
+          width: 0;
+          height: 0;
         }
         .home-reveal {
           --reveal-duration: 760ms;
@@ -207,6 +230,7 @@ export default function Home() {
             linear-gradient(rgba(var(--theme-glow-rgb),0.08) 1px, transparent 1px),
             linear-gradient(90deg, rgba(var(--theme-glow-rgb),0.08) 1px, transparent 1px);
           background-size: 46px 46px;
+          -webkit-mask-image: radial-gradient(circle at 50% 26%, black, transparent 72%);
           mask-image: radial-gradient(circle at 50% 26%, black, transparent 72%);
           opacity: 0.42;
         }
@@ -226,7 +250,7 @@ export default function Home() {
             radial-gradient(circle at 88% 8%, rgba(var(--theme-secondary-rgb),0.14), transparent 30%);
           opacity: 0.7;
         }
-        .home-card-sheen > * {
+        .home-card-sheen > :not(.absolute) {
           position: relative;
           z-index: 1;
         }
@@ -243,6 +267,104 @@ export default function Home() {
             linear-gradient(135deg, rgba(255,255,255,0.52), transparent 34%),
             radial-gradient(circle at 82% 12%, rgba(var(--theme-glow-rgb),0.18), transparent 34%);
           opacity: 0.82;
+        }
+        .home-soft-panel {
+          background: rgba(255,255,255,0.74);
+          border-color: rgba(255,255,255,0.72);
+        }
+        .home-command-card {
+          background:
+            radial-gradient(circle at 86% 12%, rgba(var(--theme-secondary-rgb),0.18), transparent 36%),
+            linear-gradient(145deg, rgba(var(--theme-surface-rgb),0.86), rgba(var(--theme-surface-rgb),0.58));
+          border-color: rgba(255,255,255,0.72);
+        }
+        .home-signal-pill {
+          background: rgba(255,255,255,0.72);
+          border-color: rgba(255,255,255,0.7);
+          color: var(--color-brand-deep);
+        }
+        .home-quote-line {
+          font-family: "KaiTi", "STKaiti", "Songti SC", serif;
+          letter-spacing: 0;
+        }
+        .home-info-tile {
+          background: rgba(255,255,255,0.76);
+          border-color: var(--color-line);
+        }
+        .home-chip {
+          background: rgba(255,255,255,0.78);
+          border: 1px solid rgba(255,255,255,0.72);
+          color: var(--color-brand-deep);
+        }
+        .home-secondary-action {
+          background: rgba(255,255,255,0.8);
+          border-color: var(--color-line);
+          color: var(--color-ink);
+        }
+        :root[data-theme="midnight"] .theme-stage {
+          --color-panel: rgba(10,19,34,0.88);
+          --color-panel-strong: rgba(13,24,42,0.96);
+          --color-header: rgba(5,10,20,0.9);
+          --surface-gradient:
+            linear-gradient(180deg, rgba(13,24,42,0.94), rgba(7,13,25,0.96));
+        }
+        :root[data-theme="midnight"] .home-hero-wash {
+          background:
+            radial-gradient(circle at 20% 10%, rgba(var(--theme-glow-rgb),0.22), transparent 36%),
+            radial-gradient(circle at 88% 8%, rgba(var(--theme-secondary-rgb),0.16), transparent 34%),
+            linear-gradient(135deg, rgba(5,10,20,0.94), rgba(9,18,34,0.72) 54%, rgba(var(--theme-glow-rgb),0.16));
+        }
+        :root[data-theme="midnight"] .home-hero-title {
+          background-image: linear-gradient(112deg,#eef7ff 0%,#8cc9ff 42%,#3394ff 70%,#dff1ff 100%);
+        }
+        :root[data-theme="midnight"] .home-card-sheen::after {
+          background:
+            linear-gradient(145deg, rgba(255,255,255,0.045), transparent 38%),
+            radial-gradient(circle at 88% 8%, rgba(var(--theme-glow-rgb),0.18), transparent 34%);
+          opacity: 0.46;
+        }
+        :root[data-theme="midnight"] .home-glass-edge::before {
+          background:
+            linear-gradient(135deg, rgba(140,201,255,0.08), transparent 36%),
+            radial-gradient(circle at 82% 12%, rgba(var(--theme-glow-rgb),0.22), transparent 34%);
+          opacity: 0.6;
+        }
+        :root[data-theme="midnight"] .home-soft-panel {
+          background:
+            linear-gradient(145deg, rgba(15,27,45,0.78), rgba(9,16,29,0.72)) !important;
+          border-color: rgba(112,184,255,0.18) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 42px rgba(0,0,0,0.18) !important;
+        }
+        :root[data-theme="midnight"] .home-command-card {
+          background:
+            radial-gradient(circle at 86% 10%, rgba(112,184,255,0.18), transparent 34%),
+            radial-gradient(circle at 12% 100%, rgba(10,132,255,0.12), transparent 38%),
+            linear-gradient(145deg, rgba(11,20,36,0.9), rgba(7,12,23,0.78) 56%, rgba(12,26,48,0.72)) !important;
+          border-color: rgba(112,184,255,0.24) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 28px 78px rgba(0,0,0,0.32), 0 0 42px rgba(10,132,255,0.08) !important;
+        }
+        :root[data-theme="midnight"] .home-signal-pill {
+          background: rgba(10,132,255,0.12) !important;
+          border-color: rgba(112,184,255,0.28) !important;
+          color: #8cc9ff !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 30px rgba(10,132,255,0.08) !important;
+        }
+        :root[data-theme="midnight"] .home-info-tile {
+          background: rgba(12,22,38,0.74) !important;
+          border-color: rgba(112,184,255,0.18) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        :root[data-theme="midnight"] .home-chip {
+          background: rgba(10,132,255,0.13) !important;
+          border-color: rgba(112,184,255,0.28) !important;
+          color: #8cc9ff !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        :root[data-theme="midnight"] .home-secondary-action {
+          background: rgba(13,24,41,0.82) !important;
+          border-color: rgba(112,184,255,0.2) !important;
+          color: var(--color-ink) !important;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
         @media (max-width: 640px) {
           .home-mobile-actions > * {
@@ -345,15 +467,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden border-b border-[var(--color-line)]">
+      <section className="relative overflow-x-clip overflow-y-visible border-b border-[var(--color-line)]">
         <RelayNetworkCanvas className="opacity-90" />
-        <div className="home-hero-wash absolute inset-0" />
-        <div className="home-hero-grid absolute inset-0" />
-        <div className="absolute inset-x-6 top-8 h-px bg-[linear-gradient(90deg,transparent,rgba(var(--theme-glow-rgb),0.34),transparent)] lg:inset-x-10" />
-        <div className="relative mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-10 lg:py-14">
-          <div className="grid gap-6 lg:grid-cols-[1.12fr_0.88fr] lg:items-end xl:gap-10">
+        <div className="home-hero-wash pointer-events-none absolute inset-0" />
+        <div className="home-hero-grid pointer-events-none absolute inset-0" />
+        <div className="pointer-events-none absolute inset-x-6 top-8 h-px bg-[linear-gradient(90deg,transparent,rgba(var(--theme-glow-rgb),0.34),transparent)] lg:inset-x-10" />
+        <div className="relative mx-auto max-w-7xl px-5 pb-8 pt-5 sm:px-6 sm:pb-10 sm:pt-7 lg:px-10 lg:pb-12 lg:pt-9">
+          <div className="grid gap-6 lg:grid-cols-[1.12fr_0.88fr] lg:items-start xl:gap-10">
             <div className="home-reveal max-w-3xl">
-              <p className="inline-flex rounded-full border border-white/70 bg-white/72 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-[var(--color-brand-deep)] shadow-[0_12px_30px_rgba(15,23,42,0.05)] backdrop-blur sm:text-xs">
+              <p className="home-signal-pill inline-flex rounded-full border px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] shadow-[0_12px_30px_rgba(15,23,42,0.05)] backdrop-blur sm:text-xs">
                 Relay Signal Desk
               </p>
               <h1 className="home-hero-title mt-5 max-w-4xl bg-[linear-gradient(112deg,var(--color-ink)_0%,var(--color-brand-deep)_48%,var(--color-ink)_92%)] bg-clip-text text-[2.65rem] font-black leading-[0.98] tracking-tight text-transparent sm:text-6xl lg:text-[4.75rem]">
@@ -371,7 +493,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/community"
-                  className="inline-flex rounded-full border border-[var(--color-line)] bg-white/80 px-6 py-3 text-sm font-bold text-[var(--color-ink)] backdrop-blur transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                  className="home-secondary-action inline-flex rounded-full border px-6 py-3 text-sm font-bold backdrop-blur transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
                 >
                   去看实时反馈
                 </Link>
@@ -385,7 +507,7 @@ export default function Home() {
                   <Link
                     key={route.title}
                     href={route.href}
-                    className="home-card-sheen card-lift rounded-[22px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_36px_rgba(15,23,42,0.10)]"
+                    className="home-card-sheen home-soft-panel card-lift rounded-[22px] border px-4 py-4 backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)]"
                   >
                     <p className="text-sm font-black text-[var(--color-ink)]">{route.title}</p>
                     <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">{route.description}</p>
@@ -394,19 +516,19 @@ export default function Home() {
                 </div>
               </div>
               <div className="home-flow-tight mt-7 grid gap-3 sm:grid-cols-3">
-                <div className="home-card-sheen rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="home-card-sheen home-soft-panel rounded-[20px] border px-4 py-4 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                     收录站点
                   </p>
                   <p className="mt-2 text-3xl font-black">{stationComparisonRows.length}</p>
                 </div>
-                <div className="home-card-sheen rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="home-card-sheen home-soft-panel rounded-[20px] border px-4 py-4 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                     低倍率样本
                   </p>
                   <p className="mt-2 text-3xl font-black">{lowRateCount}</p>
                 </div>
-                <div className="home-card-sheen rounded-[20px] border border-white/70 bg-white/72 px-4 py-4 shadow-[0_16px_34px_rgba(15,23,42,0.06)] backdrop-blur">
+                <div className="home-card-sheen home-soft-panel rounded-[20px] border px-4 py-4 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                     可先试用
                   </p>
@@ -415,12 +537,32 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="home-reveal home-delay-2 home-glass-edge home-card-sheen relative overflow-hidden rounded-[30px] border border-white/70 bg-white/78 p-5 shadow-[0_24px_74px_rgba(15,23,42,0.10)] backdrop-blur sm:p-6">
-              <div className="absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,rgba(var(--theme-glow-rgb),0.16),transparent_70%)]" />
+            <div className="home-reveal home-delay-2 home-glass-edge home-card-sheen home-command-card relative h-fit self-start overflow-clip rounded-[30px] border p-5 backdrop-blur sm:p-6">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,rgba(var(--theme-glow-rgb),0.22),transparent_70%)]" />
+              <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-secondary-rgb),0.16),transparent_70%)] blur-xl" />
               <div className="relative">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-deep)]">
                   当前主观察面
                 </p>
+                <div className="my-7 max-w-md">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                    文脉题记 / {homeVerseLines[0].source}
+                  </p>
+                  <p className="home-quote-line mt-3 text-2xl font-black leading-snug text-[var(--color-ink)] sm:text-3xl">
+                    {homeVerseLines[0].line}
+                  </p>
+                  <p className="mt-3 max-w-sm text-sm leading-7 text-[var(--color-muted)]">
+                    {homeVerseLines[0].note}
+                  </p>
+                  <div className="mt-4 border-l border-[rgba(var(--theme-glow-rgb),0.28)] pl-3">
+                    <p className="text-sm font-semibold leading-7 text-[var(--color-ink)]">
+                      {homeVerseLines[1].line}
+                    </p>
+                    <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-muted)]">
+                      {homeVerseLines[1].source}
+                    </p>
+                  </div>
+                </div>
                 {featuredLead ? (
                   <>
                     <div className="mt-4 flex items-start justify-between gap-4">
@@ -430,19 +572,19 @@ export default function Home() {
                           {featuredLead.note}
                         </p>
                       </div>
-                      <span className="rounded-full bg-[var(--color-brand-soft)] px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
+                      <span className="home-chip rounded-full px-3 py-1 text-xs font-bold">
                         {featuredLead.badge}
                       </span>
                     </div>
                     <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-[18px] border border-[var(--color-line)] bg-white/82 px-4 py-4">
+                      <div className="home-info-tile rounded-[18px] border px-4 py-4">
                         <p className="text-xs text-[var(--color-muted)]">价格 / 倍率</p>
                         <p className="mt-2 text-lg font-black">{featuredLead.price}</p>
                         <p className="mt-1 text-sm font-semibold text-[var(--color-brand-deep)]">
                           {featuredLead.multiplier}
                         </p>
                       </div>
-                      <div className="rounded-[18px] border border-[var(--color-line)] bg-white/82 px-4 py-4">
+                      <div className="home-info-tile rounded-[18px] border px-4 py-4">
                         <p className="text-xs text-[var(--color-muted)]">一句判断</p>
                         <p className="mt-2 text-sm leading-7 text-[var(--color-ink)]">
                           {featuredLead.verdict}
@@ -452,7 +594,7 @@ export default function Home() {
                   </>
                 ) : null}
                 <div className="home-flow-tight mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[18px] border border-[var(--color-line)] bg-white/76 px-4 py-4">
+                  <div className="home-info-tile rounded-[18px] border px-4 py-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                       先看什么
                     </p>
@@ -460,7 +602,7 @@ export default function Home() {
                       先看倍率和试用，再看备注。
                     </p>
                   </div>
-                  <div className="rounded-[18px] border border-[var(--color-line)] bg-white/76 px-4 py-4">
+                  <div className="home-info-tile rounded-[18px] border px-4 py-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                       观察口径
                     </p>
@@ -469,7 +611,7 @@ export default function Home() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-5 rounded-[18px] border border-[var(--color-line)] bg-white/76 px-4 py-4">
+                <div className="home-info-tile mt-5 rounded-[18px] border px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                     三步判断
                   </p>
@@ -494,29 +636,29 @@ export default function Home() {
         </div>
       </section>
 
-      <section data-reveal className="relative overflow-hidden border-b border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-surface-rgb),0.14),rgba(var(--theme-glow-rgb),0.045))]">
+      <section data-reveal className="relative overflow-x-clip overflow-y-visible border-b border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-surface-rgb),0.14),rgba(var(--theme-glow-rgb),0.045))]">
         <div className="home-ambient pointer-events-none absolute -left-24 top-12 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-glow-rgb),0.14),transparent_68%)] blur-2xl" />
         <div className="home-ambient-fast pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-secondary-rgb),0.14),transparent_70%)] blur-2xl" />
         <div className="relative mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-9 lg:px-10 lg:py-11">
           <div className="grid gap-6 xl:grid-cols-[1.04fr_0.96fr]">
-            <div className="home-reveal home-glass-edge home-card-sheen relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(var(--theme-surface-rgb),0.96),rgba(var(--theme-glow-rgb),0.07))] p-5 shadow-[0_22px_60px_rgba(15,23,42,0.06)] sm:p-6 lg:p-7">
+            <div className="home-reveal home-glass-edge home-card-sheen home-command-card relative overflow-clip rounded-[30px] border p-5 sm:p-6 lg:p-7">
               <div className="pointer-events-none absolute right-0 top-0 h-32 w-48 rounded-bl-full bg-[radial-gradient(circle_at_top_right,rgba(var(--theme-glow-rgb),0.16),transparent_70%)]" />
               <div className="relative">
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-deep)]">
-                  产品路径
+                  线索分层
                 </p>
                 <h2 className="home-mobile-balance mt-4 max-w-3xl text-3xl font-black tracking-tight sm:text-4xl">
-                  先筛候选，再进深一层验证。
+                  先看真实线索，再决定要不要深入。
                 </h2>
                 <p className="mt-4 max-w-3xl text-base leading-8 text-[var(--color-muted)]">
-                  首页先帮你定顺序，不让动作断在半路。
+                  试用、低倍率和主力候选分开摆，避免把不同类型的站点混成一个结论。
                 </p>
               </div>
               <div className="home-flow relative mt-6 grid gap-4 lg:grid-cols-3">
                 {productLayers.map((layer, index) => (
                   <article
                     key={layer.title}
-                    className="home-card-sheen group relative overflow-hidden rounded-[24px] border border-white/80 bg-white/82 px-5 py-5 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--color-brand)] hover:shadow-[0_20px_42px_rgba(15,23,42,0.09)]"
+                    className="home-card-sheen home-soft-panel group relative overflow-clip rounded-[24px] border px-5 py-5 backdrop-blur transition hover:-translate-y-1 hover:border-[var(--color-brand)]"
                   >
                     <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,var(--color-brand),rgba(var(--theme-secondary-rgb),0.64))] opacity-0 transition group-hover:opacity-100" />
                     <div className="flex items-center justify-between gap-4">
@@ -536,53 +678,57 @@ export default function Home() {
               </div>
             </div>
 
-            <aside className="home-reveal home-delay-2 relative overflow-hidden rounded-[30px] border border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-glow-rgb),0.08),rgba(var(--theme-surface-rgb),0.94))] p-5 shadow-[0_22px_60px_rgba(var(--theme-glow-rgb),0.08)] sm:p-6 lg:p-7">
+            <aside className="home-reveal home-delay-2 home-command-card relative overflow-clip rounded-[30px] border p-5 sm:p-6 lg:p-7">
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-glow-rgb),0.18),transparent_70%)] blur-xl" />
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
+                <span className="home-chip rounded-full px-3 py-1 text-xs font-bold">
                   已收录 {stationComparisonRows.length} 个站点
                 </span>
-                <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
+                <span className="home-chip rounded-full px-3 py-1 text-xs font-bold">
                   {lowRateCount} 个低倍率样本
                 </span>
-                <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-[var(--color-brand-deep)]">
+                <span className="home-chip rounded-full px-3 py-1 text-xs font-bold">
                   {trialReadyCount} 个可先试用
                 </span>
               </div>
               <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
-                推荐起步路径
+                当前值得先看的线索
               </h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)]">
-                先低成本试，再补风险，最后定长期路线。
+                不是推荐充值，是把低门槛、低倍率和待补样本先摆出来。
               </p>
               <div className="relative mt-6">
-                <div className="absolute bottom-4 left-[18px] top-4 hidden w-px bg-[linear-gradient(180deg,var(--color-brand),transparent)] sm:block" />
+                <div className="absolute bottom-4 left-[33px] top-4 hidden w-px bg-[linear-gradient(180deg,var(--color-brand),transparent)] sm:block" />
                 <div className="home-flow space-y-4">
                   {actionFlows.map((flow) => (
                   <div
                     key={flow.step}
-                    className="home-card-sheen relative rounded-[24px] border border-white/80 bg-white/84 px-5 py-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)] hover:shadow-[0_18px_38px_rgba(15,23,42,0.08)] sm:pl-14"
+                    className="home-card-sheen home-soft-panel relative rounded-[24px] border px-5 py-5 backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--color-brand)]"
                   >
-                    <span className="absolute left-5 top-5 hidden h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-white/80 bg-[var(--color-brand)] text-[10px] font-black text-[var(--color-on-brand)] shadow-[0_10px_22px_var(--color-panel-glow)] sm:flex">
-                      {flow.step}
-                    </span>
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
-                          Step {flow.step}
+                    <div className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-4">
+                      <span className="relative z-10 mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border border-[rgba(var(--theme-secondary-rgb),0.3)] bg-[var(--color-brand)] text-[10px] font-black text-[var(--color-on-brand)] shadow-[0_10px_22px_var(--color-panel-glow)]">
+                        {flow.step}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">
+                              Step {flow.step}
+                            </p>
+                            <h3 className="mt-2 text-lg font-black text-[var(--color-ink)]">{flow.title}</h3>
+                          </div>
+                          <Link
+                            href={flow.href}
+                            className="home-secondary-action shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+                          >
+                            {flow.cta}
+                          </Link>
+                        </div>
+                        <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
+                          {flow.description}
                         </p>
-                        <h3 className="mt-2 text-lg font-black text-[var(--color-ink)]">{flow.title}</h3>
                       </div>
-                      <Link
-                        href={flow.href}
-                        className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-2 text-xs font-bold text-[var(--color-brand-deep)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
-                      >
-                        {flow.cta}
-                      </Link>
                     </div>
-                    <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-                      {flow.description}
-                    </p>
                   </div>
                   ))}
                 </div>
@@ -592,7 +738,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section data-reveal className="relative overflow-hidden border-b border-[var(--color-line)]">
+      <section data-reveal className="relative overflow-x-clip overflow-y-visible border-b border-[var(--color-line)]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(var(--theme-glow-rgb),0.055),transparent)]" />
         <div className="surface-in relative mx-auto max-w-7xl px-5 py-8 sm:px-6 lg:px-10 lg:py-10">
           <div className="home-reveal mb-6 flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-end">
@@ -626,7 +772,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div data-reveal className="home-reveal home-delay-1 surface-in overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--surface-gradient)] shadow-[var(--shadow-card)]">
+          <div data-reveal className="home-reveal home-delay-1 surface-in overflow-clip rounded-[24px] border border-[var(--color-line)] bg-[var(--surface-gradient)] shadow-[var(--shadow-card)]">
             <div className="grid gap-0 lg:grid-cols-[1.35fr_0.65fr]">
               <div className="px-6 py-6 lg:px-8 lg:py-7">
                 <div className="hidden grid-cols-[0.55fr_1fr_0.95fr_0.75fr_1.35fr] border-b border-[var(--color-line)] pb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)] md:grid">
@@ -748,7 +894,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section data-reveal className="relative overflow-hidden border-t border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-surface-rgb),0),rgba(var(--theme-glow-rgb),0.055))]">
+      <section data-reveal className="relative overflow-x-clip overflow-y-visible border-t border-[var(--color-line)] bg-[linear-gradient(180deg,rgba(var(--theme-surface-rgb),0),rgba(var(--theme-glow-rgb),0.055))]">
         <div className="home-ambient pointer-events-none absolute -right-24 top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(var(--theme-glow-rgb),0.13),transparent_70%)] blur-2xl" />
         <div className="relative mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-10 lg:py-12">
           <div className="home-reveal flex flex-col items-start justify-between gap-4 border-b border-[var(--color-line)] pb-4 sm:flex-row sm:items-end sm:gap-6">
@@ -763,12 +909,12 @@ export default function Home() {
             </div>
             <Link
               href="/stations"
-              className="inline-flex items-center rounded-full border border-[var(--color-line)] bg-white/70 px-4 py-2 text-sm font-bold text-[var(--color-brand-deep)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
+              className="home-secondary-action inline-flex items-center rounded-full border px-4 py-2 text-sm font-bold transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)]"
             >
               完整榜单 →
             </Link>
           </div>
-          <div data-reveal className="mt-5 overflow-hidden rounded-[26px] border border-[var(--color-line)] bg-[var(--surface-gradient)] px-4 shadow-[0_18px_46px_rgba(15,23,42,0.055)] sm:px-5">
+          <div data-reveal className="mt-5 overflow-clip rounded-[26px] border border-[var(--color-line)] bg-[var(--surface-gradient)] px-4 shadow-[0_18px_46px_rgba(15,23,42,0.055)] sm:px-5">
             {moreRows.map((row, index) => {
               const url = stationLinkMap[row.name];
               const baseClasses =
@@ -817,7 +963,7 @@ export default function Home() {
               );
             })}
           </div>
-          <div data-reveal className="home-reveal home-delay-2 home-card-sheen mt-8 rounded-[28px] border border-[var(--color-line)] bg-[linear-gradient(135deg,rgba(var(--theme-glow-rgb),0.12),rgba(var(--theme-surface-rgb),0.94))] px-5 py-6 shadow-[0_18px_44px_rgba(var(--theme-glow-rgb),0.10)] sm:px-6">
+          <div data-reveal className="home-reveal home-delay-2 home-card-sheen home-command-card mt-8 rounded-[28px] border px-5 py-6 sm:px-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-deep)]">
@@ -839,7 +985,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/models"
-                  className="inline-flex rounded-full border border-[var(--color-line)] bg-white/88 px-5 py-3 text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
+                  className="home-secondary-action inline-flex rounded-full border px-5 py-3 text-sm font-bold transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
                 >
                   继续定模型方向
                 </Link>

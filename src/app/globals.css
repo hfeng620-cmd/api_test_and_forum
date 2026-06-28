@@ -482,6 +482,108 @@
   --shadow-card: 0 0 0 0.5px rgba(38,54,18,0.03), 0 1px 2px rgba(38,54,18,0.025), 0 4px 18px rgba(38,54,18,0.048), 0 10px 42px rgba(38,54,18,0.058);
 }
 
+:root[data-theme="slateblue"] {
+  --background: #f1f4f8;
+  --foreground: #17212f;
+  --color-bg: #f1f4f8;
+  --color-ink: #17212f;
+  --color-muted: #667283;
+  --color-line: #d9e1ec;
+  --color-soft: #e8eef6;
+  --color-brand: #4f6f8f;
+  --color-brand-deep: #3e5b76;
+  --color-brand-strong: #2c465f;
+  --color-on-brand: #ffffff;
+  --color-brand-soft: rgba(79, 111, 143, 0.1);
+  --color-panel-glow: rgba(79, 111, 143, 0.065);
+  --color-panel: rgba(255, 255, 255, 0.93);
+  --color-panel-strong: rgba(255, 255, 255, 0.985);
+  --color-header: rgba(255, 255, 255, 0.88);
+  --color-hover: rgba(23, 33, 47, 0.03);
+  --color-row-alt: #f7f9fc;
+  --color-input: #ffffff;
+  --surface-gradient: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(241,244,248,0.96));
+  --theme-glow-rgb: 79, 111, 143;
+  --theme-secondary-rgb: 152, 178, 204;
+  --theme-surface-rgb: 255, 255, 255;
+  --page-background:
+    radial-gradient(circle at 14% 0%, rgba(79,111,143,0.055), transparent 30%),
+    radial-gradient(circle at 86% 100%, rgba(152,178,204,0.1), transparent 26%),
+    linear-gradient(180deg, #fafcff 0%, #f1f4f8 100%);
+  --ambient-background:
+    radial-gradient(circle at 18% 8%, rgba(255,255,255,0.68), transparent 18%),
+    radial-gradient(circle at 74% 0%, var(--color-panel-glow), transparent 30%);
+  --shadow-card: 0 0 0 0.5px rgba(15,23,42,0.032), 0 1px 2px rgba(15,23,42,0.026), 0 4px 18px rgba(15,23,42,0.046), 0 10px 42px rgba(15,23,42,0.056);
+}
+
+:root[data-theme="mocha"] {
+  --background: #f4eee8;
+  --foreground: #251d18;
+  --color-bg: #f4eee8;
+  --color-ink: #251d18;
+  --color-muted: #75685f;
+  --color-line: #e2d7cc;
+  --color-soft: #ece3d9;
+  --color-brand: #7c5f48;
+  --color-brand-deep: #654b38;
+  --color-brand-strong: #4d3829;
+  --color-on-brand: #ffffff;
+  --color-brand-soft: rgba(124, 95, 72, 0.11);
+  --color-panel-glow: rgba(124, 95, 72, 0.07);
+  --color-panel: rgba(255, 255, 255, 0.92);
+  --color-panel-strong: rgba(255, 255, 255, 0.98);
+  --color-header: rgba(255, 255, 255, 0.86);
+  --color-hover: rgba(37, 29, 24, 0.03);
+  --color-row-alt: #fbf7f2;
+  --color-input: #fffdfb;
+  --surface-gradient: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(244,238,232,0.97));
+  --theme-glow-rgb: 124, 95, 72;
+  --theme-secondary-rgb: 205, 181, 159;
+  --theme-surface-rgb: 255, 252, 248;
+  --page-background:
+    radial-gradient(circle at 16% 0%, rgba(124,95,72,0.06), transparent 30%),
+    radial-gradient(circle at 84% 100%, rgba(205,181,159,0.12), transparent 26%),
+    linear-gradient(180deg, #fbf7f2 0%, #f4eee8 100%);
+  --ambient-background:
+    radial-gradient(circle at 18% 8%, rgba(255,255,255,0.64), transparent 18%),
+    radial-gradient(circle at 74% 0%, var(--color-panel-glow), transparent 28%);
+  --shadow-card: 0 0 0 0.5px rgba(36,25,15,0.032), 0 1px 2px rgba(36,25,15,0.026), 0 4px 18px rgba(36,25,15,0.048), 0 10px 42px rgba(36,25,15,0.058);
+}
+
+:root[data-theme="dusk"] {
+  --background: #f4f0f6;
+  --foreground: #221d2a;
+  --color-bg: #f4f0f6;
+  --color-ink: #221d2a;
+  --color-muted: #70677a;
+  --color-line: #e1d9e8;
+  --color-soft: #ece5f0;
+  --color-brand: #7e6a8f;
+  --color-brand-deep: #665375;
+  --color-brand-strong: #4d3d5b;
+  --color-on-brand: #ffffff;
+  --color-brand-soft: rgba(126, 106, 143, 0.11);
+  --color-panel-glow: rgba(126, 106, 143, 0.07);
+  --color-panel: rgba(255, 255, 255, 0.93);
+  --color-panel-strong: rgba(255, 255, 255, 0.98);
+  --color-header: rgba(255, 255, 255, 0.87);
+  --color-hover: rgba(34, 29, 42, 0.03);
+  --color-row-alt: #fbf8fc;
+  --color-input: #ffffff;
+  --surface-gradient: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(244,240,246,0.96));
+  --theme-glow-rgb: 126, 106, 143;
+  --theme-secondary-rgb: 206, 185, 218;
+  --theme-surface-rgb: 255, 255, 255;
+  --page-background:
+    radial-gradient(circle at 14% 0%, rgba(126,106,143,0.06), transparent 30%),
+    radial-gradient(circle at 86% 100%, rgba(206,185,218,0.11), transparent 24%),
+    linear-gradient(180deg, #fbf8fc 0%, #f4f0f6 100%);
+  --ambient-background:
+    radial-gradient(circle at 18% 8%, rgba(255,255,255,0.66), transparent 18%),
+    radial-gradient(circle at 74% 0%, var(--color-panel-glow), transparent 28%);
+  --shadow-card: 0 0 0 0.5px rgba(34,29,42,0.032), 0 1px 2px rgba(34,29,42,0.026), 0 4px 18px rgba(34,29,42,0.046), 0 10px 42px rgba(34,29,42,0.056);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -693,7 +795,8 @@ main#main-content > .theme-stage {
 main#main-content .route-stage > main.theme-stage {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   background:
     radial-gradient(circle at 50% -6%, rgba(255,255,255,0.16), transparent 34%),
     linear-gradient(180deg, rgba(var(--theme-glow-rgb), 0.035), rgba(var(--theme-glow-rgb), 0) 24%, rgba(var(--theme-secondary-rgb), 0.03) 100%);
@@ -1324,6 +1427,54 @@ button[aria-label="Open Next.js Dev Tools"] {
   animation: surface-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+.global-relay-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0) scale(1.01);
+  transition:
+    opacity 520ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 680ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.global-relay-canvas--active {
+  opacity: 0.24;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.global-relay-canvas[data-relay-route="stations"] {
+  opacity: 0.2;
+}
+
+.global-relay-canvas[data-relay-route="community"] {
+  opacity: 0.26;
+}
+
+.global-relay-canvas[data-relay-route="models"] {
+  opacity: 0.22;
+}
+
+.global-relay-canvas[data-relay-route="guides"],
+.global-relay-canvas[data-relay-route="profile"] {
+  opacity: 0.18;
+}
+
+.global-relay-canvas__scene {
+  position: absolute;
+  inset: 0;
+}
+
+.global-relay-canvas .relay-network-canvas__sheen {
+  opacity: 0.45;
+}
+
+.global-relay-canvas .relay-network-canvas__fade {
+  height: 34vh;
+  background: linear-gradient(180deg, transparent, rgba(var(--theme-surface-rgb), 0.42));
+}
+
 .route-shell {
   position: relative;
   isolation: isolate;
@@ -1341,7 +1492,7 @@ button[aria-label="Open Next.js Dev Tools"] {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
+  overflow: clip;
   animation: route-stage-exit 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
@@ -1369,7 +1520,6 @@ button[aria-label="Open Next.js Dev Tools"] {
   animation: route-stage-enter 680ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-:root[data-route-hydrating="true"] .route-stage--enter,
 :root[data-route-hydrating="true"] .route-stage--enter .reveal-ready,
 :root[data-route-hydrating="true"] .route-stage--enter .reveal-hidden,
 :root[data-route-hydrating="true"] .route-stage--enter .reveal-visible {
@@ -1887,6 +2037,14 @@ button[aria-label="Open Next.js Dev Tools"] {
   animation: scale-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+.ticker-enter {
+  scrollbar-width: none;
+}
+
+.ticker-enter::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(100%); }
   to   { opacity: 1; transform: translateY(0); }
@@ -1921,8 +2079,12 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme="cyber"] .bg-white,
 :root[data-theme="cyber"] .bg-white\/70,
 :root[data-theme="cyber"] .bg-white\/72,
+:root[data-theme="cyber"] .bg-white\/76,
+:root[data-theme="cyber"] .bg-white\/78,
 :root[data-theme="cyber"] .bg-white\/80,
 :root[data-theme="cyber"] .bg-white\/82,
+:root[data-theme="cyber"] .bg-white\/84,
+:root[data-theme="cyber"] .bg-white\/88,
 :root[data-theme="cyber"] .bg-white\/90,
 :root[data-theme="cyber"] .bg-white\/92,
 :root[data-theme="cyber"] .bg-white\/94,
@@ -1932,8 +2094,12 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme="midnight"] .bg-white,
 :root[data-theme="midnight"] .bg-white\/70,
 :root[data-theme="midnight"] .bg-white\/72,
+:root[data-theme="midnight"] .bg-white\/76,
+:root[data-theme="midnight"] .bg-white\/78,
 :root[data-theme="midnight"] .bg-white\/80,
 :root[data-theme="midnight"] .bg-white\/82,
+:root[data-theme="midnight"] .bg-white\/84,
+:root[data-theme="midnight"] .bg-white\/88,
 :root[data-theme="midnight"] .bg-white\/90,
 :root[data-theme="midnight"] .bg-white\/92,
 :root[data-theme="midnight"] .bg-white\/94,
@@ -1943,8 +2109,12 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme="ink"] .bg-white,
 :root[data-theme="ink"] .bg-white\/70,
 :root[data-theme="ink"] .bg-white\/72,
+:root[data-theme="ink"] .bg-white\/76,
+:root[data-theme="ink"] .bg-white\/78,
 :root[data-theme="ink"] .bg-white\/80,
 :root[data-theme="ink"] .bg-white\/82,
+:root[data-theme="ink"] .bg-white\/84,
+:root[data-theme="ink"] .bg-white\/88,
 :root[data-theme="ink"] .bg-white\/90,
 :root[data-theme="ink"] .bg-white\/92,
 :root[data-theme="ink"] .bg-white\/94,
@@ -1954,8 +2124,12 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme-mode="night"] .bg-white,
 :root[data-theme-mode="night"] .bg-white\/70,
 :root[data-theme-mode="night"] .bg-white\/72,
+:root[data-theme-mode="night"] .bg-white\/76,
+:root[data-theme-mode="night"] .bg-white\/78,
 :root[data-theme-mode="night"] .bg-white\/80,
 :root[data-theme-mode="night"] .bg-white\/82,
+:root[data-theme-mode="night"] .bg-white\/84,
+:root[data-theme-mode="night"] .bg-white\/88,
 :root[data-theme-mode="night"] .bg-white\/90,
 :root[data-theme-mode="night"] .bg-white\/92,
 :root[data-theme-mode="night"] .bg-white\/94,
@@ -1965,8 +2139,12 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme-mode="starfield"] .bg-white,
 :root[data-theme-mode="starfield"] .bg-white\/70,
 :root[data-theme-mode="starfield"] .bg-white\/72,
+:root[data-theme-mode="starfield"] .bg-white\/76,
+:root[data-theme-mode="starfield"] .bg-white\/78,
 :root[data-theme-mode="starfield"] .bg-white\/80,
 :root[data-theme-mode="starfield"] .bg-white\/82,
+:root[data-theme-mode="starfield"] .bg-white\/84,
+:root[data-theme-mode="starfield"] .bg-white\/88,
 :root[data-theme-mode="starfield"] .bg-white\/90,
 :root[data-theme-mode="starfield"] .bg-white\/92,
 :root[data-theme-mode="starfield"] .bg-white\/94,
@@ -1976,8 +2154,12 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme-mode="velvet"] .bg-white,
 :root[data-theme-mode="velvet"] .bg-white\/70,
 :root[data-theme-mode="velvet"] .bg-white\/72,
+:root[data-theme-mode="velvet"] .bg-white\/76,
+:root[data-theme-mode="velvet"] .bg-white\/78,
 :root[data-theme-mode="velvet"] .bg-white\/80,
 :root[data-theme-mode="velvet"] .bg-white\/82,
+:root[data-theme-mode="velvet"] .bg-white\/84,
+:root[data-theme-mode="velvet"] .bg-white\/88,
 :root[data-theme-mode="velvet"] .bg-white\/90,
 :root[data-theme-mode="velvet"] .bg-white\/92,
 :root[data-theme-mode="velvet"] .bg-white\/94,
@@ -1987,8 +2169,12 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme-mode="rain"] .bg-white,
 :root[data-theme-mode="rain"] .bg-white\/70,
 :root[data-theme-mode="rain"] .bg-white\/72,
+:root[data-theme-mode="rain"] .bg-white\/76,
+:root[data-theme-mode="rain"] .bg-white\/78,
 :root[data-theme-mode="rain"] .bg-white\/80,
 :root[data-theme-mode="rain"] .bg-white\/82,
+:root[data-theme-mode="rain"] .bg-white\/84,
+:root[data-theme-mode="rain"] .bg-white\/88,
 :root[data-theme-mode="rain"] .bg-white\/90,
 :root[data-theme-mode="rain"] .bg-white\/92,
 :root[data-theme-mode="rain"] .bg-white\/94,
@@ -2038,6 +2224,21 @@ button[aria-label="Open Next.js Dev Tools"] {
 :root[data-theme-mode="rain"] [class*="bg-gradient-to-"][class*="to-white"] {
   background-color: var(--color-panel) !important;
   background-image: var(--surface-gradient) !important;
+}
+
+:root[data-theme="cyber"] .border-white\/70,
+:root[data-theme="cyber"] .border-white\/80,
+:root[data-theme="midnight"] .border-white\/70,
+:root[data-theme="midnight"] .border-white\/80,
+:root[data-theme="ink"] .border-white\/70,
+:root[data-theme="ink"] .border-white\/80,
+:root[data-theme-mode="starfield"] .border-white\/70,
+:root[data-theme-mode="starfield"] .border-white\/80,
+:root[data-theme-mode="velvet"] .border-white\/70,
+:root[data-theme-mode="velvet"] .border-white\/80,
+:root[data-theme-mode="rain"] .border-white\/70,
+:root[data-theme-mode="rain"] .border-white\/80 {
+  border-color: var(--color-line) !important;
 }
 
 :root[data-theme="cyber"] .selection-comment-pop::after,

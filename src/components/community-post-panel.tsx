@@ -5,6 +5,7 @@ import { useRef, useState, useEffect, useMemo } from "react";
 import { createDiscussionPost, uploadForumImage, loadAllTags, loadDiscussionPosts } from "@/lib/discussion-storage";
 import { useForumAuth } from "@/lib/forum-auth";
 import { CATEGORIES, DEFAULT_CATEGORY, isCategoryTag, type CategoryInfo } from "@/lib/categories";
+import { FORUM_IMAGE_ACCEPT } from "@/lib/forum-image-safety";
 
 type CommunityPostPanelProps = {
   onPostCreated?: () => void;
@@ -194,12 +195,12 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
 
   return (
     <div
-      className="card-lift rounded-[20px] border border-[var(--color-line)] bg-[var(--color-panel)] p-5 shadow-[var(--shadow-card)] backdrop-blur sm:p-6 transition-all duration-300"
+      className="surface-in card-lift rounded-[22px] border border-[var(--color-line)] bg-[linear-gradient(180deg,var(--color-panel),color-mix(in_srgb,var(--color-panel)_82%,var(--color-soft)))] p-4 shadow-[var(--shadow-card)] backdrop-blur transition-all duration-300 sm:p-5"
       data-selection-comments="off"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-line)] pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-line)] pb-2.5">
         <div>
-          <h2 className="text-xl font-black tracking-tight mb-2">发帖子</h2>
+          <h2 className="mb-1 text-lg font-black tracking-tight">发帖子</h2>
           <p className="text-xs text-[var(--color-muted)]">价格、稳定性、模型口径都可以先发这里。</p>
         </div>
         <a
@@ -213,9 +214,9 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
       </div>
 
       {!open ? (
-        <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
           <button
-            className="min-h-12 rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-left text-sm text-[var(--color-muted)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
+            className="min-h-11 rounded-[14px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-2.5 text-left text-sm text-[var(--color-muted)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-ink)]"
             onClick={handlePlaceholderClick}
             type="button"
           >
@@ -223,9 +224,9 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
               ? "写站点反馈、试用活动、价格变化或避坑记录..."
               : "登录后发帖..."}
           </button>
-          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+          <div className="flex flex-col items-stretch gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <button
-              className="w-full rounded-full bg-[var(--color-brand)] px-6 py-3 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)] btn-press sm:w-auto"
+              className="btn-press w-full rounded-full bg-[var(--color-brand)] px-5 py-2.5 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_22px_var(--color-panel-glow)] transition hover:bg-[var(--color-brand-deep)] sm:w-auto"
               onClick={handlePlaceholderClick}
               type="button"
             >
@@ -347,7 +348,7 @@ export function CommunityPostPanel({ onPostCreated }: CommunityPostPanelProps) {
 
           <div className="mt-2 flex items-center gap-3">
             <input
-              accept="image/*"
+              accept={FORUM_IMAGE_ACCEPT}
               className="hidden"
               onChange={async (event) => {
                 const file = event.target.files?.[0];

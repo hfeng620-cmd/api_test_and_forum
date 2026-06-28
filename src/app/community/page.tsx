@@ -90,7 +90,6 @@ export default function CommunityPage() {
   return (
     <main
       className="theme-stage relative min-h-screen overflow-hidden bg-transparent text-[var(--color-ink)]"
-      data-route-reveal="off"
     >
       <div
         aria-hidden="true"
@@ -123,6 +122,34 @@ export default function CommunityPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* 移动端导航 */}
+            <nav aria-label="页面导航" className="flex items-center gap-1.5 md:hidden">
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/"
+              >
+                首页
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/stations"
+              >
+                榜单
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/models"
+              >
+                模型
+              </Link>
+              <Link
+                className="rounded-full px-3 py-2 text-xs font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                href="/guides"
+              >
+                指南
+              </Link>
+            </nav>
+            {/* 桌面端导航 */}
             <nav className="hidden items-center gap-2 rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] p-1 md:flex">
               <Link
                 className="rounded-full px-4 py-2 text-sm font-semibold text-[var(--color-muted)] transition hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"

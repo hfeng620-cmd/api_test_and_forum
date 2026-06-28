@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { uploadAvatar, updateProfileAvatar } from "@/lib/discussion-storage";
+import { lockBodyScroll } from "@/lib/body-scroll-lock";
+import { FORUM_IMAGE_ACCEPT, getForumImageUploadError } from "@/lib/forum-image-safety";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useForumAuth } from "@/lib/forum-auth";
 
@@ -202,11 +204,11 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
     }, 0);
 
     document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
+    const unlockBodyScroll = lockBodyScroll();
     return () => {
       clearTimeout(timer);
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+      unlockBodyScroll();
     };
   }, [open, onClose]);
 
@@ -447,12 +449,9 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
   }
 
   async function handleAvatarChange(file: File) {
-    if (!file.type.startsWith("image/")) {
-      setError("请选择图片文件。");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setError("头像图片不能超过 2MB。");
+    const uploadError = getForumImageUploadError(file);
+    if (uploadError) {
+      setError(uploadError);
       return;
     }
 
@@ -496,16 +495,18 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
 
   return (
     <div
+      aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
+      role="dialog"
     >
-      <div ref={panelRef} className="w-full max-w-md rounded-[12px] border border-[var(--color-line)] bg-[var(--color-panel)] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)]">
+      <div ref={panelRef} aria-labelledby="auth-modal-title" className="w-full max-w-md rounded-[12px] border border-[var(--color-line)] bg-[var(--color-panel)] p-6 shadow-[0_24px_80px_rgba(15,23,42,0.14)]">
         {!isConfigured ? (
           <div className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-[var(--color-ink)]">
+              <h2 className="text-lg font-bold text-[var(--color-ink)]" id="auth-modal-title">
                 论坛登录未配置
               </h2>
               <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
@@ -530,7 +531,7 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
              ============================================ */
           <div className="space-y-5">
             <div>
-              <h2 className="text-lg font-bold text-[var(--color-ink)]">
+              <h2 className="text-lg font-bold text-[var(--color-ink)]" id="auth-modal-title">
                 {needsPassword ? "设置登录密码" : "已登录"}
               </h2>
               {needsPassword ? (
@@ -558,8 +559,11 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                 <p className="text-sm text-[var(--color-muted)]">
                   请设置密码和昵称。
                 </p>
+                <label className="sr-only" htmlFor="auth-setup-name">昵称</label>
                 <input
+                  aria-describedby={error ? "auth-error" : undefined}
                   className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                  id="auth-setup-name"
                   onChange={(event) => {
                     setDisplayNameInput(event.target.value);
                     setError("");
@@ -569,8 +573,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                   value={displayNameInput}
                   maxLength={80}
                 />
+                <label className="sr-only" htmlFor="auth-setup-password">设置密码</label>
                 <input
+                  aria-describedby={error ? "auth-error" : undefined}
+                  aria-invalid={error && registrationPasswordError ? true : undefined}
                   className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                  id="auth-setup-password"
                   onChange={(event) => {
                     setPasswordValue(event.target.value);
                     setError("");
@@ -579,8 +587,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                   type="password"
                   value={password}
                 />
+                <label className="sr-only" htmlFor="auth-setup-confirm">确认密码</label>
                 <input
+                  aria-describedby={error ? "auth-error" : undefined}
+                  aria-invalid={error && password !== confirmPassword ? true : undefined}
                   className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                  id="auth-setup-confirm"
                   onChange={(event) => {
                     setConfirmPassword(event.target.value);
                     setError("");
@@ -603,7 +615,7 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                 {/* Avatar upload */}
                 <div className="flex items-center gap-4">
                   <input
-                    accept="image/*"
+                    accept={FORUM_IMAGE_ACCEPT}
                     className="hidden"
                     onChange={(event) => {
                       const file = event.target.files?.[0];
@@ -625,7 +637,7 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
                     ) : avatarUrl ? (
-                      <img alt="头像" className="h-full w-full object-cover" src={avatarUrl} />
+                      <img alt="头像" className="h-full w-full object-cover" referrerPolicy="no-referrer" src={avatarUrl} />
                     ) : (
                       <svg aria-hidden="true" className="h-5 w-5 text-[var(--color-muted)]" fill="none" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14c-5.333 0-8 2.667-8 4v2h16v-2c0-1.333-2.667-4-8-4z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
@@ -645,8 +657,11 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                 <p className="text-sm text-[var(--color-muted)]">
                   已登录为 <span className="font-semibold text-[var(--color-ink)]">{signedInEmail}</span>
                 </p>
+                <label className="sr-only" htmlFor="auth-edit-name">修改昵称</label>
                 <input
+                  aria-describedby={error ? "auth-error" : undefined}
                   className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                  id="auth-edit-name"
                   onChange={(event) => {
                     setDisplayNameInput(event.target.value);
                     setError("");
@@ -700,7 +715,7 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
              ============================================ */
           <div className="space-y-5">
             <div>
-              <h2 className="text-lg font-bold text-[var(--color-ink)]">
+              <h2 className="text-lg font-bold text-[var(--color-ink)]" id="auth-modal-title">
                 {mode === "login" ? "登录" : "注册"}
               </h2>
               <p className="mt-1.5 text-xs text-[var(--color-muted)]">
@@ -741,8 +756,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
 
             <div className="space-y-3">
               {/* 邮箱 */}
+              <label className="sr-only" htmlFor="auth-email">邮箱地址</label>
               <input
+                aria-describedby={error ? "auth-error" : undefined}
+                aria-invalid={error && !normalizedEmail ? true : undefined}
                 className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                id="auth-email"
                 onChange={(event) => {
                   setEmail(event.target.value);
                   setError("");
@@ -755,8 +774,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
               {mode === "login" ? (
                 /* ---- 登录模式 ---- */
                 <>
+                  <label className="sr-only" htmlFor="auth-password">密码</label>
                   <input
+                    aria-describedby={error ? "auth-error" : undefined}
+                    aria-invalid={error && !password ? true : undefined}
                     className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                    id="auth-password"
                     onChange={(event) => {
                       setPasswordValue(event.target.value);
                       setError("");
@@ -782,8 +805,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                   {!otpSent ? (
                     /* 第一步：填写注册信息 */
                     <>
+                      <label className="sr-only" htmlFor="auth-display-name">昵称</label>
                       <input
+                        aria-describedby={error ? "auth-error" : undefined}
+                        aria-invalid={error && !displayNameInput.trim() ? true : undefined}
                         className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                        id="auth-display-name"
                         onChange={(event) => {
                           setDisplayNameInput(event.target.value);
                           setError("");
@@ -793,8 +820,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                         value={displayNameInput}
                         maxLength={80}
                       />
+                      <label className="sr-only" htmlFor="auth-reg-password">密码</label>
                       <input
+                        aria-describedby={error ? "auth-error" : undefined}
+                        aria-invalid={error && registrationPasswordError ? true : undefined}
                         className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                        id="auth-reg-password"
                         onChange={(event) => {
                           setPasswordValue(event.target.value);
                           setError("");
@@ -803,8 +834,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                         type="password"
                         value={password}
                       />
+                      <label className="sr-only" htmlFor="auth-confirm-password">确认密码</label>
                       <input
+                        aria-describedby={error ? "auth-error" : undefined}
+                        aria-invalid={error && password !== confirmPassword ? true : undefined}
                         className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-sm outline-none transition focus:border-[var(--color-brand)]"
+                        id="auth-confirm-password"
                         onChange={(event) => {
                           setConfirmPassword(event.target.value);
                           setError("");
@@ -832,8 +867,12 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
                         <p className="text-sm font-medium text-[var(--color-ink)]">{normalizedEmail}</p>
                         <p className="text-xs text-[var(--color-muted)]">昵称：{displayNameInput || "未填写"}</p>
                       </div>
+                      <label className="sr-only" htmlFor="auth-otp-code">验证码</label>
                       <input
+                        aria-describedby={error ? "auth-error" : undefined}
+                        aria-invalid={error && otpCode.length < OTP_CODE_MIN_LENGTH ? true : undefined}
                         className="w-full rounded-[12px] border border-[var(--color-line)] bg-[var(--color-input)] px-4 py-3 text-center text-lg tracking-[0.5em] outline-none transition focus:border-[var(--color-brand)]"
+                        id="auth-otp-code"
                         onChange={(event) => {
                           setOtpCode(event.target.value.replace(/\D/g, ""));
                           setError("");
@@ -873,9 +912,9 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
               )}
             </div>
 
-            {error ? <p className="text-sm font-semibold text-red-500">{error}</p> : null}
+            {error ? <p className="text-sm font-semibold text-red-500" id="auth-error" role="alert">{error}</p> : null}
             {notice ? (
-              <p className="text-sm font-semibold text-emerald-600">{notice}</p>
+              <p className="text-sm font-semibold text-emerald-600" id="auth-notice" role="status">{notice}</p>
             ) : null}
 
             <div className="flex items-center justify-end gap-3">
@@ -908,9 +947,9 @@ export function ForumAuthModal({ open, onClose }: ForumAuthModalProps) {
 
         {isConnected && (error || notice) ? (
           <div className="mt-4">
-            {error ? <p className="text-sm font-semibold text-red-500">{error}</p> : null}
+            {error ? <p className="text-sm font-semibold text-red-500" id="auth-error" role="alert">{error}</p> : null}
             {notice ? (
-              <p className="text-sm font-semibold text-emerald-600">{notice}</p>
+              <p className="text-sm font-semibold text-emerald-600" id="auth-notice" role="status">{notice}</p>
             ) : null}
           </div>
         ) : null}

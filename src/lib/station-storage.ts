@@ -105,8 +105,35 @@ const CAMEL_TO_SNAKE: Record<string, string> = {
   lastEditAt: "last_edit_at",
 };
 
+const EDITABLE_STATION_FIELDS = new Set([
+  "name",
+  "url",
+  "price",
+  "multiplier",
+  "entry",
+  "package_type",
+  "status",
+  "models",
+  "uptime",
+  "latency",
+  "source",
+  "verdict",
+  "note",
+  "advantage",
+  "risk",
+  "badge",
+  "group_name",
+  "sort_order",
+]);
+
 function toSnakeCase(field: string): string {
   return CAMEL_TO_SNAKE[field] ?? field;
+}
+
+function assertEditableStationField(fieldName: string) {
+  if (!EDITABLE_STATION_FIELDS.has(fieldName)) {
+    throw new Error("这个字段不允许通过协作编辑修改。");
+  }
 }
 
 /** Map a station_edits row (snake_case) to our camelCase StationEditRecord. */
@@ -313,6 +340,7 @@ export async function updateStation(
       if (camelKey === "id") continue;
 
       const snakeKey = toSnakeCase(camelKey);
+      assertEditableStationField(snakeKey);
       const oldVal = currentRow[snakeKey];
 
       const oldStr = oldVal === null || oldVal === undefined ? "" : String(oldVal);
@@ -450,6 +478,7 @@ export async function approvePendingEdit(editId: string): Promise<void> {
 
   // Apply the update to the station
   const fieldName = editRow.field_name as string;
+  assertEditableStationField(fieldName);
   const newValue = editRow.new_value as string;
   const stationId = editRow.station_id as string;
 

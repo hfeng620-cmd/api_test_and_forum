@@ -135,6 +135,7 @@ export default function UserRankPanel() {
                 <img
                   alt={user.display_name}
                   className="h-7 w-7 shrink-0 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
                   src={user.avatar_url}
                 />
               ) : (

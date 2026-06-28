@@ -2089,7 +2089,7 @@ export default function AdminPage() {
                 .map((user) => (
                   <div key={user.id} className="flex items-center gap-4 py-3">
                     <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--color-soft)] text-sm font-bold text-[var(--color-muted)]">
-                      {user.avatar_url ? <img alt="" className="h-full w-full rounded-full object-cover" src={user.avatar_url} /> : user.display_name.charAt(0)}
+                      {user.avatar_url ? <img alt="" className="h-full w-full rounded-full object-cover" referrerPolicy="no-referrer" src={user.avatar_url} /> : user.display_name.charAt(0)}
                       <span
                         className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${
                           user.is_online ? "bg-[#22c55e]" : "bg-[#d1d5db]"

@@ -1,18 +1,11 @@
 "use client";
 
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
+import { ALLOWED_FORUM_IMAGE_TYPES, getForumImageUploadError } from "@/lib/forum-image-safety";
 
 const FORUM_POSTS_PUBLIC_VIEW = "forum_posts_public";
 const FORUM_PUBLIC_REPLIES_VIEW = "forum_public_replies";
-const MAX_FORUM_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_EXTERNAL_URL_LENGTH = 500;
-const ALLOWED_FORUM_IMAGE_TYPES = {
-  "image/avif": "avif",
-  "image/gif": "gif",
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-} as const;
 const DEFAULT_SPAM_KEYWORDS = [
   "加微信",
   "免费领取",
@@ -984,18 +977,13 @@ function normalizeProfileTags(tags?: string[]) {
 }
 
 function validateForumImageUpload(file: File) {
-  if (file.size <= 0) {
-    throw new Error("图片文件不能为空。");
-  }
-
-  if (file.size > MAX_FORUM_IMAGE_BYTES) {
-    throw new Error("图片不能超过 5MB。");
-  }
+  const error = getForumImageUploadError(file);
+  if (error) throw new Error(error);
 
   const normalizedType = file.type.toLowerCase();
   const extension = ALLOWED_FORUM_IMAGE_TYPES[normalizedType as keyof typeof ALLOWED_FORUM_IMAGE_TYPES];
   if (!extension) {
-    throw new Error("仅支持 JPG、PNG、WebP、GIF 或 AVIF 图片。");
+    throw new Error("仅支持 JPG、PNG 或 WebP 图片。");
   }
 
   return extension;

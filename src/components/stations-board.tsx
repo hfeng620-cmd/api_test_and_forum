@@ -30,7 +30,7 @@ type SortOption = "default" | "priceAsc" | "recentUpdate";
 
 const sortOptions: { value: SortOption; label: string }[] = [
   { value: "default", label: "默认排序" },
-  { value: "priceAsc", label: "价格从低到高" },
+  { value: "priceAsc", label: "倍率从低到高" },
   { value: "recentUpdate", label: "最近更新" },
 ];
 
@@ -448,7 +448,7 @@ export function StationsBoard() {
     try {
       const result = await updateStation(editingId, editForm, editorName);
       if (result.needsReview) {
-        alert("已提交审核，管理员审核通过后会生效。");
+        alert("已提交巡查队列，站主或管理员确认后会生效。");
       } else {
         await refreshStations();
       }
@@ -745,7 +745,7 @@ export function StationsBoard() {
   return (
     <>
       {/* ---- Hero + Filters ---- */}
-      <section className="relative mx-auto max-w-[1760px] px-3 py-3 sm:px-5 lg:px-6 lg:py-4">
+      <section className="relative mx-auto max-w-[1680px] px-3 py-3 sm:px-5 lg:px-6 lg:py-4">
         <div className="rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3 shadow-[var(--shadow-card)] sm:px-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="max-w-3xl">
@@ -756,7 +756,7 @@ export function StationsBoard() {
                 中转站榜单
               </h1>
               <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
-                先用这张工作台缩出 2 到 3 个候选，再回社区补变化和风险，不用在多页之间来回切。
+                用倍率、试用和备注先缩出 2 到 3 个候选。
               </p>
             </div>
 
@@ -927,7 +927,7 @@ export function StationsBoard() {
               </p>
               <h2 className="mt-1 text-xl font-black">搜索 / 筛选</h2>
               <p className="mt-1 max-w-2xl text-sm leading-6 text-[var(--color-muted)]">
-                先把结果收成可比较的一批，再往下看总表，不要在第一屏就读完所有备注。
+                搜索后直接看总表；详细口径进历史或讨论区。
               </p>
             </div>
             <div className="hidden gap-2 lg:grid">
@@ -1047,7 +1047,7 @@ export function StationsBoard() {
       </section>
 
       {/* ---- Table ---- */}
-      <section className="relative mx-auto max-w-[1760px] px-3 pb-6 sm:px-5 lg:px-6">
+      <section className="relative mx-auto max-w-[1680px] px-3 pb-6 sm:px-5 lg:px-6">
         <div className="grid gap-3 2xl:grid-cols-[minmax(0,1fr)_280px] 2xl:items-start">
           <div className="overflow-hidden rounded-[22px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[var(--shadow-card)]">
           {/* Table header */}
@@ -1092,9 +1092,9 @@ export function StationsBoard() {
           </div>
 
           {/* ---- Mobile card layout (below lg) ---- */}
-          <div className="space-y-3 p-3 lg:hidden">
+          <div className="grid gap-3 p-3 md:grid-cols-2 lg:hidden">
             {visibleRows.length === 0 ? (
-              <div className="rounded-[20px] shadow-[var(--shadow-card)] bg-[var(--color-panel)] px-6 py-16 text-center">
+              <div className="rounded-[20px] bg-[var(--color-panel)] px-6 py-16 text-center shadow-[var(--shadow-card)] md:col-span-2">
                 {stations.length === 0 ? (
                   <>
                     <p className="text-lg font-bold text-[var(--color-muted)]">暂无站点数据</p>
@@ -1252,7 +1252,7 @@ export function StationsBoard() {
             {/* Add-new button */}
             {isConnected && !addingNew && (
               <button
-                className="w-full rounded-full border border-dashed border-[var(--color-brand-soft)] bg-[var(--color-soft)] px-5 py-3 text-sm font-bold text-[var(--color-brand-deep)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)]"
+                className="w-full rounded-full border border-dashed border-[var(--color-brand-soft)] bg-[var(--color-soft)] px-5 py-3 text-sm font-bold text-[var(--color-brand-deep)] transition hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-soft)] md:col-span-2"
                 onClick={startAdd}
                 type="button"
               >
@@ -1261,7 +1261,7 @@ export function StationsBoard() {
             )}
 
             {/* Create panel */}
-            {addingNew && renderCreatePanel()}
+            {addingNew && <div className="md:col-span-2">{renderCreatePanel()}</div>}
           </div>
 
           <div className="hidden overflow-x-auto lg:block">
@@ -1353,20 +1353,11 @@ export function StationsBoard() {
                             );
                           })()}
                         </div>
-                        {stationHref ? (
-                          <a
-                            href={stationHref}
-                            rel="noopener noreferrer"
-                            target="_blank"
-                            className="mt-2 inline-block line-clamp-2 text-sm leading-6 font-semibold text-[var(--color-brand-deep)] transition hover:text-[var(--color-brand)]"
-                          >
-                            {station.entry || stationHref}
-                          </a>
-                        ) : (
+                        {station.groupName || station.entry ? (
                           <p className="mt-2 line-clamp-1 text-sm leading-5 text-[var(--color-muted)]">
                             {station.groupName || station.entry}
                           </p>
-                        )}
+                        ) : null}
                       </div>
 
                       {/* 入口 / 地址 */}
@@ -1491,10 +1482,7 @@ export function StationsBoard() {
 
           <aside className="hidden 2xl:block">
             <div className="surface-in sticky top-24 rounded-[24px] border border-[var(--color-line)] bg-[linear-gradient(180deg,var(--color-panel),color-mix(in_srgb,var(--color-soft)_68%,var(--color-panel)))] p-4 shadow-[var(--shadow-card)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">右侧协作栏</p>
-              <p className="mt-3 text-sm leading-6 text-[var(--color-muted)]">
-                这里只保留看表时最常用的辅助动作，不和总表抢视觉重心。
-              </p>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">快速动作</p>
 
               <div className="mt-4 grid gap-2.5">
                 <div className="rounded-[18px] bg-[var(--color-soft)] px-4 py-2.5">
@@ -1505,17 +1493,17 @@ export function StationsBoard() {
                     {visibleRows.length} / {filteredRows.length} 条
                   </p>
                   <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
-                    先把眼前这一批看完，再决定要不要展开更多样本。
+                    按当前筛选结果显示。
                   </p>
                 </div>
 
                 <div className="rounded-[18px] bg-[var(--color-soft)] px-4 py-2.5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
-                    判断顺序
+                    看表顺序
                   </p>
                   <p className="mt-2 text-sm font-black text-[var(--color-ink)]">倍率和门槛先看，备注后看</p>
                   <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
-                    详细口径更适合进历史或讨论区，不要把总表当长文看。
+                    入口、套餐和更新时间决定是否值得继续试。
                   </p>
                 </div>
               </div>
@@ -1573,7 +1561,7 @@ export function StationsBoard() {
       </section>
 
       {/* ---- Submission ---- */}
-      <section className="relative mx-auto max-w-[1760px] px-3 pb-8 sm:px-5 lg:px-6">
+      <section className="relative mx-auto max-w-[1680px] px-3 pb-8 sm:px-5 lg:px-6">
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.52fr)] xl:items-start">
           <SubmissionPanel />
 
@@ -1598,30 +1586,17 @@ export function StationsBoard() {
 
               <div className="rounded-[20px] bg-[var(--color-soft)] px-4 py-3.5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
-                  社区入口
+                  编辑口径
                 </p>
-                <div className="mt-3 grid gap-2">
-                  <Link
-                    href="/community"
-                    className="rounded-full bg-[var(--color-brand)] px-4 py-2.5 text-center text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
-                  >
-                    进入站内讨论区
-                  </Link>
-                  <a
-                    href="https://github.com/hfeng620-cmd/timin_api_test_and_forum/discussions"
-                    rel="noopener noreferrer"
-                    target="_blank"
-                    className="rounded-full border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-2.5 text-center text-sm font-bold text-[var(--color-ink)] transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand-deep)]"
-                  >
-                    GitHub Discussions
-                  </a>
-                </div>
+                <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                  登录后可提交补站和字段修改；当前改动会进入巡查队列，确认后沉淀到榜单。
+                </p>
               </div>
 
               <div className="rounded-[20px] bg-[var(--color-brand-soft)] px-4 py-3.5 text-sm leading-7 text-[var(--color-muted)]">
-                <p className="font-black text-[var(--color-ink)]">QQ群 602190132</p>
+                <p className="font-black text-[var(--color-ink)]">优先补这四项</p>
                 <p className="mt-1">
-                  群内适合同步临时变化、补充截图来源，稳定信息再沉淀回榜单。
+                  入口、倍率、套餐门槛、更新时间。短线变化放讨论区，稳定后再沉淀回榜单。
                 </p>
               </div>
             </div>
@@ -1654,7 +1629,7 @@ export function StationsBoard() {
                 </div>
                 <div>
                   <h2 className="text-lg font-black text-[var(--color-ink)]">{discussionStation.name} 讨论区</h2>
-                  <p className="text-xs text-[var(--color-muted)]">站点专属讨论空间</p>
+                  <p className="text-xs text-[var(--color-muted)]">价格、入口和稳定性反馈</p>
                 </div>
               </div>
               <button
@@ -1702,7 +1677,7 @@ export function StationsBoard() {
                 onClick={() => { setQuickMenuOpen(false); document.getElementById("station-search")?.focus(); }}
                 type="button"
               >
-                ✎ 编辑已有站点
+                ✎ 搜索站点后编辑
               </button>
             </div>
           )}

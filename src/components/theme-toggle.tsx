@@ -104,7 +104,23 @@ export const PALETTES = [
   { id: "ink", label: "墨黑青", note: "深墨冷青", mood: "深墨锐利", swatch: "linear-gradient(135deg, #071013, #2dd4bf)" },
   { id: "ceramic", label: "陶瓷白", note: "瓷白钴蓝", mood: "瓷面清雅", swatch: "linear-gradient(135deg, #fbfaf6, #315f8c)" },
   { id: "lime", label: "酸橙光", note: "亮绿高能", mood: "清醒高能", swatch: "linear-gradient(135deg, #f8ffe8, #a3e635)" },
+  { id: "slateblue", label: "雾蓝灰", note: "蓝灰冷静", mood: "克制科技", swatch: "linear-gradient(135deg, #f4f7fb, #4f6f8f)" },
+  { id: "mocha", label: "摩卡棕", note: "咖调温润", mood: "低调展厅", swatch: "linear-gradient(135deg, #f7f2ec, #7c5f48)" },
+  { id: "dusk", label: "霞暮紫", note: "灰紫柔雾", mood: "精致柔光", swatch: "linear-gradient(135deg, #f7f3f8, #7e6a8f)" },
 ] as const;
+
+const FEATURED_PALETTE_IDS = new Set<PaletteId>([
+  "blue",
+  "graphite",
+  "slateblue",
+  "ocean",
+  "sage",
+  "ceramic",
+  "mocha",
+  "dusk",
+  "pearl",
+  "midnight",
+]);
 
 const APPEARANCE_PRESETS = [
   {
@@ -260,6 +276,8 @@ export function ThemeToggleInline({ view = "all", compact = false }: ThemeToggle
   const showAll = view === "all";
   const showTheme = showAll || view === "theme";
   const showPalette = showAll || view === "palette";
+  const featuredPalettes = PALETTES.filter((item) => FEATURED_PALETTE_IDS.has(item.id));
+  const experimentalPalettes = PALETTES.filter((item) => !FEATURED_PALETTE_IDS.has(item.id));
 
   useEffect(() => {
     const nextMode = resolveStoredThemeMode();
@@ -483,37 +501,86 @@ export function ThemeToggleInline({ view = "all", compact = false }: ThemeToggle
         <p className="mt-1 text-[11px] leading-5 text-[var(--color-muted)]">
           换按钮、描边和强调色，不动背景层次。
         </p>
-        <div className={`mt-2 grid grid-cols-2 gap-2 ${showAll ? "" : "sm:grid-cols-3"}`}>
-          {PALETTES.map((item) => {
-            const active = item.id === palette;
+        <div className="mt-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
+              精选配色
+            </p>
+            <span className="text-[10px] text-[var(--color-muted)]">更稳、更像成熟产品站</span>
+          </div>
+          <div className={`mt-2 grid grid-cols-2 gap-2 ${showAll ? "" : "sm:grid-cols-3"}`}>
+            {featuredPalettes.map((item) => {
+              const active = item.id === palette;
 
-            return (
-              <button
-                key={item.id}
-                className={`rounded-[16px] border px-3 py-3 text-left transition ${
-                  active
-                    ? "border-[var(--color-brand)] bg-[var(--color-brand-soft)] shadow-[0_10px_26px_var(--color-panel-glow)]"
-                    : "border-[var(--color-line)] bg-[var(--color-panel-strong)] hover:border-[var(--color-brand)] hover:bg-[var(--color-soft)]"
-                }`}
-                onClick={() => handlePaletteChange(item.id)}
-                type="button"
-              >
-                <span
-                  aria-hidden="true"
-                  className="block h-9 rounded-[12px] border border-white/40"
-                  style={{ background: item.swatch }}
-                />
-                <span className="mt-2 flex items-center justify-between gap-2">
-                  <span className="truncate text-sm font-bold text-[var(--color-ink)]">{item.label}</span>
-                  {active ? (
-                    <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-brand)]" />
-                  ) : null}
-                </span>
-                <span className="mt-1 block text-[11px] leading-5 text-[var(--color-muted)]">{item.note}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={item.id}
+                  className={`rounded-[16px] border px-3 py-3 text-left transition ${
+                    active
+                      ? "border-[var(--color-brand)] bg-[var(--color-brand-soft)] shadow-[0_10px_26px_var(--color-panel-glow)]"
+                      : "border-[var(--color-line)] bg-[var(--color-panel-strong)] hover:border-[var(--color-brand)] hover:bg-[var(--color-soft)]"
+                  }`}
+                  onClick={() => handlePaletteChange(item.id)}
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="block h-9 rounded-[12px] border border-white/40"
+                    style={{ background: item.swatch }}
+                  />
+                  <span className="mt-2 flex items-center justify-between gap-2">
+                    <span className="truncate text-sm font-bold text-[var(--color-ink)]">{item.label}</span>
+                    {active ? (
+                      <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-brand)]" />
+                    ) : null}
+                  </span>
+                  <span className="mt-1 block text-[11px] leading-5 text-[var(--color-muted)]">{item.note}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+        {experimentalPalettes.length > 0 ? (
+          <div className="mt-4 rounded-[18px] border border-[var(--color-line)] bg-[var(--color-soft)]/70 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
+                更多实验配色
+              </p>
+              <span className="text-[10px] text-[var(--color-muted)]">高能或特殊场景</span>
+            </div>
+            <div className={`mt-2 grid grid-cols-2 gap-2 ${showAll ? "" : "sm:grid-cols-3"}`}>
+              {experimentalPalettes.map((item) => {
+                const active = item.id === palette;
+
+                return (
+                  <button
+                    key={item.id}
+                    className={`rounded-[15px] border px-3 py-2.5 text-left transition ${
+                      active
+                        ? "border-[var(--color-brand)] bg-[var(--color-brand-soft)] shadow-[0_10px_26px_var(--color-panel-glow)]"
+                        : "border-[var(--color-line)] bg-[var(--color-panel-strong)] hover:border-[var(--color-brand)] hover:bg-[var(--color-soft)]"
+                    }`}
+                    onClick={() => handlePaletteChange(item.id)}
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="block h-7 rounded-[10px] border border-white/40"
+                      style={{ background: item.swatch }}
+                    />
+                    <span className="mt-2 flex items-center justify-between gap-2">
+                      <span className="truncate text-sm font-bold text-[var(--color-ink)]">{item.label}</span>
+                      {active ? (
+                        <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-brand)]" />
+                      ) : null}
+                    </span>
+                    <span className="mt-1 block text-[11px] leading-5 text-[var(--color-muted)]">{item.note}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
       ) : null}
 
