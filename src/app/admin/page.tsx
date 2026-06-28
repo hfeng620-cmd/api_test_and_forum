@@ -191,6 +191,8 @@ export default function AdminPage() {
   const [editModalStation, setEditModalStation] = useState<Station | null>(null);
   const [editModalForm, setEditModalForm] = useState<Partial<Station>>({});
   const [editModalSaving, setEditModalSaving] = useState(false);
+  const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   // ---- User management state ----
   const [userList, setUserList] = useState<
@@ -1689,143 +1691,20 @@ export default function AdminPage() {
                       全部站点管理
                     </p>
                     <h2 className="mt-2 text-2xl font-black">增删 / 排顺</h2>
+                    <p className="mt-1 text-sm text-[var(--color-muted)]" />
+                    {allStations.length > 0 && (
+                      <p className="mt-1 text-sm text-[var(--color-muted)]">
+                        当前共 {allStations.length} 个站点
+                      </p>
+                    )}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-[var(--color-on-brand)]"
-                      onClick={() => { setShowAddForm(!showAddForm); setStationMgmtStatus(""); }}
-                      type="button"
-                    >
-                      {showAddForm ? "取消添加" : "＋ 添加站点"}
-                    </button>
-                    <button
-                      className="rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-bold text-[var(--color-ink)] hover:bg-[var(--color-soft)]"
-                      onClick={refreshAllStations}
-                      type="button"
-                    >
-                      刷新
-                    </button>
-                  </div>
-                </div>
-
-                {/* Add form */}
-                {showAddForm && (
-                  <div className="mt-5 rounded-[24px] border border-dashed border-[var(--color-brand)] bg-[var(--color-soft)] p-5">
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <input
-                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
-                        placeholder="站点名*"
-                        value={newStationForm.name}
-                        onChange={(e) => setNewStationForm({ ...newStationForm, name: e.target.value })}
-                      />
-                      <input
-                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
-                        placeholder="网址"
-                        value={newStationForm.url}
-                        onChange={(e) => setNewStationForm({ ...newStationForm, url: e.target.value })}
-                      />
-                      <input
-                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
-                        placeholder="标签"
-                        value={newStationForm.badge}
-                        onChange={(e) => setNewStationForm({ ...newStationForm, badge: e.target.value })}
-                      />
-                      <input
-                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
-                        placeholder="价格"
-                        value={newStationForm.price}
-                        onChange={(e) => setNewStationForm({ ...newStationForm, price: e.target.value })}
-                      />
-                      <input
-                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
-                        placeholder="倍率"
-                        value={newStationForm.multiplier}
-                        onChange={(e) => setNewStationForm({ ...newStationForm, multiplier: e.target.value })}
-                      />
-                      <button
-                        className="rounded-xl bg-[var(--color-brand)] px-4 py-2.5 text-sm font-bold text-[var(--color-on-brand)] hover:bg-[var(--color-brand-deep)] disabled:opacity-50"
-                        disabled={newStationSaving}
-                        onClick={handleAddStation}
-                        type="button"
-                      >
-                        {newStationSaving ? "保存中..." : "确认添加"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {stationMgmtStatus && (
-                  <p className="mt-3 text-sm text-[var(--color-muted)]">{stationMgmtStatus}</p>
-                )}
-
-                {/* Station list */}
-                <div className="mt-5">
-                  {allStationsLoading ? (
-                    <p className="text-sm text-[var(--color-muted)]">加载中...</p>
-                  ) : allStations.length === 0 ? (
-                    <p className="text-sm text-[var(--color-muted)]">暂无站点数据。</p>
-                  ) : (
-                    <div className="max-h-[500px] overflow-y-auto">
-                      <div className="space-y-2">
-                        {[...allStations]
-                          .sort((a, b) => a.sortOrder - b.sortOrder)
-                          .map((s, index, sorted) => (
-                          <div
-                            key={s.id}
-                            className="flex items-center gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-2"
-                          >
-                            {/* Sort buttons */}
-                            <div className="flex shrink-0 flex-col gap-0.5">
-                              <button
-                                className="flex h-5 w-6 items-center justify-center rounded text-[10px] text-[var(--color-muted)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)] disabled:opacity-30"
-                                disabled={index === 0}
-                                onClick={() => handleMoveStation(index, "up")}
-                                type="button"
-                                title="上移"
-                              >
-                                ▲
-                              </button>
-                              <button
-                                className="flex h-5 w-6 items-center justify-center rounded text-[10px] text-[var(--color-muted)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)] disabled:opacity-30"
-                                disabled={index >= sorted.length - 1}
-                                onClick={() => handleMoveStation(index, "down")}
-                                type="button"
-                                title="下移"
-                              >
-                                ▼
-                              </button>
-                            </div>
-                            <span className="text-xs font-semibold text-[var(--color-muted)] w-5 text-center">
-                              {index + 1}
-                            </span>
-                            <span className="text-sm font-bold text-[var(--color-ink)] min-w-0 flex-1 truncate">
-                              {s.name}
-                              {s.badge ? <span className="ml-2 text-xs text-[var(--color-muted)]">({s.badge})</span> : null}
-                            </span>
-                            <span className="hidden sm:inline text-xs text-[var(--color-muted)] truncate max-w-[150px]">
-                              {s.url || "无网址"}
-                            </span>
-                            <button
-                              className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-[var(--color-brand-deep)] hover:bg-[var(--color-brand-soft)]"
-                              onClick={() => { setEditModalStation(s); setEditModalForm({ ...s }); }}
-                              type="button"
-                              title="编辑全部字段"
-                            >
-                              编辑
-                            </button>
-                            <button
-                              className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
-                              disabled={deletingStationId === s.id}
-                              onClick={() => handleDeleteStation(s.id, s.name)}
-                              type="button"
-                            >
-                              {deletingStationId === s.id ? "..." : "删除"}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <button
+                    className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-[var(--color-on-brand)] shadow-[0_10px_24px_var(--color-panel-glow)] hover:bg-[var(--color-brand-deep)]"
+                    onClick={() => { setManageModalOpen(true); void refreshAllStations(); }}
+                    type="button"
+                  >
+                    更改
+                  </button>
                 </div>
               </div>
 
@@ -2223,6 +2102,92 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ---- Station Manage Modal (portal) ---- */}
+        {manageModalOpen && typeof document !== "undefined" && createPortal(
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+            style={{ backdropFilter: "blur(4px)", position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+            onClick={(e) => { if (e.target === e.currentTarget) setManageModalOpen(false); }}
+          >
+            <div className="relative flex h-[88vh] w-[95vw] max-w-5xl flex-col overflow-hidden rounded-[24px] border border-[var(--color-line)] bg-[var(--color-panel)] shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+              {/* Header */}
+              <div className="shrink-0 flex items-center justify-between border-b border-[var(--color-line)] px-6 py-4">
+                <div>
+                  <h2 className="text-xl font-black text-[var(--color-ink)]">管理全部站点</h2>
+                  <p className="text-xs text-[var(--color-muted)]">拖拽排序 · 上下箭头 · 编辑 · 删除 · 添加</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-[var(--color-on-brand)] hover:bg-[var(--color-brand-deep)]"
+                    onClick={() => { setShowAddForm(!showAddForm); setStationMgmtStatus(""); }}
+                    type="button"
+                  >
+                    {showAddForm ? "取消添加" : "＋ 添加"}
+                  </button>
+                  <button
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--color-muted)] hover:bg-[var(--color-soft)] hover:text-[var(--color-ink)]"
+                    onClick={() => setManageModalOpen(false)}
+                    type="button"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto">
+                {/* Add form */}
+                {showAddForm && (
+                  <div className="border-b border-[var(--color-line)] bg-[var(--color-soft)] p-5">
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <input className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]" placeholder="站点名*" value={newStationForm.name} onChange={(e) => setNewStationForm({ ...newStationForm, name: e.target.value })} />
+                      <input className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]" placeholder="网址" value={newStationForm.url} onChange={(e) => setNewStationForm({ ...newStationForm, url: e.target.value })} />
+                      <input className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]" placeholder="标签" value={newStationForm.badge} onChange={(e) => setNewStationForm({ ...newStationForm, badge: e.target.value })} />
+                      <input className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]" placeholder="价格" value={newStationForm.price} onChange={(e) => setNewStationForm({ ...newStationForm, price: e.target.value })} />
+                      <input className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]" placeholder="倍率" value={newStationForm.multiplier} onChange={(e) => setNewStationForm({ ...newStationForm, multiplier: e.target.value })} />
+                      <button className="rounded-xl bg-[var(--color-brand)] px-4 py-2.5 text-sm font-bold text-[var(--color-on-brand)] hover:bg-[var(--color-brand-deep)] disabled:opacity-50" disabled={newStationSaving} onClick={handleAddStation} type="button">
+                        {newStationSaving ? "保存中..." : "确认添加"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {stationMgmtStatus && <p className="px-6 py-2 text-sm text-[var(--color-muted)]">{stationMgmtStatus}</p>}
+                {/* Station list */}
+                <div className="p-4">
+                  {allStationsLoading ? <p className="text-sm text-[var(--color-muted)]">加载中...</p> : allStations.length === 0 ? <p className="text-sm text-[var(--color-muted)]">暂无站点。</p> : (
+                    <div className="space-y-1.5">
+                      {[...allStations].sort((a, b) => a.sortOrder - b.sortOrder).map((s, index, sorted) => (
+                        <div key={s.id} className={`flex items-center gap-2 rounded-xl border px-3 py-2 transition ${dragOverId === s.id ? "border-[var(--color-brand)] bg-[var(--color-brand-soft)]" : "border-[var(--color-line)] bg-[var(--color-soft)]"}`}
+                          draggable onDragStart={() => setDragOverId(s.id)} onDragOver={(e) => { e.preventDefault(); setDragOverId(s.id); }} onDragLeave={() => setDragOverId(null)}
+                          onDrop={() => {
+                            if (dragOverId && dragOverId !== s.id) {
+                              const dragIdx = sorted.findIndex((x) => x.id === dragOverId);
+                              if (dragIdx >= 0) {
+                                handleMoveStation(dragIdx, dragIdx < index ? "down" : "up");
+                              }
+                            }
+                            setDragOverId(null);
+                          }}
+                        >
+                          <div className="flex shrink-0 flex-col gap-0.5">
+                            <button className="flex h-5 w-6 items-center justify-center rounded text-[10px] text-[var(--color-muted)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)] disabled:opacity-30" disabled={index === 0} onClick={() => handleMoveStation(index, "up")} type="button" title="上移">▲</button>
+                            <button className="flex h-5 w-6 items-center justify-center rounded text-[10px] text-[var(--color-muted)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)] disabled:opacity-30" disabled={index >= sorted.length - 1} onClick={() => handleMoveStation(index, "down")} type="button" title="下移">▼</button>
+                          </div>
+                          <span className="text-xs font-semibold text-[var(--color-muted)] w-6 text-center">{index + 1}</span>
+                          <span className="text-sm font-bold text-[var(--color-ink)] min-w-0 flex-1 truncate">{s.name}{s.badge ? <span className="ml-2 text-xs text-[var(--color-muted)]">({s.badge})</span> : null}</span>
+                          <span className="hidden lg:inline text-xs text-[var(--color-muted)] truncate max-w-[180px]">{s.url || "无网址"}</span>
+                          <button className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-[var(--color-brand-deep)] hover:bg-[var(--color-brand-soft)]" onClick={() => { setEditModalStation(s); setEditModalForm({ ...s }); }} type="button">编辑</button>
+                          <button className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50" disabled={deletingStationId === s.id} onClick={() => handleDeleteStation(s.id, s.name)} type="button">{deletingStationId === s.id ? "..." : "删除"}</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
         )}
 
         {/* ---- Station Edit Modal (portal) ---- */}
