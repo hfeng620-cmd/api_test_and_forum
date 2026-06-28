@@ -30,6 +30,12 @@ import {
   rejectPendingEdit,
 } from "@/lib/station-storage";
 import {
+  loadStations,
+  createStation,
+  deleteStation,
+  type Station,
+} from "@/lib/station-storage";
+import {
   loadPendingGuides,
   approveGuide,
   rejectGuide,
@@ -171,6 +177,15 @@ export default function AdminPage() {
   const [pendingGuidesLoading, setPendingGuidesLoading] = useState(false);
   const [pendingGuidesStatus, setPendingGuidesStatus] = useState("");
   const [processingGuideId, setProcessingGuideId] = useState<string | null>(null);
+
+  // ---- Station management state ----
+  const [allStations, setAllStations] = useState<Station[]>([]);
+  const [allStationsLoading, setAllStationsLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newStationForm, setNewStationForm] = useState({ name: "", url: "", badge: "", price: "", multiplier: "" });
+  const [newStationSaving, setNewStationSaving] = useState(false);
+  const [deletingStationId, setDeletingStationId] = useState<string | null>(null);
+  const [stationMgmtStatus, setStationMgmtStatus] = useState("");
 
   // ---- User management state ----
   const [userList, setUserList] = useState<
@@ -554,6 +569,66 @@ export default function AdminPage() {
       setPendingGuidesStatus(`拒绝失败: ${getErrorMessage(error, "请稍后重试。")}`);
     } finally {
       setProcessingGuideId(null);
+    }
+  }
+
+  // ---- Station management ----
+  const refreshAllStations = useCallback(async () => {
+    if (!adminOk) return;
+    setAllStationsLoading(true);
+    try {
+      const data = await loadStations();
+      setAllStations(data);
+    } catch (error) {
+      setStationMgmtStatus(`加载失败: ${getErrorMessage(error, "请稍后重试。")}`);
+    } finally {
+      setAllStationsLoading(false);
+    }
+  }, [adminOk]);
+
+  useEffect(() => {
+    if (!adminOk || activeTab !== "stations") return;
+    void refreshAllStations();
+  }, [adminOk, activeTab, refreshAllStations]);
+
+  async function handleAddStation() {
+    if (!newStationForm.name.trim()) {
+      setStationMgmtStatus("站点名不能为空。");
+      return;
+    }
+    setNewStationSaving(true);
+    try {
+      await createStation({
+        name: newStationForm.name.trim(),
+        url: newStationForm.url.trim(),
+        badge: newStationForm.badge.trim(),
+        price: newStationForm.price.trim(),
+        multiplier: newStationForm.multiplier.trim(),
+      });
+      setNewStationForm({ name: "", url: "", badge: "", price: "", multiplier: "" });
+      setShowAddForm(false);
+      setStationMgmtStatus("站点已添加。");
+      addAudit("添加站点", newStationForm.name.trim());
+      void refreshAllStations();
+    } catch (error) {
+      setStationMgmtStatus(`添加失败: ${getErrorMessage(error, "请稍后重试。")}`);
+    } finally {
+      setNewStationSaving(false);
+    }
+  }
+
+  async function handleDeleteStation(id: string, name: string) {
+    if (!window.confirm(`确定要删除「${name}」吗？此操作不可撤销。`)) return;
+    setDeletingStationId(id);
+    try {
+      await deleteStation(id);
+      setStationMgmtStatus(`已删除「${name}」。`);
+      addAudit("删除站点", name);
+      void refreshAllStations();
+    } catch (error) {
+      setStationMgmtStatus(`删除失败: ${getErrorMessage(error, "请稍后重试。")}`);
+    } finally {
+      setDeletingStationId(null);
     }
   }
 
@@ -1529,15 +1604,130 @@ export default function AdminPage() {
         {/* ---- Tab: 站点管理 ---- */}
         {activeTab === "stations" && (
           <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-            {/* Station editing */}
-            <div className="rounded-[34px] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_60px_rgba(13,25,48,0.07)]">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
-                    首页精选站文案
-                  </p>
-                  <h1 className="mt-2 text-3xl font-black">把虎虎、Aether、杂货铺、秋天中转站放在最上面</h1>
+            <div className="space-y-6">
+              {/* 全部站点管理 */}
+              <div className="rounded-[34px] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_60px_rgba(13,25,48,0.07)]">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                      全部站点管理
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black">增删站点</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className="rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-bold text-[var(--color-on-brand)]"
+                      onClick={() => { setShowAddForm(!showAddForm); setStationMgmtStatus(""); }}
+                      type="button"
+                    >
+                      {showAddForm ? "取消添加" : "＋ 添加站点"}
+                    </button>
+                    <button
+                      className="rounded-full border border-[var(--color-line)] bg-white px-4 py-2 text-sm font-bold text-[var(--color-ink)] hover:bg-[var(--color-soft)]"
+                      onClick={refreshAllStations}
+                      type="button"
+                    >
+                      刷新
+                    </button>
+                  </div>
                 </div>
+
+                {/* Add form */}
+                {showAddForm && (
+                  <div className="mt-5 rounded-[24px] border border-dashed border-[var(--color-brand)] bg-[var(--color-soft)] p-5">
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <input
+                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
+                        placeholder="站点名*"
+                        value={newStationForm.name}
+                        onChange={(e) => setNewStationForm({ ...newStationForm, name: e.target.value })}
+                      />
+                      <input
+                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
+                        placeholder="网址"
+                        value={newStationForm.url}
+                        onChange={(e) => setNewStationForm({ ...newStationForm, url: e.target.value })}
+                      />
+                      <input
+                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
+                        placeholder="标签"
+                        value={newStationForm.badge}
+                        onChange={(e) => setNewStationForm({ ...newStationForm, badge: e.target.value })}
+                      />
+                      <input
+                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
+                        placeholder="价格"
+                        value={newStationForm.price}
+                        onChange={(e) => setNewStationForm({ ...newStationForm, price: e.target.value })}
+                      />
+                      <input
+                        className="rounded-xl border border-[var(--color-line)] bg-white px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand)]"
+                        placeholder="倍率"
+                        value={newStationForm.multiplier}
+                        onChange={(e) => setNewStationForm({ ...newStationForm, multiplier: e.target.value })}
+                      />
+                      <button
+                        className="rounded-xl bg-[var(--color-brand)] px-4 py-2.5 text-sm font-bold text-[var(--color-on-brand)] hover:bg-[var(--color-brand-deep)] disabled:opacity-50"
+                        disabled={newStationSaving}
+                        onClick={handleAddStation}
+                        type="button"
+                      >
+                        {newStationSaving ? "保存中..." : "确认添加"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {stationMgmtStatus && (
+                  <p className="mt-3 text-sm text-[var(--color-muted)]">{stationMgmtStatus}</p>
+                )}
+
+                {/* Station list */}
+                <div className="mt-5">
+                  {allStationsLoading ? (
+                    <p className="text-sm text-[var(--color-muted)]">加载中...</p>
+                  ) : allStations.length === 0 ? (
+                    <p className="text-sm text-[var(--color-muted)]">暂无站点数据。</p>
+                  ) : (
+                    <div className="max-h-[500px] overflow-y-auto">
+                      <div className="space-y-2">
+                        {allStations.map((s) => (
+                          <div
+                            key={s.id}
+                            className="flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-soft)] px-4 py-2.5"
+                          >
+                            <span className="text-sm font-bold text-[var(--color-ink)] min-w-0 flex-1 truncate">
+                              {s.name}
+                              {s.badge ? <span className="ml-2 text-xs text-[var(--color-muted)]">({s.badge})</span> : null}
+                            </span>
+                            <span className="hidden sm:inline text-xs text-[var(--color-muted)] truncate max-w-[200px]">
+                              {s.url || "无网址"}
+                            </span>
+                            <button
+                              className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+                              disabled={deletingStationId === s.id}
+                              onClick={() => handleDeleteStation(s.id, s.name)}
+                              type="button"
+                            >
+                              {deletingStationId === s.id ? "..." : "删除"}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 首页精选站文案 */}
+              <div className="rounded-[34px] border border-[var(--color-line)] bg-white p-6 shadow-[0_18px_60px_rgba(13,25,48,0.07)]">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
+                      首页精选站文案
+                    </p>
+                    <h1 className="mt-2 text-3xl font-black">把虎虎、Aether、杂货铺、秋天中转站放在最上面</h1>
+                  </div>
                 <div className="flex flex-wrap gap-3">
                   <button
                     className="rounded-full bg-[var(--color-brand)] px-5 py-3 text-sm font-bold text-[var(--color-on-brand)] transition hover:bg-[var(--color-brand-deep)]"
@@ -1604,6 +1794,7 @@ export default function AdminPage() {
                   </article>
                 ))}
               </div>
+            </div>
             </div>
 
             {/* Submissions + status */}
