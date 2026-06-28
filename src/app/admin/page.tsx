@@ -13,7 +13,7 @@ import {
   loadFeaturedStationDrafts,
   saveFeaturedStationDrafts,
 } from "@/lib/featured-station-storage";
-import { homeFeaturedStations, type HomeFeaturedStation } from "@/lib/site-data";
+import { homeFeaturedStations, stationComparisonRows, stationLinkMap, type HomeFeaturedStation } from "@/lib/site-data";
 import {
   loadStationSubmissions,
   saveStationSubmissions,
@@ -583,7 +583,31 @@ export default function AdminPage() {
     setAllStationsLoading(true);
     try {
       const data = await loadStations();
-      setAllStations(data);
+      // Merge with static fallback, dedup by name
+      const dbNames = new Set(data.map((s) => s.name));
+      const staticStations = stationComparisonRows.map((row, i) => ({
+        id: `static-${i}`,
+        name: row.name,
+        url: stationLinkMap[row.name] ?? "",
+        price: row.price,
+        multiplier: row.multiplier,
+        entry: row.entry ?? "",
+        packageType: row.packageType ?? "",
+        status: row.status ?? "",
+        models: row.models ?? "",
+        uptime: row.uptime ?? "",
+        latency: row.latency ?? "",
+        source: row.source ?? "",
+        verdict: row.verdict ?? "",
+        note: row.note ?? "",
+        advantage: row.advantage ?? "",
+        risk: row.risk ?? "",
+        badge: row.badge ?? "",
+        groupName: row.group ?? "",
+        sortOrder: data.length + i + 1,
+      } as Station));
+      const merged = [...data, ...staticStations.filter((s) => !dbNames.has(s.name))];
+      setAllStations(merged);
     } catch (error) {
       setStationMgmtStatus(`加载失败: ${getErrorMessage(error, "请稍后重试。")}`);
     } finally {
