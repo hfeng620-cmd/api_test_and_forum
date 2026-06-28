@@ -35,6 +35,7 @@ import {
   loadStations,
   createStation,
   deleteStation,
+  updateStation,
   type Station,
 } from "@/lib/station-storage";
 import {
@@ -629,6 +630,28 @@ export default function AdminPage() {
       setStationMgmtStatus(`删除失败: ${getErrorMessage(error, "请稍后重试。")}`);
     } finally {
       setDeletingStationId(null);
+    }
+  }
+
+  async function handleMoveStation(index: number, direction: "up" | "down") {
+    const sorted = [...allStations].sort((a, b) => a.sortOrder - b.sortOrder);
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index >= sorted.length - 1) return;
+
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    const a = sorted[index];
+    const b = sorted[targetIdx];
+
+    try {
+      // Swap sort_order values
+      const editorName = "管理员";
+      const supabase = getSupabaseClient();
+      await supabase.from("stations").update({ sort_order: b.sortOrder }).eq("id", a.id);
+      await supabase.from("stations").update({ sort_order: a.sortOrder }).eq("id", b.id);
+      setStationMgmtStatus(`已调整「${a.name}」顺序。`);
+      void refreshAllStations();
+    } catch (error) {
+      setStationMgmtStatus(`排序失败: ${getErrorMessage(error, "请稍后重试。")}`);
     }
   }
 
@@ -1637,7 +1660,7 @@ export default function AdminPage() {
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-muted)]">
                       全部站点管理
                     </p>
-                    <h2 className="mt-2 text-2xl font-black">增删站点</h2>
+                    <h2 className="mt-2 text-2xl font-black">增删 / 排顺</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -1716,20 +1739,46 @@ export default function AdminPage() {
                   ) : (
                     <div className="max-h-[500px] overflow-y-auto">
                       <div className="space-y-2">
-                        {allStations.map((s) => (
+                        {[...allStations]
+                          .sort((a, b) => a.sortOrder - b.sortOrder)
+                          .map((s, index, sorted) => (
                           <div
                             key={s.id}
-                            className="flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-soft)] px-4 py-2.5"
+                            className="flex items-center gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-soft)] px-3 py-2"
                           >
+                            {/* Sort buttons */}
+                            <div className="flex shrink-0 flex-col gap-0.5">
+                              <button
+                                className="flex h-5 w-6 items-center justify-center rounded text-[10px] text-[var(--color-muted)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)] disabled:opacity-30"
+                                disabled={index === 0}
+                                onClick={() => handleMoveStation(index, "up")}
+                                type="button"
+                                title="上移"
+                              >
+                                ▲
+                              </button>
+                              <button
+                                className="flex h-5 w-6 items-center justify-center rounded text-[10px] text-[var(--color-muted)] hover:bg-[var(--color-brand-soft)] hover:text-[var(--color-brand-deep)] disabled:opacity-30"
+                                disabled={index >= sorted.length - 1}
+                                onClick={() => handleMoveStation(index, "down")}
+                                type="button"
+                                title="下移"
+                              >
+                                ▼
+                              </button>
+                            </div>
+                            <span className="text-xs font-semibold text-[var(--color-muted)] w-5 text-center">
+                              {index + 1}
+                            </span>
                             <span className="text-sm font-bold text-[var(--color-ink)] min-w-0 flex-1 truncate">
                               {s.name}
                               {s.badge ? <span className="ml-2 text-xs text-[var(--color-muted)]">({s.badge})</span> : null}
                             </span>
-                            <span className="hidden sm:inline text-xs text-[var(--color-muted)] truncate max-w-[200px]">
+                            <span className="hidden sm:inline text-xs text-[var(--color-muted)] truncate max-w-[150px]">
                               {s.url || "无网址"}
                             </span>
                             <button
-                              className="shrink-0 rounded-lg px-2.5 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+                              className="shrink-0 rounded-lg px-2 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
                               disabled={deletingStationId === s.id}
                               onClick={() => handleDeleteStation(s.id, s.name)}
                               type="button"
